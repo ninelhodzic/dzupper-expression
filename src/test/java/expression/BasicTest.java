@@ -3,9 +3,9 @@ package expression;
 import base.TestBase;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.pathextractor.PathExtractor;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.util.Assert;
 
 
 /**
@@ -36,36 +36,36 @@ public class BasicTest extends TestBase {
     public void testAnd(){
         String expression = "2==2 && 1==1";
         Object res = evaluateOnMap(expression);
-        Assert.isInstanceOf(Boolean.class, res);
+        Assert.assertTrue (res instanceof Boolean);
         Boolean bres = (Boolean)res;
-        Assert.isTrue(bres);
+        Assert.assertTrue(bres);
     }
 
     @Test
     public void testAndFalse(){
         String expression = "1==1 && 23!=23";
         Object res = evaluateOnMap(expression);
-        Assert.isInstanceOf(Boolean.class, res);
+        Assert.assertTrue (res instanceof Boolean);
         Boolean bres = (Boolean)res;
-        Assert.isTrue(!bres);
+        Assert.assertTrue(!bres);
     }
 
     @Test
     public void testComplexBooleanTrue(){
         String expression = "1==1 && (10>(5+2) || (23+42)<21)";
         Object res = evaluateOnMap(expression);
-        Assert.isInstanceOf(Boolean.class, res);
+        Assert.assertTrue (res instanceof Boolean);
         Boolean bres = (Boolean)res;
-        Assert.isTrue(bres);
+        Assert.assertTrue(bres);
     }
 
     @Test
     public void testComplexBooleanFalse(){
         String expression = "1==1 && IS_NULL($name$) || !SIZE_OF($child$)<1";
         Object res = evaluateOnMap(expression);
-        Assert.isInstanceOf(Boolean.class, res);
+        Assert.assertTrue (res instanceof Boolean);
         Boolean bres = (Boolean)res;
-        Assert.isTrue(bres);
+        Assert.assertTrue(bres);
     }
 
     /*@Test //this doesn;t work due to minus (-) in date format and date
