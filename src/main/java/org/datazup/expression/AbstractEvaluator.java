@@ -237,7 +237,7 @@ public abstract class AbstractEvaluator<T> {
         return contains;
     }*/
 
-    public T    evaluate(String expression, Object evaluationContext) {
+    public T evaluate(String expression, Object evaluationContext) {
 
         if (StringUtils.isEmpty(expression)){
             return (T) Boolean.TRUE;

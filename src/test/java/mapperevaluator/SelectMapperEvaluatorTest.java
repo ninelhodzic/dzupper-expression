@@ -1,4 +1,4 @@
-package SelectMapperEvaluator;
+package mapperevaluator;
 
 import base.TestBase;
 import org.datazup.expression.SelectMapperEvaluator;

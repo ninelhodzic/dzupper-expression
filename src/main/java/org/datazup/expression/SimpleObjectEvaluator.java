@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.pathextractor.PathExtractor;
+import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -39,6 +40,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function NOW = new Function("NOW", 0);
     public final static Function STR_TO_DATE_TIMESTAMP = new Function("STR_TO_DATE_TIMESTAMP", 2);
 
+    public final static Function MINUTE = new Function("MINUTE", 1);
+    public final static Function HOUR = new Function("HOUR", 1);
+    public final static Function DAY = new Function("DAY", 1);
+    public final static Function WEEK = new Function("WEEK", 1);
+    public final static Function MONTH = new Function("MONTH", 1);
+    public final static Function YEAR = new Function("YEAR", 1);
+
    // public final static Function DATE = new Function("DATE", 2);
 
 
@@ -68,6 +76,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(SIZE_OF);
 
         PARAMETERS.add(STR_TO_DATE_TIMESTAMP);
+
+        PARAMETERS.add(MINUTE);
+        PARAMETERS.add(HOUR);
+        PARAMETERS.add(DAY);
+        PARAMETERS.add(WEEK);
+        PARAMETERS.add(MONTH);
+        PARAMETERS.add(YEAR);
    }
 
     public SimpleObjectEvaluator() {
@@ -93,7 +108,39 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         if (function==STR_TO_DATE_TIMESTAMP){
             return strToDateTimeStamp(function, operands, argumentList, evaluationContext);
         }else
-        if (function==NOW){
+        if (function==MINUTE){
+            Object op1 = operands.next();
+            argumentList.pop();
+            DateTime dt = DateTimeUtils.resolve(op1);
+            return dt.getMinuteOfDay();
+        }else if (function==HOUR){
+            Object op1 = operands.next();
+            argumentList.pop();
+            DateTime dt = DateTimeUtils.resolve(op1);
+            return dt.getHourOfDay();
+        }else  if (function==DAY){
+            Object op1 = operands.next();
+            argumentList.pop();
+            DateTime dt = DateTimeUtils.resolve(op1);
+            return dt.getDayOfMonth();
+        }else  if (function==WEEK){
+            Object op1 = operands.next();
+            argumentList.pop();
+            DateTime dt = DateTimeUtils.resolve(op1);
+            Integer res =  dt.getDayOfMonth() % 7;
+            return  res;
+        }else  if (function==MONTH){
+            Object op1 = operands.next();
+            argumentList.pop();
+            DateTime dt = DateTimeUtils.resolve(op1);
+            return dt.getMonthOfYear();
+        }else
+        if (function==YEAR){
+            Object op1 = operands.next();
+            argumentList.pop();
+            DateTime dt = DateTimeUtils.resolve(op1);
+            return dt.getYear();
+        }else  if (function==NOW){
             return System.currentTimeMillis();
         }else if (function==SET_NULL){
             Object op1 = operands.next();
