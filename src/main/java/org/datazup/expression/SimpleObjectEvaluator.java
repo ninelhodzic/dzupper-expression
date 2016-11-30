@@ -259,16 +259,16 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         else if (operator==AND){
             Object left = operands.next();
             Object right = operands.next();
-            Boolean l = (Boolean)left;
-            Boolean r = (Boolean)right;
-            return Boolean.logicalAnd(l,r);
+            boolean l = (Boolean)left;
+            boolean r = (Boolean)right;
+            return l && r; //Boolean.logicalAnd(l,r);
         }
         else if (operator==OR){
             Object left = operands.next();
             Object right = operands.next();
-            Boolean l = (Boolean)left;
-            Boolean r = (Boolean)right;
-            return Boolean.logicalOr(l,r);
+            boolean l = (Boolean)left;
+            boolean r = (Boolean)right;
+            return l || r; //Boolean.logicalOr(l,r);
         }
         else if (operator==PLUS){
             Object left = operands.next();
