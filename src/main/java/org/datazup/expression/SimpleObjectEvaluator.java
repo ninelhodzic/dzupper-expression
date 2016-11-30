@@ -145,7 +145,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }else if (function==SET_NULL){
             Object op1 = operands.next();
             argumentList.pop();
-            return new NullObject();
+            return null; //getNullObject();
         }
         else if (function==IS_NULL){
             Object op1 = operands.next();
@@ -177,6 +177,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
     }
+
+
+
 
     private Object strToDateTimeStamp(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
         Object dateString = operands.next();

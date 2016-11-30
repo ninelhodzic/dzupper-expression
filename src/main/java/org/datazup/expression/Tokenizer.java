@@ -54,7 +54,13 @@ public class Tokenizer {
     }
 
     private static Pattern delimitersToRegexp(List<String> delimiters) {
-        Collections.sort(delimiters, (o1, o2) -> -o1.compareTo(o2));
+        //Collections.sort(delimiters, (o1, o2) -> -o1.compareTo(o2));
+        Collections.sort(delimiters, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareTo(o2);
+            }
+        });
 
         StringBuilder result = new StringBuilder();
         result.append('(');

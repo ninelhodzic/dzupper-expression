@@ -131,7 +131,7 @@ public abstract class AbstractEvaluator<T> {
             }*/
 
             values.push(value != null ? value : this.toValue(operator, evaluationContext));
-        } else if (token.isLookupLiteral()){
+        } else if (token.isLookupLiteral()) {
             String operator = token.getLookupLiteralValue();
             Constant ct = (Constant) this.constants.get(operator);
             T value = ct == null ? null : this.evaluate(ct, evaluationContext);
@@ -139,22 +139,21 @@ public abstract class AbstractEvaluator<T> {
                 AbstractVariableSet abstractVariableSet = (AbstractVariableSet) evaluationContext;
                 value = (T) abstractVariableSet.get(operator);
             }
-                if (value instanceof String){
-                String strVal = (String)value;
-                if (StringUtils.isNotEmpty(strVal) && NumberUtils.isNumber(strVal)){
+            if (value instanceof String) {
+                String strVal = (String) value;
+                if (StringUtils.isNotEmpty(strVal) && NumberUtils.isNumber(strVal)) {
                     value = (T) NumberUtils.createNumber(strVal);
                 }
             }
 
-            values.push(value != null ? value : (T) new NullObject());
-        }
-        else if (token.isLiteralValue()){
-            String value =  token.getLiteralValue();
-            value = value.replaceAll("'","").trim();
-            values.push((T)value);
-        } else if (token.isNumber()){
+            values.push(value);// != null ? value : (T) new NullObject());
+        } else if (token.isLiteralValue()) {
+            String value = token.getLiteralValue();
+            value = value.replaceAll("'", "").trim();
+            values.push((T) value);
+        } else if (token.isNumber()) {
             Number value = token.getNumber();
-            values.push((T)value);
+            values.push((T) value);
         } else {
             if (!token.isOperator()) {
                 throw new IllegalArgumentException();
@@ -178,11 +177,11 @@ public abstract class AbstractEvaluator<T> {
         throw new RuntimeException("evaluate(Function, Iterator) is not implemented for " + function.getName());
     }
 
-    private void doFunction(Deque<T> values, Function function, int argCount,Deque<Token> argumentList, Object evaluationContext) {
+    private void doFunction(Deque<T> values, Function function, int argCount, Deque<Token> argumentList, Object evaluationContext) {
         if (function.getMinimumArgumentCount() <= argCount && function.getMaximumArgumentCount() >= argCount) {
             try {
                 values.push(this.evaluate(function, this.getArguments(values, argCount), argumentList, evaluationContext));
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw e;
             }
         } else {
@@ -239,31 +238,31 @@ public abstract class AbstractEvaluator<T> {
 
     public T evaluate(String expression, Object evaluationContext) {
 
-        if (StringUtils.isEmpty(expression)){
+        if (StringUtils.isEmpty(expression)) {
             return (T) Boolean.TRUE;
         }
-        if (expression.startsWith("'") && expression.endsWith("'")){
-           try {
-               expression = expression.substring(1, expression.length()-1);
-               T res = (T) expression;
-               return  res;
-           }catch (Exception e){
-               e.printStackTrace();
-               return null;
-           }
+        if (expression.startsWith("'") && expression.endsWith("'")) {
+            try {
+                expression = expression.substring(1, expression.length() - 1);
+                T res = (T) expression;
+                return res;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
         }
 
-        if (Pattern.matches("[a-zA-Z0-9 _]+", expression)){ //match string without special characters as string not expression
+        if (Pattern.matches("[a-zA-Z0-9 _]+", expression)) { //match string without special characters as string not expression
             T res = (T) expression;
             return res;
         }
 
-        ArrayDeque<T> values = new ArrayDeque();
+        Deque<T> values = new LinkedList();
         ArrayDeque<Token> argumentTokens = new ArrayDeque();
         ArrayDeque stack = new ArrayDeque();
         ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
         Iterator tokens = this.tokenize(expression);
-      //  List<Token> functionArgumentList = null;
+        //  List<Token> functionArgumentList = null;
 
         Token token;
         for (Token previous = null; tokens.hasNext(); previous = token) {
@@ -289,7 +288,6 @@ public abstract class AbstractEvaluator<T> {
 
                 BracketPair sc1 = token.getBrackets();
                 boolean openBracketFound = false;
-
 
 
                 while (!stack.isEmpty()) {
@@ -318,7 +316,7 @@ public abstract class AbstractEvaluator<T> {
                         Token tkn = (Token) stack.pop();
                         this.doFunction(values, (tkn).getFunction(), argCount1, argumentTokens, evaluationContext);
                         argumentTokens.push(tkn);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         throw e;
                     }
 
@@ -401,13 +399,12 @@ public abstract class AbstractEvaluator<T> {
             BracketPair brackets = this.getBracketPair(token);
             if (brackets != null)
                 return (brackets.getOpen().equals(token) ? Token.buildOpenToken(brackets) : Token.buildCloseToken(brackets));
-            else if (token.startsWith("'") && token.endsWith("'")){
+            else if (token.startsWith("'") && token.endsWith("'")) {
                 return Token.buildLiteralValue(token);
-            }
-            else if (NumberUtils.isNumber(token)){
+            } else if (NumberUtils.isNumber(token)) {
                 Number number = NumberUtils.createDouble(token);// NumberUtils.createNumber(token);
                 return Token.buildNumber(number);
-            }else{
+            } else {
                 return Token.buildLookupLiteral(token); // we want clean tokens such as: person.name or person.items[] or person.items[0].title
             }
             /*else if (token.startsWith("$") && token.endsWith("$")){
