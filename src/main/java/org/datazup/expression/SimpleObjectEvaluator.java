@@ -150,7 +150,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         else if (function==IS_NULL){
             Object op1 = operands.next();
             Token token = argumentList.pop();
-            if (op1 instanceof NullObject || op1.toString()==token.getContent().toString()){
+            if (null== op1 || op1 instanceof NullObject || op1.toString()==token.getContent().toString()){
                 return true;
             }
             return op1==null;
