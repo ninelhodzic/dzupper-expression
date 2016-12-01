@@ -21,10 +21,16 @@
     </repositories>
 
     <dependencies>
-        <dependency>
+      <!--  <dependency>
             <groupId>com.github.datazup</groupId>
             <artifactId>path-extractor</artifactId>
             <version>master</version>
+        </dependency>-->
+
+        <dependency>
+            <groupId>org.datazup</groupId>
+            <artifactId>path-extractor</artifactId>
+            <version>1.0</version>
         </dependency>
 
         <dependency>
