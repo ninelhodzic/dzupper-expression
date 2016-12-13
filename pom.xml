@@ -34,9 +34,9 @@
         </dependency>-->
 
         <dependency>
-            <groupId>com.github.mornya</groupId>
-            <artifactId>spring-social-naver</artifactId>
-            <version>-08ec23cca0-1</version>
+            <groupId>com.github.datazup</groupId>
+            <artifactId>path-extractor</artifactId>
+            <version>d772c05c2f</version>
         </dependency>
 
         <dependency>
