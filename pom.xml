@@ -27,10 +27,16 @@
             <version>master</version>
         </dependency>-->
 
-        <dependency>
+       <!-- <dependency>
             <groupId>org.datazup</groupId>
             <artifactId>path-extractor</artifactId>
             <version>1.0</version>
+        </dependency>-->
+
+        <dependency>
+            <groupId>com.github.mornya</groupId>
+            <artifactId>spring-social-naver</artifactId>
+            <version>-08ec23cca0-1</version>
         </dependency>
 
         <dependency>
