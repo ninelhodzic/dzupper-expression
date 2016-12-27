@@ -312,7 +312,7 @@ public abstract class AbstractEvaluator<T> {
 
                 if (!stack.isEmpty() && ((Token) stack.peek()).isFunction()) {
                     try {
-                        int argCount1 = values.size() - ((Integer) previousValuesSize.pop()).intValue();
+                        int argCount1 = values.size() - (previousValuesSize.size() > 0 ? ((Integer) previousValuesSize.pop()).intValue(): 0);
                         Token tkn = (Token) stack.pop();
                         this.doFunction(values, (tkn).getFunction(), argCount1, argumentTokens, evaluationContext);
                         argumentTokens.push(tkn);

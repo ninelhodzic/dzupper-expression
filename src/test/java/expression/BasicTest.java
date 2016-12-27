@@ -68,12 +68,12 @@ public class BasicTest extends TestBase {
         Assert.assertTrue(bres);
     }
 
-    /*@Test //this doesn;t work due to minus (-) in date format and date
+    @Test //this doesn't work due to minus (-) in date format and date // it does now
     public void testDate(){
-        String expression = "NOW() > STR_TO_DATE_TIMESTAMP('2016-01-01', 'yyyy-MM-dd')";
+        String expression = "NOW() > STR_TO_DATE_TIMESTAMP('#2016-01-01#', '#yyyy-MM-dd#')";
         Object res = evaluateOnMap(expression);
-        Assert.isInstanceOf(Boolean.class, res);
+        Assert.assertTrue(res instanceof Boolean);
         Boolean bres = (Boolean)res;
-        Assert.isTrue(bres);
-    }*/
+        Assert.assertTrue(bres);
+    }
 }
