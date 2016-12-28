@@ -49,7 +49,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function MONTH = new Function("MONTH", 1);
     public final static Function YEAR = new Function("YEAR", 1);
     public final static Function REGEX_MATCH= new Function("REGEX_MATCH", 2);
-    public final static Function REGEX_EXTRACT= new Function("REGEX_EXTRACT", 2);
+    public final static Function REGEX_EXTRACT= new Function("REGEX_EXTRACT",2,3);
 
    // public final static Function DATE = new Function("DATE", 2);
 
@@ -194,23 +194,37 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     private Object regexExtract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
 			Object evaluationContext) {
-		// TODO Auto-generated method stub
+		
     	String regexFieldValue = operands.next().toString();
         Token token = argumentList.pop();
 
         String regexPattern = operands.next().toString();
         Token token1 = argumentList.pop();
+        
+        Object group = null;
+        if(operands.hasNext()){
+        	group = operands.next();
+            Token token2 = argumentList.pop();
+        }
+        
         regexPattern = regexPattern.replace("#", "");
         Pattern r = Pattern.compile(regexPattern);
         Matcher matcher = r.matcher(regexFieldValue);
 
         int pos;
         String result = "";
+        	
         for(pos = 0; matcher.find(); pos = matcher.end()) {
         	if("" != result){
         		result+=", ";
         	}
-        	result +=  regexFieldValue.substring(matcher.start(),matcher.end());
+        	
+        	if( null != group){
+        		result +=  matcher.group(((Double)group).intValue());
+        	}
+        	else{
+        		result +=  regexFieldValue.substring(matcher.start(),matcher.end());
+        	}       	
         }
         
         return result;

@@ -92,4 +92,12 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof String);
     }
+    
+    @Test
+    public void evaluateRegexExtractByGroupFunctionExpressionTest(){
+        String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#',1)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+    }
 }
