@@ -68,6 +68,24 @@ public class BasicTest extends TestBase {
         Assert.assertTrue(bres);
     }
 
+    @Test
+    public void testSumWithPlusStrings(){
+        String expression = "'Hello'+'World'";
+        Object r = evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof String);
+        Assert.assertTrue(r.toString().equals("HelloWorld"));
+    }
+
+    @Test
+    public void testSum(){
+        String expression = "5+10";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==15d);
+    }
+
     /*@Test //this doesn;t work due to minus (-) in date format and date
     public void testDate(){
         String expression = "NOW() > STR_TO_DATE_TIMESTAMP('2016-01-01', 'yyyy-MM-dd')";
