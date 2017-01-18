@@ -74,4 +74,30 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         SimpleObjectEvaluator evaluator = new SimpleObjectEvaluator();
         return  evaluator.evaluate(expression,pathExtractor);
     }
+    
+    @Test
+    public void evaluateRegexFunctionExpressionTest(){
+        String expression = "REGEX_MATCH($child.name$, '\bchild\b')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Boolean b = (Boolean)evaluaged;
+        Assert.assertTrue(b);
+    }
+    
+    @Test
+    public void evaluateRegexExtractFunctionExpressionTest(){
+        String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+    }
+    
+    @Test
+    public void evaluateRegexExtractByGroupFunctionExpressionTest(){
+        String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#',1)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+    }
 }

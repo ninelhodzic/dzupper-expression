@@ -11,6 +11,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by ninel on 3/14/16.
@@ -52,6 +54,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function WEEK = new Function("WEEK", 1);
     public final static Function MONTH = new Function("MONTH", 1);
     public final static Function YEAR = new Function("YEAR", 1);
+    public final static Function REGEX_MATCH = new Function("REGEX_MATCH", 2);
+    public final static Function REGEX_EXTRACT = new Function("REGEX_EXTRACT", 2, 3);
 
     // public final static Function DATE = new Function("DATE", 2);
 
@@ -89,6 +93,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(WEEK);
         PARAMETERS.add(MONTH);
         PARAMETERS.add(YEAR);
+
+        PARAMETERS.add(REGEX_MATCH);
+        PARAMETERS.add(REGEX_EXTRACT);
     }
 
     public SimpleObjectEvaluator() {
@@ -174,23 +181,82 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 }
             }
             return 0;
+        } else if (function == REGEX_MATCH) {
+
+            return regexMatch(function, operands, argumentList, evaluationContext);
+        } else if (function == REGEX_EXTRACT) {
+
+            return regexExtract(function, operands, argumentList, evaluationContext);
         } else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
     }
 
+    private Object regexExtract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
+                                Object evaluationContext) {
 
-    private Object strToDateTimeStamp(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        Object dateString = operands.next();
+        String regexFieldValue = operands.next().toString();
         Token token = argumentList.pop();
 
-        Object stringFormat = operands.next();
+        String regexPattern = operands.next().toString();
+        Token token1 = argumentList.pop();
+
+        Object group = null;
+        if (operands.hasNext()) {
+            group = operands.next();
+            Token token2 = argumentList.pop();
+        }
+
+        regexPattern = regexPattern.replace("#", "");
+        Pattern r = Pattern.compile(regexPattern);
+        Matcher matcher = r.matcher(regexFieldValue);
+
+        int pos;
+        String result = "";
+
+        for (pos = 0; matcher.find(); pos = matcher.end()) {
+            if ("" != result) {
+                result += ", ";
+            }
+
+            if (null != group) {
+                result += matcher.group(((Double) group).intValue());
+            } else {
+                result += regexFieldValue.substring(matcher.start(), matcher.end());
+            }
+        }
+
+        return result;
+    }
+
+    private Object regexMatch(Function function, Iterator<Object> operands, Deque<Token> argumentList,
+                              Object evaluationContext) {
+        String regexFieldValue = operands.next().toString();
+        Token token = argumentList.pop();
+
+        String regexPattern = operands.next().toString();
+        Token token1 = argumentList.pop();
+
+        Pattern r = Pattern.compile(regexPattern);
+        Matcher matcher = r.matcher(regexFieldValue);
+
+        boolean matches = matcher.matches();
+
+        return matches;
+    }
+
+    private Object strToDateTimeStamp(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        String dateString = operands.next().toString().replace("#", "");
+
+        Token token = argumentList.pop();
+
+        String stringFormat = operands.next().toString().replace("#", "");
         Token token1 = argumentList.pop();
 
         if (stringFormat instanceof String && dateString instanceof String) {
             try {
-                DateTimeFormatter df = DateTimeFormat.forPattern((String) stringFormat);
-                DateTime dt = DateTime.parse((String) dateString, df);
+                DateTimeFormatter df = DateTimeFormat.forPattern(stringFormat);
+                DateTime dt = DateTime.parse(dateString, df);
                 return dt.getMillis();
             } catch (Exception e) {
                 System.out.println("Parse date error for date: " + dateString + " and format: " + stringFormat + " - " + e.getMessage());
