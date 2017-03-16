@@ -18,11 +18,17 @@ import java.util.regex.Pattern;
  * Created by ninel on 3/14/16.
  */
 public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
-    /** The negate unary operator.*/
+    /**
+     * The negate unary operator.
+     */
     public final static Operator NEGATE = new Operator("!", 1, Operator.Associativity.RIGHT, 3);
-    /** The logical AND operator.*/
+    /**
+     * The logical AND operator.
+     */
     private static final Operator AND = new Operator("&&", 2, Operator.Associativity.LEFT, 2);
-    /** The logical OR operator.*/
+    /**
+     * The logical OR operator.
+     */
     public final static Operator OR = new Operator("||", 2, Operator.Associativity.LEFT, 1);
 
     public final static Operator NOT_EQUAL = new Operator("!=", 2, Operator.Associativity.LEFT, 4);
@@ -52,7 +58,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function REGEX_EXTRACT= new Function("REGEX_EXTRACT",2,3);
     public final static Function EXTRACT= new Function("EXTRACT",2);
 
-   // public final static Function DATE = new Function("DATE", 2);
+    // public final static Function DATE = new Function("DATE", 2);
 
 
     protected static final Parameters PARAMETERS;
@@ -88,6 +94,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(WEEK);
         PARAMETERS.add(MONTH);
         PARAMETERS.add(YEAR);
+
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
         PARAMETERS.add(EXTRACT);
@@ -99,12 +106,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     @Override
     protected Object toValue(String literal, Object evaluationContext) {
-        if (evaluationContext instanceof AbstractVariableSet){
-            AbstractVariableSet abs = (AbstractVariableSet)evaluationContext;
+        if (evaluationContext instanceof AbstractVariableSet) {
+            AbstractVariableSet abs = (AbstractVariableSet) evaluationContext;
             Object o = abs.get(literal);
-            if (null==o){
+            if (null == o) {
                 return new NullObject();
-            }else{
+            } else {
                 return o;
             }
         }
@@ -112,81 +119,75 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     }
 
     @Override
-    protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext){
-        if (function==STR_TO_DATE_TIMESTAMP){
+    protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        if (function == STR_TO_DATE_TIMESTAMP) {
             return strToDateTimeStamp(function, operands, argumentList, evaluationContext);
-        }else
-        if (function==MINUTE){
+        } else if (function == MINUTE) {
             Object op1 = operands.next();
             argumentList.pop();
             DateTime dt = DateTimeUtils.resolve(op1);
             return dt.getMinuteOfDay();
-        }else if (function==HOUR){
+        } else if (function == HOUR) {
             Object op1 = operands.next();
             argumentList.pop();
             DateTime dt = DateTimeUtils.resolve(op1);
             return dt.getHourOfDay();
-        }else  if (function==DAY){
+        } else if (function == DAY) {
             Object op1 = operands.next();
             argumentList.pop();
             DateTime dt = DateTimeUtils.resolve(op1);
             return dt.getDayOfMonth();
-        }else  if (function==WEEK){
+        } else if (function == WEEK) {
             Object op1 = operands.next();
             argumentList.pop();
             DateTime dt = DateTimeUtils.resolve(op1);
-            Integer res =  dt.getDayOfMonth() % 7;
-            return  res;
-        }else  if (function==MONTH){
+            Integer res = dt.getDayOfMonth() % 7;
+            return res;
+        } else if (function == MONTH) {
             Object op1 = operands.next();
             argumentList.pop();
             DateTime dt = DateTimeUtils.resolve(op1);
             return dt.getMonthOfYear();
-        }else
-        if (function==YEAR){
+        } else if (function == YEAR) {
             Object op1 = operands.next();
             argumentList.pop();
             DateTime dt = DateTimeUtils.resolve(op1);
             return dt.getYear();
-        }else  if (function==NOW){
+        } else if (function == NOW) {
             return System.currentTimeMillis();
-        }else if (function==SET_NULL){
+        } else if (function == SET_NULL) {
             Object op1 = operands.next();
             argumentList.pop();
             return null; //getNullObject();
-        }
-        else if (function==IS_NULL){
+        } else if (function == IS_NULL) {
             Object op1 = operands.next();
             Token token = argumentList.pop();
-            if (null== op1 || op1 instanceof NullObject || op1.toString()==token.getContent().toString()){
+            if (null == op1 || op1 instanceof NullObject || op1.toString() == token.getContent().toString()) {
                 return true;
             }
-            return op1==null;
-        }else if (function==SIZE_OF){
+            return op1 == null;
+        } else if (function == SIZE_OF) {
             Object op1 = operands.next();
             argumentList.pop();
-            if (null!=op1 && !(op1 instanceof NullObject)){
-                if (op1 instanceof Collection){
-                    Collection c = (Collection)op1;
+            if (null != op1 && !(op1 instanceof NullObject)) {
+                if (op1 instanceof Collection) {
+                    Collection c = (Collection) op1;
                     return c.size();
-                }else if (op1 instanceof Map){
-                    Map map = (Map)op1;
+                } else if (op1 instanceof Map) {
+                    Map map = (Map) op1;
                     return map.size();
-                }
-                else if (op1 instanceof String){
-                    return ((String)op1).length();
-                }else{
-                    throw new NotSupportedExpressionException("SizeOf function not supported for instance of \""+op1.getClass()+"\"");
+                } else if (op1 instanceof String) {
+                    return ((String) op1).length();
+                } else {
+                    throw new NotSupportedExpressionException("SizeOf function not supported for instance of \"" + op1.getClass() + "\"");
                 }
             }
             return 0;
-        }
-        else if (function==REGEX_MATCH){
-            
+        } else if (function == REGEX_MATCH) {
+
             return regexMatch(function, operands, argumentList, evaluationContext);
-        }
-        else if (function==REGEX_EXTRACT){
-            
+        } else if (function == REGEX_EXTRACT) {
+
             return regexExtract(function, operands, argumentList, evaluationContext);
         }
     	else if (function==EXTRACT){
@@ -228,13 +229,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         String regexPattern = operands.next().toString();
         Token token1 = argumentList.pop();
-        
+
         Object group = null;
-        if(operands.hasNext()){
-        	group = operands.next();
+        if (operands.hasNext()) {
+            group = operands.next();
             Token token2 = argumentList.pop();
         }
-        
+
         regexPattern = regexPattern.replace("#", "");
         Pattern r = Pattern.compile(regexPattern);
         Matcher matcher = r.matcher(regexFieldValue);
@@ -276,7 +277,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 	}
 
 	private Object strToDateTimeStamp(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+
         String dateString = operands.next().toString().replace("#", "");
+
         Token token = argumentList.pop();
 
         String stringFormat = operands.next().toString().replace("#", "");
@@ -287,124 +290,134 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 DateTimeFormatter df = DateTimeFormat.forPattern(stringFormat);
                 DateTime dt = DateTime.parse(dateString, df);
                 return dt.getMillis();
-            }catch (Exception e){
-                System.out.println("Parse date error for date: "+dateString+" and format: "+stringFormat+" - "+e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Parse date error for date: " + dateString + " and format: " + stringFormat + " - " + e.getMessage());
             }
         }
 
         return null;
     }
 
-    protected Object nextFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext){
+    protected Object nextFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
         return super.evaluate(function, operands, argumentList, evaluationContext);
     }
 
-    protected Object superFunctionEvaluate(Function function, Iterator<Object> operands,Deque<Token> argumentList, Object evaluationContext){
+    protected Object superFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
         return super.evaluate(function, operands, argumentList, evaluationContext);
     }
 
     @Override
     protected Object evaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
-        if (operator==NEGATE){
+        if (operator == NEGATE) {
             Object next = operands.next();
-            if (next==null){
+            if (next == null) {
                 return false;
             }
-            if (next instanceof Boolean){
-                return !((Boolean)next);
+            if (next instanceof Boolean) {
+                return !((Boolean) next);
             }
-        }else if (operator==NOT_EQUAL){
+        } else if (operator == NOT_EQUAL) {
             Object left = operands.next();
             Object right = operands.next();
-            if (left instanceof Number && right instanceof Number){
-                return ((Number)left).doubleValue()!=((Number)right).doubleValue();
-            }else {
+            if (left instanceof Number && right instanceof Number) {
+                return ((Number) left).doubleValue() != ((Number) right).doubleValue();
+            } else {
                 return !left.equals(right);
             }
-        }else if (operator==EQUAL){
+        } else if (operator == EQUAL) {
             Object left = operands.next();
             Object right = operands.next();
-            if (left instanceof Number && right instanceof Number){
-                return ((Number)left).doubleValue()==((Number)right).doubleValue();
-            }else {
+            if (left instanceof Number && right instanceof Number) {
+                return ((Number) left).doubleValue() == ((Number) right).doubleValue();
+            } else {
                 return left.equals(right);
             }
-        }
-        else if (operator==GREATER_THEN){
+        } else if (operator == GREATER_THEN) {
             Object left = operands.next();
             Object right = operands.next();
             // check this: http://stackoverflow.com/questions/2683202/comparing-the-values-of-two-generic-numbers
-            Number l = (Number)left;
-            Number r = (Number)right;
-         //   if (null!=l && null!=r)
+            Number l = (Number) left;
+            Number r = (Number) right;
+            //   if (null!=l && null!=r)
             return l.doubleValue() > r.doubleValue();
-         //   else return false;
-        }
-        else if (operator==LOWER_THEN){
+            //   else return false;
+        } else if (operator == LOWER_THEN) {
             Object left = operands.next();
             Object right = operands.next();
-        // check this: http://stackoverflow.com/questions/2683202/comparing-the-values-of-two-generic-numbers
-            Number l = (Number)left;
-            Number r = (Number)right;
-           // if (null!=l && null!=r)
+            // check this: http://stackoverflow.com/questions/2683202/comparing-the-values-of-two-generic-numbers
+            Number l = (Number) left;
+            Number r = (Number) right;
+            // if (null!=l && null!=r)
             return l.doubleValue() < r.doubleValue();
-           // else return false;
-        }
-        else if (operator==AND){
+            // else return false;
+        } else if (operator == AND) {
             Object left = operands.next();
             Object right = operands.next();
-            boolean l = (Boolean)left;
-            boolean r = (Boolean)right;
+            boolean l = (Boolean) left;
+            boolean r = (Boolean) right;
             return l && r; //Boolean.logicalAnd(l,r);
-        }
-        else if (operator==OR){
+        } else if (operator == OR) {
             Object left = operands.next();
             Object right = operands.next();
-            boolean l = (Boolean)left;
-            boolean r = (Boolean)right;
+            boolean l = (Boolean) left;
+            boolean r = (Boolean) right;
             return l || r; //Boolean.logicalOr(l,r);
-        }
-        else if (operator==PLUS){
+        } else if (operator == PLUS) {
             Object left = operands.next();
             Object right = operands.next();
-            Number l = (Number)left;
-            Number r = (Number)right;
-            //if (null!=l && null!=r)
-                return l.doubleValue()+r.doubleValue();
+            if (left instanceof String || right instanceof String) {
+                String l = null;
+                String r = null;
+                if (left instanceof String) {
+                    l = (String) left;
+                } else {
+                    l = left.toString();
+                }
+                if (right instanceof String) {
+                    r = (String) right;
+                } else {
+                    r = right.toString();
+                }
+                return l + r;
+            } else {
+                Number l = (Number) left;
+                Number r = (Number) right;
+                return l.doubleValue() + r.doubleValue();
+            }
 
-        }else if (operator==MINUS){
+        } else if (operator == MINUS) {
             Object left = operands.next();
             Object right = operands.next();
-            Number l = (Number)left;
-            Number r = (Number)right;
-           // if (null!=l && null!=r)
-                return l.doubleValue()-r.doubleValue();
-        }
-        else {
+            Number l = (Number) left;
+            Number r = (Number) right;
+            // if (null!=l && null!=r)
+            return l.doubleValue() - r.doubleValue();
+        } else {
             return nextOperatorEvaluate(operator, operands, evaluationContext);
         }
         return false;
     }
 
-    protected Object nextOperatorEvaluate(Operator operator, Iterator<Object> operands, Object evaluationContext){
+    protected Object nextOperatorEvaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
         return super.evaluate(operator, operands, evaluationContext);
     }
-    protected Object superOperatorEvaluate(Operator operator, Iterator<Object> operands, Object evaluationContext){
+
+    protected Object superOperatorEvaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
         return super.evaluate(operator, operands, evaluationContext);
     }
 
     protected String normalizeTokenName(String tokenName) {
-        if(tokenName.startsWith("$") && tokenName.endsWith("$")){
-            tokenName = tokenName.substring(1,tokenName.length()-1);
+        if (tokenName.startsWith("$") && tokenName.endsWith("$")) {
+            tokenName = tokenName.substring(1, tokenName.length() - 1);
         }
-        if (tokenName.contains(".")){
+        if (tokenName.contains(".")) {
             StringBuilder builder = new StringBuilder();
             String[] splitted = tokenName.split("\\.");
             int counter = 0;
-            for (String s: splitted){
-                if (counter==0) {
+            for (String s : splitted) {
+                if (counter == 0) {
                     builder.append(s);
-                }else{
+                } else {
                     String sc = StringUtils.capitalize(s);
                     builder.append(sc);
                 }
@@ -417,21 +430,21 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     public static void main(String[] args) {
 
-        Map<String,Object> child = new HashMap<>();
-        child.put("name","child");
-        Map<String , Object> parent = new HashMap<>();
+        Map<String, Object> child = new HashMap<>();
+        child.put("name", "child");
+        Map<String, Object> parent = new HashMap<>();
         List<Object> list = new ArrayList<>();
         list.add("Hello");
         list.add("Hi");
         List<Object> list1 = new ArrayList<>();
         list1.add((new HashMap<>().put("n", "n")));
 
-        child.put("list",list);
+        child.put("list", list);
 
 
         parent.put("child", child);
-        parent.put("list",list1);
-        parent.put("number",5.30);
+        parent.put("list", list1);
+        parent.put("number", 5.30);
 
         String path = "child.name";
         String listParentPath = "list";
@@ -442,16 +455,16 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         SimpleObjectEvaluator evaluator = new SimpleObjectEvaluator();
         String expression = "(child.name == 'child' && number==5.30 && 6.30-1 == number) && (NOW() < NOW() || NOW()==NOW())";
         //String expression = "now() < now() || now()==now()";
-       // String expression = "6.30-1 +0 + (1-1) == number";
+        // String expression = "6.30-1 +0 + (1-1) == number";
         //String expression = "number==5";
         System.out.println(expression + " = " + evaluator.evaluate(expression, pathExtractor));
 
         Long start = System.currentTimeMillis();
-        for (int i=0;i<10000;i++) {
+        for (int i = 0; i < 10000; i++) {
             evaluator.evaluate(expression, pathExtractor);
             //System.out.println(expression + " = " + );
         }
-        System.out.println("total time executed: "+(System.currentTimeMillis()-start)+" ms");
+        System.out.println("total time executed: " + (System.currentTimeMillis() - start) + " ms");
        /* expression = "true || false";
         System.out.println (expression+" = "+evaluator.evaluate(expression));
         expression = "!true";

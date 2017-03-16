@@ -242,13 +242,16 @@ public abstract class AbstractEvaluator<T> {
             return (T) Boolean.TRUE;
         }
         if (expression.startsWith("'") && expression.endsWith("'")) {
-            try {
-                expression = expression.substring(1, expression.length() - 1);
-                T res = (T) expression;
-                return res;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
+            int count = StringUtils.countMatches(expression, "'");
+            if (count==2) {
+                try {
+                    expression = expression.substring(1, expression.length() - 1);
+                    T res = (T) expression;
+                    return res;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
         }
 
