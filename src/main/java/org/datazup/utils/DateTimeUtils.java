@@ -27,12 +27,20 @@ public class DateTimeUtils {
 
                 return dt;
             }catch (Exception e){
-                try {
-                    DateTime dt1 = resolve((String) obj);
-                    return dt1;
+
+                try{
+                    DateTime dt = resolve((String)obj, "yyyy-MM-dd hh:mm:ss.sss");
+                    return  dt;
                 }catch (Exception e1){
 
+                    try {
+                        DateTime dt1 = resolve((String) obj);
+                        return dt1;
+                    }catch (Exception e2){
+
+                    }
                 }
+
             }
         }
         return null;
