@@ -48,8 +48,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function WEEK = new Function("WEEK", 1);
     public final static Function MONTH = new Function("MONTH", 1);
     public final static Function YEAR = new Function("YEAR", 1);
-    public final static Function REGEX_MATCH= new Function("REGEX_MATCH", 2);
+	public final static Function REGEX_MATCH= new Function("REGEX_MATCH", 2);
     public final static Function REGEX_EXTRACT= new Function("REGEX_EXTRACT",2,3);
+    public final static Function EXTRACT= new Function("EXTRACT",2);
 
    // public final static Function DATE = new Function("DATE", 2);
 
@@ -89,6 +90,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(YEAR);
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
+        PARAMETERS.add(EXTRACT);
    }
 
     public SimpleObjectEvaluator() {
@@ -187,12 +189,38 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             
             return regexExtract(function, operands, argumentList, evaluationContext);
         }
+    	else if (function==EXTRACT){
+            
+            return extract(function, operands, argumentList, evaluationContext);
+        }
         else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
     }
 
-    private Object regexExtract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
+    private Object extract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
+			Object evaluationContext) {
+
+    	String fieldValue = operands.next().toString();
+    	String[] fieldValueSplited = fieldValue.toLowerCase().split("\\b");
+        Token token = argumentList.pop();
+
+        String topicValues = operands.next().toString();
+        Token token1 = argumentList.pop();
+        
+        String[] searchedTopics =  topicValues.toLowerCase().split("\\|");
+        
+        ArrayList list = new ArrayList();
+        for(int i =0; i<searchedTopics.length; i++){
+    	   if(fieldValue.toLowerCase().contains(searchedTopics[i].trim())){
+    		   list.add(searchedTopics[i]);
+    	   }
+        }
+        
+		return list;
+	}
+
+	private Object regexExtract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
 			Object evaluationContext) {
 		
     	String regexFieldValue = operands.next().toString();
@@ -212,22 +240,23 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         Matcher matcher = r.matcher(regexFieldValue);
 
         int pos;
-        String result = "";
+        ArrayList<String> list = new ArrayList<String>();
         	
         for(pos = 0; matcher.find(); pos = matcher.end()) {
-        	if("" != result){
-        		result+=", ";
-        	}
         	
         	if( null != group){
-        		result +=  matcher.group(((Double)group).intValue());
+        		list.add(matcher.group(((Double)group).intValue()));
         	}
         	else{
-        		result +=  regexFieldValue.substring(matcher.start(),matcher.end());
+        		list.add(regexFieldValue.substring(matcher.start(),matcher.end()));
         	}       	
         }
         
-        return result;
+        if(list.size() > 1){
+        	return list;
+        }
+        
+        return list.size() !=0 ? list.get(0).toString():"";
 	}
 
 	private Object regexMatch(Function function, Iterator<Object> operands, Deque<Token> argumentList,
