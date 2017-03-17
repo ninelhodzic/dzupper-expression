@@ -99,6 +99,9 @@ public abstract class TestBase {
 
         parent.put("child", child);
         parent.put("list", list1);
+
+        parent.put("text", "this is some longer text for testing purposes");
+
         return parent;
     }
 

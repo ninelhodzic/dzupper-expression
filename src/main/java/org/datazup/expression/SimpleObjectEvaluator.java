@@ -203,18 +203,20 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 			Object evaluationContext) {
 
     	String fieldValue = operands.next().toString();
-    	String[] fieldValueSplited = fieldValue.toLowerCase().split("\\b");
+    	//String[] fieldValueSplited = fieldValue.toLowerCase().split("\\b");
         Token token = argumentList.pop();
 
         String topicValues = operands.next().toString();
+        topicValues = topicValues.replaceAll("#", "");
         Token token1 = argumentList.pop();
         
-        String[] searchedTopics =  topicValues.toLowerCase().split("\\|");
+        String[] searchedTopics =  topicValues.toLowerCase().split(",");
         
         ArrayList list = new ArrayList();
         for(int i =0; i<searchedTopics.length; i++){
-    	   if(fieldValue.toLowerCase().contains(searchedTopics[i].trim())){
-    		   list.add(searchedTopics[i]);
+            String k = searchedTopics[i].trim();
+    	   if(fieldValue.toLowerCase().contains(k)){
+    		   list.add(k);
     	   }
         }
         

@@ -6,6 +6,8 @@ import org.datazup.pathextractor.PathExtractor;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.List;
+
 /**
  * Created by ninel on 3/15/16.
  */
@@ -100,4 +102,18 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof String);
     }
+
+    @Test
+    public void evaluateExtractorFnTest(){
+        String expression = "EXTRACT($text$, '#this,longer, test#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof List);
+        List l = (List)evaluaged;
+        Assert.assertTrue(l.size()==3);
+        Assert.assertTrue("this".equals(l.get(0)));
+        Assert.assertTrue("longer".equals(l.get(1)));
+        Assert.assertTrue("test".equals(l.get(2)));
+    }
+
 }
