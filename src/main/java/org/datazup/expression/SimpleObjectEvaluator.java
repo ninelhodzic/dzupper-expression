@@ -215,9 +215,24 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         ArrayList list = new ArrayList();
         for(int i =0; i<searchedTopics.length; i++){
             String k = searchedTopics[i].trim();
-    	   if(fieldValue.toLowerCase().contains(k)){
-    		   list.add(k);
-    	   }
+            boolean exists = false;
+            if (k.contains(" ")){
+                String[] sk = k.split(" ");
+                for (int j =0;j<sk.length;j++){
+                    String sk1 = sk[j];
+                    if (fieldValue.contains(sk1)){
+                        exists = true;
+                        break;
+                    }
+                }
+            }else{
+                if(fieldValue.toLowerCase().contains(k)){
+                    exists = true;
+                }
+            }
+    	    if(exists){
+    	        list.add(k);
+    	    }
         }
         
 		return list;

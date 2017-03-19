@@ -104,8 +104,9 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateExtractorFnTest(){
-        String expression = "EXTRACT($text$, '#this,longer, test#')";
+    public void evaluateRegexExtractByKeywordsTest(){
+        String expression = "REGEX_EXTRACT($text$, '#(\\bthis\\b|\\blonger\\b|\\btest\\b)(?!.*\\1)#',0)";
+
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof List);
@@ -114,6 +115,20 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue("this".equals(l.get(0)));
         Assert.assertTrue("longer".equals(l.get(1)));
         Assert.assertTrue("test".equals(l.get(2)));
+    }
+
+    @Test
+    public void evaluateExtractorFnTest(){
+        String expression = "EXTRACT($text$, '#this,longer, test, has purposes#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof List);
+        List l = (List)evaluaged;
+        Assert.assertTrue(l.size()==4);
+        Assert.assertTrue("this".equals(l.get(0)));
+        Assert.assertTrue("longer".equals(l.get(1)));
+        Assert.assertTrue("test".equals(l.get(2)));
+        Assert.assertTrue("has purposes".equals(l.get(3)));
     }
 
 }
