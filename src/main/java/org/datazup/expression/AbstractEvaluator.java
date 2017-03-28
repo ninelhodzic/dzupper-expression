@@ -4,6 +4,7 @@ package org.datazup.expression;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.pathextractor.AbstractVariableSet;
+import org.datazup.utils.JsonUtils;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -185,23 +186,11 @@ public abstract class AbstractEvaluator<T> {
                 throw e;
             }
         } else {
-            throw new IllegalArgumentException("Invalid argument count for " + function.getName());
+            throw new IllegalArgumentException("Invalid argument count for " + function.getName()
+                    +", min: "+function.getMinimumArgumentCount()+", max: "+function.getMaximumArgumentCount()
+                    +", count: "+argCount+" argumentList: "+ JsonUtils.getJsonFromObject(argumentList)+", values: "+JsonUtils.getJsonFromObject(values));
         }
     }
-
-    /*private Iterator<Token> getArgumentTokens(Deque<Token> values, int argCount) {
-        if (values.size() < argCount) {
-            throw new IllegalArgumentException();
-        } else {
-            LinkedList<Token> result = new LinkedList();
-
-            for (int i = 0; i < argCount; ++i) {
-                result.addFirst(values.pop());
-            }
-
-            return result.iterator();
-        }
-    }*/
 
     private Iterator<T> getArguments(Deque<T> values, int nb) {
         if (values.size() < nb) {

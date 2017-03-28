@@ -160,7 +160,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     shouldIncludeNull = Boolean.parseBoolean(s);
 
                 }else if (value3 instanceof Boolean) {
-                    shouldIncludeNull = (Boolean) shouldIncludeNull;
+                    shouldIncludeNull = (Boolean) value3;
                 }
             }
         }
