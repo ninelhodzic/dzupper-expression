@@ -3,6 +3,7 @@ package mapperevaluator;
 import base.TestBase;
 import org.datazup.expression.SelectMapperEvaluator;
 import org.datazup.pathextractor.PathExtractor;
+import org.datazup.utils.JsonUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -299,7 +300,43 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
         Assert.assertNotNull(((Map)firstObject).get("firstChildListItem"));
         Assert.assertNotNull(((Map)secondObject).get("list"));
+    }
 
+    @Test
+    public void doesFieldIncludeNull(){
+        Map<String,Object> data =  getData();
+        PathExtractor pathExtractor = new PathExtractor(data);
+        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
+        String expression = "FIELD('newFieldName', $textUnknown$, 'false')";
+
+        Object o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof Map);
+        Map r = (Map)o;
+        Assert.assertTrue(r.size()==0);
+    }
+
+    @Test
+    public void hierarchicalExtractionTest(){
+        Map<String,Object> data =  getData();
+        PathExtractor pathExtractor = new PathExtractor(data);
+        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+
+        String expression = "KEYS(MAP(FIELD('this',EXTRACT($text$, '#this#'), 'false'), FIELD('longer',EXTRACT($text$, '#longer, test#'), 'false'), FIELD('has', EXTRACT($text$, '#longer,  test, has purposes#'),'false')))";
+
+        Object o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof List);
+
+        List l = (List)o;
+        Assert.assertTrue(l.size()==3);
+        Assert.assertTrue(l.get(0).equals("this"));
+        Assert.assertTrue(l.get(1).equals("longer"));
+        Assert.assertTrue(l.get(2).equals("has"));
+
+        System.out.println(JsonUtils.getJsonFromObject(l));
     }
 }

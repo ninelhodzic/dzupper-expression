@@ -26,7 +26,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function EXTEND = new Function("EXTEND", 1, Integer.MAX_VALUE);
     public final static Function KEYS = new Function("KEYS", 1);
     public final static Function VALUES = new Function("VALUES", 1);
-    public final static Function FIELD = new Function("FIELD", 2);
+    public final static Function FIELD = new Function("FIELD",  2, 3);
     public final static Function TEMPLATE = new Function("T", 1, 2);
 
     private static SelectMapperEvaluator INSTANCE;
@@ -149,7 +149,37 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         Object value2 = operands.next();
         Token token2 = argumentList.pop();
 
-        map.put(value1, value2);
+        boolean shouldIncludeNull = true;
+        if (argumentList.size()>0 && operands.hasNext()){
+            Object value3 = operands.next();
+            Token token3 = argumentList.pop();
+
+            if (null!=value3){
+                if (value3 instanceof String){
+                    String s = (String)value3;
+                    shouldIncludeNull = Boolean.parseBoolean(s);
+
+                }else if (value3 instanceof Boolean) {
+                    shouldIncludeNull = (Boolean) shouldIncludeNull;
+                }
+            }
+        }
+
+        if (shouldIncludeNull){
+            map.put(value1, value2);
+        }else{
+            if (null!=value2){
+                if (value2 instanceof List || value2 instanceof Map){
+                    Collection c = (Collection)value2;
+                    if (c.size()>0){
+                        map.put(value1, value2);
+                    }
+                }else {
+                    map.put(value1, value2);
+                }
+            }
+        }
+
 
         return map;
     }

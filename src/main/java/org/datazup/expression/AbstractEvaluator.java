@@ -180,7 +180,7 @@ public abstract class AbstractEvaluator<T> {
     private void doFunction(Deque<T> values, Function function, int argCount, Deque<Token> argumentList, Object evaluationContext) {
         if (function.getMinimumArgumentCount() <= argCount && function.getMaximumArgumentCount() >= argCount) {
             try {
-                values.push(this.evaluate(function, this.getArguments(values, argCount), argumentList, evaluationContext));
+                values.push(this.evaluate(function, this.getArguments(values, argCount), getArgumentList(argumentList, argCount), evaluationContext));
             } catch (Exception e) {
                 throw e;
             }
@@ -214,6 +214,20 @@ public abstract class AbstractEvaluator<T> {
             }
 
             return result.iterator();
+        }
+    }
+
+    private Deque<Token> getArgumentList(Deque<Token> values, int nb) {
+        if (values.size() < nb) {
+            throw new IllegalArgumentException();
+        } else {
+            Deque<Token> result = new ArrayDeque<>();
+
+            for (int i = 0; i < nb; ++i) {
+                result.addFirst(values.pop());
+            }
+
+            return result;
         }
     }
 

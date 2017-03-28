@@ -103,6 +103,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof String);
     }
 
+    /*
     @Test
     public void evaluateRegexExtractByKeywordsTest(){
         String expression = "REGEX_EXTRACT($text$, '#(\\bthis\\b|\\blonger\\b|\\btest.*[])(?!.*\\1)#',0)";
@@ -119,6 +120,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue("longer".equals(l.get(1)));
       //  Assert.assertTrue("test".equals(l.get(2)));
     }
+    */
 
     @Test
     public void evaluateExtractorFnTest(){
