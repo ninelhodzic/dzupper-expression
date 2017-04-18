@@ -216,4 +216,42 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         assertDateZeroMinutes(dt);
     }
 
+
+    @Test
+    public void evaluateDateTimeToDateYearFormatExpressionTest(){
+        String expression = "TO_DATE($dateTime$, '#YYYY#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof DateTime);
+
+        DateTime dt = (DateTime)evaluaged;
+        assertDayDates(dt);
+        Assert.assertTrue(dt.getMonthOfYear()==1);
+        Assert.assertTrue(dt.getDayOfYear()==1);
+    }
+
+    @Test
+    public void evaluateDateTimeStringToDateMonthFormatExpressionTest(){
+        String expression = "TO_DATE($dateTimeString$, '#YYYY-MM#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof DateTime);
+
+        DateTime dt = (DateTime)evaluaged;
+        assertDayDates(dt);
+        Assert.assertTrue(dt.getDayOfMonth()==1);
+    }
+
+    @Test
+    public void evaluateTweetStringToDateMonthFormatExpressionTest(){
+        String expression = "TO_DATE($tweetCreatedAt$, '#YYYY-MM#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof DateTime);
+
+        DateTime dt = (DateTime)evaluaged;
+        assertDayDates(dt);
+        Assert.assertTrue(dt.getDayOfMonth()==1);
+    }
+
 }

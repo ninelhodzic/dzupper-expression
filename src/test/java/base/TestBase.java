@@ -99,6 +99,7 @@ public abstract class TestBase {
         parent.put("dateTime", new DateTime());
         parent.put("date", new Date());
         parent.put("dateTimeString", (new DateTime()).toString());
+        parent.put("tweetCreatedAt", "Tue Apr 18 18:35:35 +0000 2017");
 
         parent.put("text", "this is some longer text for testing purposes and we'll make it more longer having different keywords in it");
 

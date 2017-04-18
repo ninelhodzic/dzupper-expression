@@ -322,7 +322,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         if (valueObject instanceof String){
             String strDateTime =(String)valueObject;
-            DateTime dt = DateTimeUtils.resolve(strDateTime);
+
+            // first try to resolve as object
+            DateTime dt = DateTimeUtils.resolve(valueObject);
             if (null==dt){
                 dt = DateTimeUtils.resolve(strDateTime, format);
             }
