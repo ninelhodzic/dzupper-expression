@@ -7,6 +7,7 @@ import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -54,9 +55,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function WEEK = new Function("WEEK", 1);
     public final static Function MONTH = new Function("MONTH", 1);
     public final static Function YEAR = new Function("YEAR", 1);
-	public final static Function REGEX_MATCH= new Function("REGEX_MATCH", 2);
+
+    public final static Function TO_DATE = new Function("TO_DATE", 2);
+
+    public final static Function REGEX_MATCH= new Function("REGEX_MATCH", 2);
     public final static Function REGEX_EXTRACT= new Function("REGEX_EXTRACT",2,3);
     public final static Function EXTRACT= new Function("EXTRACT",2);
+
 
     // public final static Function DATE = new Function("DATE", 2);
 
@@ -95,6 +100,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(MONTH);
         PARAMETERS.add(YEAR);
 
+        PARAMETERS.add(TO_DATE);
+
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
         PARAMETERS.add(EXTRACT);
@@ -120,7 +127,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     @Override
     protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        if (function == STR_TO_DATE_TIMESTAMP) {
+        if (function == TO_DATE){
+            return toDate(function, operands, argumentList, evaluationContext);
+        }
+        else if (function == STR_TO_DATE_TIMESTAMP) {
             return strToDateTimeStamp(function, operands, argumentList, evaluationContext);
         } else if (function == MINUTE) {
             Object op1 = operands.next();
@@ -198,6 +208,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
     }
+
+
 
     private Object extract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
 			Object evaluationContext) {
@@ -292,6 +304,55 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
          
          return matches;
 	}
+
+    private Object toDate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+
+        Object valueObject = operands.next();
+        Token valueObjectToken = argumentList.pop();
+        String formatObject = (String) operands.next();
+        Token formatObjectToken = argumentList.pop();
+
+        String format = null;
+        if (null!=formatObject){
+            format = formatObject.replace("#", "");
+        }
+
+
+        DateTime leftDateTime = null;
+
+        if (valueObject instanceof String){
+            String strDateTime =(String)valueObject;
+            DateTime dt = DateTimeUtils.resolve(strDateTime);
+            if (null==dt){
+                dt = DateTimeUtils.resolve(strDateTime, format);
+            }
+            if (null!=dt){
+                DateTimeFormatter formatter =  DateTimeFormat.forPattern(format).withLocale(Locale.ENGLISH);
+                String s = dt.toString(format);
+                leftDateTime = formatter.withZoneUTC().parseDateTime(s);
+            }
+
+        }else if (valueObject instanceof DateTime){
+            leftDateTime = ((DateTime)valueObject).toDateTime(DateTimeZone.UTC);
+        }else if (valueObject instanceof Date){
+            leftDateTime = new DateTime(((Date)valueObject).getTime(), DateTimeZone.UTC);
+        }else if (valueObject instanceof Number){
+            Number valueNumber = (Number)valueObject;
+            Long value = valueNumber.longValue();
+            leftDateTime = new DateTime(value, DateTimeZone.UTC);
+
+        }
+
+        if (null!=leftDateTime){
+            DateTimeFormatter formatter =  DateTimeFormat.forPattern(format).withLocale(Locale.ENGLISH);
+            String val = leftDateTime.toString(formatter);
+            DateTime dateTime = formatter.withZoneUTC().parseDateTime(val);
+
+            return dateTime;
+        }
+
+        return null;
+    }
 
 	private Object strToDateTimeStamp(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
 

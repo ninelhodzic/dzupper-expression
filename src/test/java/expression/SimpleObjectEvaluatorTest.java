@@ -3,6 +3,10 @@ package expression;
 import base.TestBase;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.pathextractor.PathExtractor;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -134,6 +138,82 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue("longer".equals(l.get(1)));
         Assert.assertTrue("test".equals(l.get(2)));
         Assert.assertTrue("has purposes".equals(l.get(3)));
+    }
+
+    @Test
+    public void evaluateSimpleDateConversionBasedOnFormatTest(){
+        DateTime dt = DateTime.now(DateTimeZone.UTC);
+        String format = "YYYY";
+
+        Integer year = dt.getYear();
+
+        DateTimeFormatter formatter = DateTimeFormat.forPattern(format);
+        String str = dt.toString(formatter);
+
+        Assert.assertTrue(str.equals(year.toString()));
+
+        DateTime dtNew = formatter.withZoneUTC().parseDateTime(str);
+        String str1 = dtNew.toString(formatter);
+        Assert.assertTrue(str1.startsWith(year.toString()));
+
+    }
+
+    private void assertDayDates(DateTime dt){
+
+        Assert.assertTrue(dt.getHourOfDay()==0);
+        Assert.assertTrue(dt.getMinuteOfDay()==0);
+        Assert.assertTrue(dt.getSecondOfDay()==0);
+        assertDateZeroMinutes(dt);
+    }
+
+    private void assertDateZeroMinutes(DateTime dt){
+
+        Assert.assertTrue(dt.getMinuteOfHour()==0);
+        Assert.assertTrue(dt.getSecondOfMinute()==0);
+    }
+
+    @Test
+    public void evaluateDateTimeToDateFormatExpressionTest(){
+        String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof DateTime);
+
+        DateTime dt = (DateTime)evaluaged;
+        assertDayDates(dt);
+    }
+
+    @Test
+    public void evaluateDateToDateFormatExpressionTest(){
+        String expression = "TO_DATE($date$, '#YYYY-MM-dd#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof DateTime);
+
+        DateTime dt = (DateTime)evaluaged;
+        assertDayDates(dt);
+    }
+
+    @Test
+    public void evaluateDateTimeStringToDateFormatExpressionTest(){
+        String expression = "TO_DATE($dateTimeString$, '#YYYY-MM-dd#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof DateTime);
+
+        DateTime dt = (DateTime)evaluaged;
+        assertDayDates(dt);
+    }
+
+    @Test
+    public void evaluateDateTimeToDateHourFormatExpressionTest(){
+        String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd hh#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof DateTime);
+
+        DateTime dt = (DateTime)evaluaged;
+        assertDateZeroMinutes(dt);
     }
 
 }

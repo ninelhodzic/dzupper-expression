@@ -2,10 +2,7 @@ package base;
 
 import org.joda.time.DateTime;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by ninel on 11/25/16.
@@ -99,6 +96,9 @@ public abstract class TestBase {
 
         parent.put("child", child);
         parent.put("list", list1);
+        parent.put("dateTime", new DateTime());
+        parent.put("date", new Date());
+        parent.put("dateTimeString", (new DateTime()).toString());
 
         parent.put("text", "this is some longer text for testing purposes and we'll make it more longer having different keywords in it");
 
