@@ -20,6 +20,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function LIST = new Function("LIST", 1, Integer.MAX_VALUE);
     public final static Function MAP = new Function("MAP", 1, Integer.MAX_VALUE);
     public final static Function REMOVE = new Function("REMOVE", 1);
+    public final static Function THIS = new Function("THIS", 0);
     public final static Function COPY = new Function("COPY", 1);
     /* public final static Function REMOVE = new Function("remove", 1);*/
     public final static Function UNION = new Function("UNION", 1, Integer.MAX_VALUE);
@@ -28,19 +29,33 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function VALUES = new Function("VALUES", 1);
     public final static Function FIELD = new Function("FIELD",  2, 3);
     public final static Function TEMPLATE = new Function("T", 1, 2);
+    public final static Function EXCLUDE_FIELDS = new Function("EXCLUDE_FIELDS",  1, Integer.MAX_VALUE);
+
 
     private static SelectMapperEvaluator INSTANCE;
 
     public static SelectMapperEvaluator getInstance(){
+        SimpleMapListResolver simpleMapListResolver = new SimpleMapListResolver();
+        return getInstance(simpleMapListResolver);
+    }
+    public static SelectMapperEvaluator getInstance(AbstractMapListResolver mapListResolver){
         synchronized (SelectMapperEvaluator.class){
             if (null==INSTANCE){
                 synchronized (SelectMapperEvaluator.class){
                     if (null==INSTANCE)
-                        INSTANCE = new SelectMapperEvaluator();
+                        INSTANCE = new SelectMapperEvaluator(mapListResolver);
                 }
             }
         }
         return INSTANCE;
+    }
+
+    public SelectMapperEvaluator(){
+        super();
+    }
+
+    public SelectMapperEvaluator(AbstractMapListResolver mapListResolver){
+        super(mapListResolver);
     }
 
 
@@ -51,11 +66,14 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         SimpleObjectEvaluator.PARAMETERS.add(FIELD);
         SimpleObjectEvaluator.PARAMETERS.add(REMOVE);
         SimpleObjectEvaluator.PARAMETERS.add(COPY);
+        SimpleObjectEvaluator.PARAMETERS.add(THIS);
         SimpleObjectEvaluator.PARAMETERS.add(UNION);
         SimpleObjectEvaluator.PARAMETERS.add(EXTEND);
         SimpleObjectEvaluator.PARAMETERS.add(KEYS);
         SimpleObjectEvaluator.PARAMETERS.add(VALUES);
         SimpleObjectEvaluator.PARAMETERS.add(TEMPLATE);
+        SimpleObjectEvaluator.PARAMETERS.add(EXCLUDE_FIELDS);
+
     }
 
     @Override
@@ -78,6 +96,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getField(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == COPY) {
             return getCopy(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == THIS) {
+            return getThis(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == UNION) {
             return getUnion(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == EXTEND) {
@@ -86,9 +106,24 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getKeys(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == VALUES) {
             return getValues(function, operands, argumentList, (PathExtractor) evaluationContext);
-        } else {
+        } else if (function == EXCLUDE_FIELDS) {
+            return getExcludeFields(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else {
             return superFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private Object getExcludeFields(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+
+        while (operands.hasNext()) {
+            Object value = operands.next();
+            Token token = argumentList.removeLast();
+
+            String key = token.getLookupLiteralValue();
+            evaluationContext.remove(key);
+        }
+
+        return evaluationContext.getDataObject();
     }
 
     private Object getMap(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
@@ -98,12 +133,14 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         while (operands.hasNext()) {
             Object value = operands.next();
             argumentList.removeLast();
-            if (!(value instanceof Map)){
-                throw new ExpressionValidationException("Value in MAP expression should be of Map type");
-            }
-            Map tmp = (Map)value;
-            if (null!=tmp){
-                map.putAll(tmp);
+            if (null!=value) {
+                Map newMap = mapListResolver.resolveToMap(value);
+                if (null==newMap)
+                    throw new ExpressionValidationException("Value in MAP expression should be of Map type");
+
+                if (null != newMap) {
+                    map.putAll(newMap);
+                }
             }
         }
         return map;
@@ -169,12 +206,12 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             map.put(value1, value2);
         }else{
             if (null!=value2){
-                if (value2 instanceof List || value2 instanceof Map){
-                    Collection c = (Collection)value2;
-                    if (c.size()>0){
+                Collection collection = mapListResolver.resolveToCollection(value2);
+                if (null!=collection){
+                    if (collection.size()>0){
                         map.put(value1, value2);
                     }
-                }else {
+                }else{
                     map.put(value1, value2);
                 }
             }
@@ -187,8 +224,10 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     private Object getValues(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         Object value = operands.next();
         Token token = argumentList.pop();
-        if (value instanceof Map) {
+        Map newMap = mapListResolver.resolveToMap(value);
+        if (null!=newMap) {
             List list = new ArrayList<>();
+
             Collection c = ((Map) value).values();
             List cL = new ArrayList<>(c);
             list.addAll(cL);
@@ -200,7 +239,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     private Object getKeys(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         Object value = operands.next();
         Token token = argumentList.pop();
-        if (value instanceof Map) {
+        Map newMap = mapListResolver.resolveToMap(value);
+        if (null!=newMap) {
             List list = new ArrayList<>();
             Collection c = ((Map) value).keySet();
             List cL = new ArrayList<>(c);
@@ -217,8 +257,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         while (operands.hasNext()) {
             Object value = operands.next();
             Token token = argumentList.pop();
-
-            if (value instanceof Map) {
+            Map newMap = mapListResolver.resolveToMap(value);
+            if (null!=newMap) {
                 map.putAll((Map) value);
             }
 
@@ -234,7 +274,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             if (argumentList.size() > 0) {
                 Token token = argumentList.pop(); // just pop if exist - it will not exists if function was called before. Sample: union(keys($item$), values($item$))
             }
-            if (value instanceof List) {
+            List lst = mapListResolver.resolveToList(value);
+
+            if (null!=lst) {
                 List l = (List)value;
                 if (null!=l)
                     list.addAll((List) value);
@@ -246,10 +288,26 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         return list;
     }
 
+    private Object getThis(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        return evaluationContext.getDataObject();
+    }
+
     private Object getCopy(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         Object value = operands.next();
         Token token = argumentList.pop();
-        return value;
+
+        Object newObject = value;
+        Map newMap = mapListResolver.resolveToMap(value);
+        if (null!=newMap){
+            newObject = new HashMap((Map)value);
+        }else{
+            List newList = mapListResolver.resolveToList(value);
+            if (null!=newList){
+                newObject = new ArrayList(newList);
+            }
+        }
+
+        return newObject;
     }
 
     private Object getRemove(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {

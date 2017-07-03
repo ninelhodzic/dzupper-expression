@@ -17,7 +17,7 @@ public class BasicTest extends TestBase {
 
     @BeforeClass
     public static void init(){
-        evaluator = new SimpleObjectEvaluator();
+        evaluator = SimpleObjectEvaluator.getInstance();
     }
 
     private Object evaluateOnMap(String expression){

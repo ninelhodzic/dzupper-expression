@@ -4,7 +4,6 @@ package org.datazup.expression;
 import org.apache.commons.lang3.StringUtils;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractVariableSet;
-import org.datazup.pathextractor.PathExtractor;
 import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
 
@@ -105,8 +104,31 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(EXTRACT);
    }
 
+    private static SimpleObjectEvaluator INSTANCE;
+
+    public static SimpleObjectEvaluator getInstance(){
+        SimpleMapListResolver simpleMapListResolver = new SimpleMapListResolver();
+        return getInstance(simpleMapListResolver);
+    }
+
+
+    public static SimpleObjectEvaluator getInstance(AbstractMapListResolver mapListResolver){
+        synchronized (SimpleObjectEvaluator.class){
+            if (null==INSTANCE){
+                synchronized (SimpleObjectEvaluator.class){
+                    if (null==INSTANCE)
+                        INSTANCE = new SimpleObjectEvaluator(mapListResolver);
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
     public SimpleObjectEvaluator() {
-        super(PARAMETERS);
+        super(PARAMETERS, new SimpleMapListResolver());
+    }
+    public SimpleObjectEvaluator(AbstractMapListResolver mapListResolver) {
+        super(PARAMETERS, mapListResolver);
     }
 
     @Override
@@ -518,47 +540,6 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         return tokenName;
     }
 
-    public static void main(String[] args) {
 
-        Map<String, Object> child = new HashMap<>();
-        child.put("name", "child");
-        Map<String, Object> parent = new HashMap<>();
-        List<Object> list = new ArrayList<>();
-        list.add("Hello");
-        list.add("Hi");
-        List<Object> list1 = new ArrayList<>();
-        list1.add((new HashMap<>().put("n", "n")));
-
-        child.put("list", list);
-
-
-        parent.put("child", child);
-        parent.put("list", list1);
-        parent.put("number", 5.30);
-
-        String path = "child.name";
-        String listParentPath = "list";
-        String listChildPath = "child.list";
-
-        PathExtractor pathExtractor = new PathExtractor(parent);
-
-        SimpleObjectEvaluator evaluator = new SimpleObjectEvaluator();
-        String expression = "(child.name == 'child' && number==5.30 && 6.30-1 == number) && (NOW() < NOW() || NOW()==NOW())";
-        //String expression = "now() < now() || now()==now()";
-        // String expression = "6.30-1 +0 + (1-1) == number";
-        //String expression = "number==5";
-        System.out.println(expression + " = " + evaluator.evaluate(expression, pathExtractor));
-
-        Long start = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
-            evaluator.evaluate(expression, pathExtractor);
-            //System.out.println(expression + " = " + );
-        }
-        System.out.println("total time executed: " + (System.currentTimeMillis() - start) + " ms");
-       /* expression = "true || false";
-        System.out.println (expression+" = "+evaluator.evaluate(expression));
-        expression = "!true";
-        System.out.println (expression+" = "+evaluator.evaluate(expression));*/
-    }
 
 }

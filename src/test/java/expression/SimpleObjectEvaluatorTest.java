@@ -79,7 +79,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
     public Object evaluate(String expression){
         PathExtractor pathExtractor = new PathExtractor(getData());
-        SimpleObjectEvaluator evaluator = new SimpleObjectEvaluator();
+        SimpleObjectEvaluator evaluator = SimpleObjectEvaluator.getInstance(); //new SimpleObjectEvaluator();
         return  evaluator.evaluate(expression,pathExtractor);
     }
     

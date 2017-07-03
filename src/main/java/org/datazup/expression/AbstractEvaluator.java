@@ -21,7 +21,11 @@ public abstract class AbstractEvaluator<T> {
     private final Map<String, BracketPair> functionBrackets;
     private final Map<String, BracketPair> expressionBrackets;
 
-    protected AbstractEvaluator(Parameters parameters) {
+    protected AbstractMapListResolver mapListResolver;
+
+    protected AbstractEvaluator(Parameters parameters, AbstractMapListResolver mapListResolver) {
+        this.mapListResolver = mapListResolver;
+
         ArrayList tokenDelimitersBuilder = new ArrayList();
         this.functions = new HashMap();
         this.operators = new HashMap();

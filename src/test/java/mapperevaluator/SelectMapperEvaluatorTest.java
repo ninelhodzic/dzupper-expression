@@ -17,6 +17,36 @@ import java.util.regex.Pattern;
  */
 public class SelectMapperEvaluatorTest extends TestBase {
 
+    private  static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+
+    @Test
+    public void isFilterFieldsRuns(){
+
+        Map<String,Object> data =  getData();
+        PathExtractor pathExtractor = new PathExtractor(data);
+
+        Object evaluated = evaluator.evaluate("EXCLUDE_FIELDS($child$, $text$)", pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof Map);
+        Map m = (Map)evaluated;
+        Assert.assertTrue(!m.containsKey("child"));
+        Assert.assertTrue(!m.containsKey("text"));
+    }
+    @Test
+    public void isThisExpressionRuns(){
+        String expression = "THIS()";
+        Map<String,Object> objectMap = new HashMap<String,Object>();
+        objectMap.put("dateString", "nesto nebitno");
+
+        PathExtractor pathExtractor = new PathExtractor(objectMap);
+
+        Object evaluated = evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof Map);
+        Map m = (Map)evaluated;
+        Assert.assertTrue(m.get("dateString").equals("nesto nebitno"));
+    }
+
     @Test
     public void isPatternMatch(){
         String expression = "SELECT";
@@ -41,7 +71,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Map<String,Object> objectMap = new HashMap<String,Object>();
         objectMap.put("dateString", "nesto nebitno");
 
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        //SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
         PathExtractor pathExtractor = new PathExtractor(objectMap);
 
         Object stringValue = evaluator.evaluate("'SELECT VALUES(jpa,dsd)'", pathExtractor);
@@ -55,7 +85,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Map<String,Object> objectMap = new HashMap<String,Object>();
         objectMap.put("dateString", "Wed May 21 00:00:00 EDT 2008");
 
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
         PathExtractor pathExtractor = new PathExtractor(objectMap);
 
         // NOTE: this is working as there is no - (minus) in these strings
@@ -70,7 +100,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Map<String,Object> objectMap = new HashMap<String,Object>();
 
 
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+      //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
         PathExtractor pathExtractor = new PathExtractor(objectMap);
 
         // NOTE: this is working as there is no - (minus) in these strings
@@ -84,7 +114,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isMovingAndRemovingAndPuttingTest() {
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SIZE_OF(child.list)", pathExtractor);
         Assert.assertNotNull(o);
@@ -105,7 +135,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isSelectingSimpleItemsTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SELECT(1,2,3)", pathExtractor);
         Assert.assertNotNull(o);
@@ -116,7 +146,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isSelectingItemsFromMapTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+      //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SELECT($child.list$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
@@ -132,7 +162,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isSelectingItemsFromMapWhereListLastTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SELECT($child.list[last]$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
@@ -148,7 +178,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isSelectingItemsFromMapWhereListIndex0Test(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SELECT($child.list[0]$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
@@ -165,7 +195,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Map<String,Object> data =  getData();
 
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+       // SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         long start = System.currentTimeMillis();
         int num = 1000;
@@ -185,7 +215,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isUnionListItemsFromMapTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+      //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("UNION($child.list$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
@@ -200,7 +230,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isUnioMapItemsFromMapTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+     //   SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("UNION($child$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
@@ -215,7 +245,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isKeysItemsFromMapTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+     //   SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("KEYS($child$)", pathExtractor);
         Assert.assertNotNull(o);
@@ -231,7 +261,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isValuesItemsFromMapTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+     //   SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("VALUES($child$)", pathExtractor);
         Assert.assertNotNull(o);
@@ -247,7 +277,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isUnionKeyValuesItemsFromMapTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+      //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("UNION(KEYS($child$), VALUES($child$))", pathExtractor);
         Assert.assertNotNull(o);
@@ -263,7 +293,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isToMapTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+      //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("MAP(FIELD('firstChildListItem', $child.list[0]$), FIELD('list', $list$))", pathExtractor);
         Assert.assertNotNull(o);
@@ -279,7 +309,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void isToListTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+      //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("LIST(FIELD('firstChildListItem', $child.list[0]$), FIELD('list', $list$))", pathExtractor);
         Assert.assertNotNull(o);
@@ -306,7 +336,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void doesFieldIncludeNull(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+
 
         String expression = "FIELD('newFieldName', $textUnknown$, 'false')";
 
@@ -322,7 +352,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void hierarchicalExtractionTest(){
         Map<String,Object> data =  getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-        SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+    //    SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         String expression = "KEYS(MAP(FIELD('this',EXTRACT($text$, '#this#'), 'false'), FIELD('longer',EXTRACT($text$, '#longer, test#'), 'false'), FIELD('has', EXTRACT($text$, '#longer,  test, has purposes#'),'false')))";
 

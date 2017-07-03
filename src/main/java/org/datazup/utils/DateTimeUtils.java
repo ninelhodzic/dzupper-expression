@@ -14,8 +14,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-//import java.time.format.DateTimeFormatter;
-
 
 /**
  * Created by ninel on 11/25/16.
@@ -29,12 +27,6 @@ public class DateTimeUtils {
                     getFormatter("EEE MMM dd HH:mm:ss z yyyy"));
 
     private static DateTimeFormatter getFormatter(String format) {
-        /*DateTimeFormatter fmt = new DateTimeFormatterBuilder().appendPattern(format)
-                .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-                .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-                .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
-                .toFormatter(Locale.ENGLISH);*/
-
        DateTimeFormatter fmt = DateTimeFormat.forPattern(format).withZoneUTC().withLocale(Locale.ENGLISH);
         return fmt;
     }
@@ -61,22 +53,12 @@ public class DateTimeUtils {
     }
 
     public static Instant resolve(DateTimeFormatter fmt, String dateString){
-        /*try {
-            TemporalAccessor temporalAccessor = fmt.parse(dateString);
-            LocalDateTime localDateTime = LocalDateTime.from(temporalAccessor);
-            ZonedDateTime zonedDateTime = ZonedDateTime.of(localDateTime, ZoneOffset.UTC);
-            Instant dt = Instant.from(zonedDateTime);
-            return dt;
-        }catch (Exception e){
-            e.printStackTrace();
-            return null;
-        }*/
 
         try {
             DateTime dt = fmt.parseDateTime(dateString);
             return resolve(dt);
         }catch (Exception e){
-            e.printStackTrace();
+           // e.printStackTrace();
             return null;
         }
     }
@@ -115,7 +97,6 @@ public class DateTimeUtils {
     }
 
     public static Instant format(Instant dt, String format) {
-        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format).withLocale(Locale.ENGLISH).withZone(ZoneOffset.UTC);
         DateTimeFormatter formatter = getFormatter(format);
         DateTime dti = new DateTime( dt.toEpochMilli());
         String dtString = dti.toString(formatter);
