@@ -3,6 +3,7 @@ package expression;
 import base.TestBase;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.pathextractor.PathExtractor;
+import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -10,6 +11,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -158,18 +160,22 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
     }
 
-    private void assertDayDates(DateTime dt){
+    private void assertDayDates(Instant dt){
 
-        Assert.assertTrue(dt.getHourOfDay()==0);
-        Assert.assertTrue(dt.getMinuteOfDay()==0);
-        Assert.assertTrue(dt.getSecondOfDay()==0);
+        //LocalDateTime.ofInstant(dt, ZoneOffset.UTC).getHour();
+
+
+
+        Assert.assertTrue(DateTimeUtils.getHour(dt)==0);//dt.get(ChronoField.HOUR_OF_DAY)==0);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt)==0);//dt.get(ChronoField.MINUTE_OF_DAY)==0);//dt.getMinuteOfDay()==0);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt)==0);//dt.get(ChronoField.SECOND_OF_DAY)==0);//dt.getSecondOfDay()==0);
         assertDateZeroMinutes(dt);
     }
 
-    private void assertDateZeroMinutes(DateTime dt){
+    private void assertDateZeroMinutes(Instant dt){
 
-        Assert.assertTrue(dt.getMinuteOfHour()==0);
-        Assert.assertTrue(dt.getSecondOfMinute()==0);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt)==0);//dt.get(ChronoField.MINUTE_OF_HOUR)==0);//dt.getMinuteOfHour()==0);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt)==0);//dt.get(ChronoField.SECOND_OF_MINUTE)==0);//dt.getSecondOfMinute()==0);
     }
 
     @Test
@@ -177,9 +183,9 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof DateTime);
+        Assert.assertTrue(evaluaged instanceof Instant);
 
-        DateTime dt = (DateTime)evaluaged;
+        Instant dt = (Instant)evaluaged;
         assertDayDates(dt);
     }
 
@@ -188,9 +194,9 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         String expression = "TO_DATE($date$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof DateTime);
+        Assert.assertTrue(evaluaged instanceof Instant);
 
-        DateTime dt = (DateTime)evaluaged;
+        Instant dt = (Instant)evaluaged;
         assertDayDates(dt);
     }
 
@@ -199,9 +205,9 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         String expression = "TO_DATE($dateTimeString$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof DateTime);
+        Assert.assertTrue(evaluaged instanceof Instant);
 
-        DateTime dt = (DateTime)evaluaged;
+        Instant dt = (Instant)evaluaged;
         assertDayDates(dt);
     }
 
@@ -210,9 +216,9 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd hh#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof DateTime);
+        Assert.assertTrue(evaluaged instanceof Instant);
 
-        DateTime dt = (DateTime)evaluaged;
+        Instant dt = (Instant)evaluaged;
         assertDateZeroMinutes(dt);
     }
 
@@ -222,12 +228,12 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         String expression = "TO_DATE($dateTime$, '#YYYY#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof DateTime);
+        Assert.assertTrue(evaluaged instanceof Instant);
 
-        DateTime dt = (DateTime)evaluaged;
+        Instant dt = (Instant)evaluaged;
         assertDayDates(dt);
-        Assert.assertTrue(dt.getMonthOfYear()==1);
-        Assert.assertTrue(dt.getDayOfYear()==1);
+        Assert.assertTrue(DateTimeUtils.getMonth(dt)==1);//dt.get(ChronoField.MONTH_OF_YEAR)==1);//dt.getMonthOfYear()==1);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==1);//dt.get(ChronoField.DAY_OF_YEAR)==1);//dt.getDayOfYear()==1);
     }
 
     @Test
@@ -235,11 +241,11 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         String expression = "TO_DATE($dateTimeString$, '#YYYY-MM#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof DateTime);
+        Assert.assertTrue(evaluaged instanceof Instant);
 
-        DateTime dt = (DateTime)evaluaged;
+        Instant dt = (Instant)evaluaged;
         assertDayDates(dt);
-        Assert.assertTrue(dt.getDayOfMonth()==1);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==1);//dt.get(ChronoField.DAY_OF_MONTH)==1);//dt.getDayOfMonth()==1);
     }
 
     @Test
@@ -247,11 +253,11 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         String expression = "TO_DATE($tweetCreatedAt$, '#YYYY-MM#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof DateTime);
+        Assert.assertTrue(evaluaged instanceof Instant);
 
-        DateTime dt = (DateTime)evaluaged;
+        Instant dt = (Instant)evaluaged;
         assertDayDates(dt);
-        Assert.assertTrue(dt.getDayOfMonth()==1);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==1);//dt.get(ChronoField.DAY_OF_MONTH)==1);//dt.getDayOfMonth()==1);
     }
 
 }

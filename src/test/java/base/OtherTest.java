@@ -1,11 +1,11 @@
 package base;
 
-import junit.framework.Assert;
 import org.datazup.utils.DateTimeUtils;
 import org.datazup.utils.JsonUtils;
-import org.joda.time.DateTime;
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,8 +16,15 @@ public class OtherTest {
 
     @Test
     public void dateTimeTwitterFormatTest(){
-        Object twitterCreatedAt = "Wed Aug 27 13:08:45 +0900 2008";
-        DateTime dt = DateTimeUtils.resolve(twitterCreatedAt);
+        Object dtstr = "Wed Aug 27 13:08:45 +0900 2008";
+        Instant dt = DateTimeUtils.resolve(dtstr);
+        Assert.assertNotNull(dt);
+    }
+
+    @Test
+    public void customDateTimeFormatTest(){
+        Object dtstr = "Wed May 21 00:00:00 EDT 2008";
+        Instant dt = DateTimeUtils.resolve(dtstr);
         Assert.assertNotNull(dt);
     }
 

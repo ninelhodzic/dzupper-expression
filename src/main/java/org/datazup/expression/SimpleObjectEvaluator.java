@@ -7,10 +7,8 @@ import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -135,34 +133,34 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else if (function == MINUTE) {
             Object op1 = operands.next();
             argumentList.pop();
-            DateTime dt = DateTimeUtils.resolve(op1);
-            return dt.getMinuteOfDay();
+            Instant dt = DateTimeUtils.resolve(op1);
+            return DateTimeUtils.getMinute(dt); //LocalDateTime.ofInstant(dt, ZoneOffset.UTC).getMinute();
         } else if (function == HOUR) {
             Object op1 = operands.next();
             argumentList.pop();
-            DateTime dt = DateTimeUtils.resolve(op1);
-            return dt.getHourOfDay();
+            Instant dt = DateTimeUtils.resolve(op1);
+            return DateTimeUtils.getHour(dt);
         } else if (function == DAY) {
             Object op1 = operands.next();
             argumentList.pop();
-            DateTime dt = DateTimeUtils.resolve(op1);
-            return dt.getDayOfMonth();
+            Instant dt = DateTimeUtils.resolve(op1);
+            return DateTimeUtils.getDayOfMonth(dt);
         } else if (function == WEEK) {
             Object op1 = operands.next();
             argumentList.pop();
-            DateTime dt = DateTimeUtils.resolve(op1);
-            Integer res = dt.getDayOfMonth() % 7;
+            Instant dt = DateTimeUtils.resolve(op1);
+            int res = DateTimeUtils.getDayOfMonth(dt) % 7;
             return res;
         } else if (function == MONTH) {
             Object op1 = operands.next();
             argumentList.pop();
-            DateTime dt = DateTimeUtils.resolve(op1);
-            return dt.getMonthOfYear();
+            Instant dt = DateTimeUtils.resolve(op1);
+            return DateTimeUtils.getMonth(dt);
         } else if (function == YEAR) {
             Object op1 = operands.next();
             argumentList.pop();
-            DateTime dt = DateTimeUtils.resolve(op1);
-            return dt.getYear();
+            Instant dt = DateTimeUtils.resolve(op1);
+            return DateTimeUtils.getYear(dt);
         } else if (function == NOW) {
             return System.currentTimeMillis();
         } else if (function == SET_NULL) {
@@ -318,39 +316,50 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
 
 
-        DateTime leftDateTime = null;
+        Instant leftDateTime = null;
 
         if (valueObject instanceof String){
             String strDateTime =(String)valueObject;
 
             // first try to resolve as object
-            DateTime dt = DateTimeUtils.resolve(valueObject);
+            Instant dt = DateTimeUtils.resolve(valueObject);
             if (null==dt){
                 dt = DateTimeUtils.resolve(strDateTime, format);
             }
             if (null!=dt){
-                DateTimeFormatter formatter =  DateTimeFormat.forPattern(format).withLocale(Locale.ENGLISH);
+
+                leftDateTime = DateTimeUtils.format(dt, format);
+
+               /* DateTimeFormatter formatter =  DateTimeFormat.forPattern(format).withLocale(Locale.ENGLISH);
                 String s = dt.toString(format);
-                leftDateTime = formatter.withZoneUTC().parseDateTime(s);
+                leftDateTime = formatter.withZoneUTC().parseDateTime(s);*/
             }
 
         }else if (valueObject instanceof DateTime){
-            leftDateTime = ((DateTime)valueObject).toDateTime(DateTimeZone.UTC);
+            Instant dt = DateTimeUtils.format((DateTime)valueObject, format);
+            leftDateTime = dt;
+            //leftDateTime = ((DateTime)valueObject).toDateTime(DateTimeZone.UTC);
         }else if (valueObject instanceof Date){
-            leftDateTime = new DateTime(((Date)valueObject).getTime(), DateTimeZone.UTC);
+            //leftDateTime = new DateTime(((Date)valueObject).getTime(), DateTimeZone.UTC);
+            Instant dt = DateTimeUtils.format((Date)valueObject, format);
+            leftDateTime = dt;
         }else if (valueObject instanceof Number){
             Number valueNumber = (Number)valueObject;
             Long value = valueNumber.longValue();
-            leftDateTime = new DateTime(value, DateTimeZone.UTC);
+            Instant dt = DateTimeUtils.format(value, format);
+            leftDateTime = dt;
+           // leftDateTime = new DateTime(value, DateTimeZone.UTC);
 
         }
 
         if (null!=leftDateTime){
-            DateTimeFormatter formatter =  DateTimeFormat.forPattern(format).withLocale(Locale.ENGLISH);
+            /*DateTimeFormatter formatter =  DateTimeFormat.forPattern(format).withLocale(Locale.ENGLISH);
             String val = leftDateTime.toString(formatter);
-            DateTime dateTime = formatter.withZoneUTC().parseDateTime(val);
+            DateTime dateTime = formatter.withZoneUTC().parseDateTime(val);*/
 
-            return dateTime;
+            Instant i = DateTimeUtils.format(leftDateTime, format);
+
+            return i; //leftDateTime.atOffset(ZoneOffset.UTC);//dateTime;
         }
 
         return null;
@@ -367,9 +376,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         if (stringFormat instanceof String && dateString instanceof String) {
             try {
-                DateTimeFormatter df = DateTimeFormat.forPattern(stringFormat);
-                DateTime dt = DateTime.parse(dateString, df);
-                return dt.getMillis();
+                /*DateTimeFormatter df = DateTimeFormat.forPattern(stringFormat);
+                DateTime dt = DateTime.parse(dateString, df);*/
+                Instant dt = DateTimeUtils.resolve(dateString, stringFormat);
+                return dt.toEpochMilli();
             } catch (Exception e) {
                 System.out.println("Parse date error for date: " + dateString + " and format: " + stringFormat + " - " + e.getMessage());
             }
