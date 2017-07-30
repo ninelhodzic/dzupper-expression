@@ -245,6 +245,7 @@ public abstract class AbstractEvaluator<T> {
 
     public T evaluate(String expression, Object evaluationContext) {
 
+        expression = expression.trim();
         if (StringUtils.isEmpty(expression)) {
             return (T) Boolean.TRUE;
         }

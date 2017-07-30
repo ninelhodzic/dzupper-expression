@@ -7,7 +7,7 @@
 
     <groupId>org.datazup</groupId>
     <artifactId>dzupper-expression</artifactId>
-    <version>1.0</version>
+    <version>1.0-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,23 +21,17 @@
     </repositories>
 
     <dependencies>
-      <!--  <dependency>
-            <groupId>com.github.datazup</groupId>
-            <artifactId>path-extractor</artifactId>
-            <version>master</version>
-        </dependency>-->
-
-       <!-- <dependency>
-            <groupId>org.datazup</groupId>
-            <artifactId>path-extractor</artifactId>
-            <version>1.0</version>
-        </dependency>-->
 
         <dependency>
+            <groupId>org.datazup</groupId>
+            <artifactId>path-extractor</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <!--<dependency>
             <groupId>com.github.datazup</groupId>
             <artifactId>path-extractor</artifactId>
-            <version>e64233d916</version>
-        </dependency>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>-->
 
         <dependency>
             <groupId>junit</groupId>

@@ -169,6 +169,13 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
             try {
                 Object evaluated = evaluationContext.compileString((String)value1);
+                if (evaluated instanceof String){
+                    String s = (String)evaluated;
+                    if (s.startsWith("#") && s.endsWith("#")) {
+                        s = s.trim().substring(1, s.length() - 1).trim();
+                        return s;
+                    }
+                }
                 return evaluated;
             } catch (IOException e) {
                 e.printStackTrace();

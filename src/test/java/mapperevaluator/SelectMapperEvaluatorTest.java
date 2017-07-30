@@ -369,4 +369,39 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
         System.out.println(JsonUtils.getJsonFromObject(l));
     }
+
+    @Test
+    public void templateSimpleTest(){
+        Map<String,Object> data =  getData();
+        String strToCompile = "T('ovo je moj text {{child.name}}')";
+        PathExtractor pathExtractor = new PathExtractor(data);
+        Object o =  evaluator.evaluate(strToCompile, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o.equals("ovo je moj text child"));
+    }
+
+    @Test
+    public void templateHtmlTest(){
+        Map<String,Object> data =  getData();
+        String strToCompile = "T('#<html>This is Twitter results </br> \n" +
+                "    <pre> {{json child}}</pre>\n" +
+                "</html>#')";
+        //String strToCompile = "T('#<html>ovo je moj text {{child.name}}</html>#')";
+        PathExtractor pathExtractor = new PathExtractor(data);
+        Object o =  evaluator.evaluate(strToCompile, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(((String)o).startsWith("<html>"));
+        Assert.assertTrue(((String)o).endsWith("</html>"));
+    }
+
+    @Test
+    public void templateHtmlMultiLineTest(){
+        Map<String,Object> data =  getData();
+        String strToCompile = "T('#<html>ovo je moj </br> text <pre> {{child.name}} </pre> </html>#')";
+        PathExtractor pathExtractor = new PathExtractor(data);
+        Object o =  evaluator.evaluate(strToCompile, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(((String)o).startsWith("<html>"));
+        Assert.assertTrue(((String)o).endsWith("</html>"));
+    }
 }

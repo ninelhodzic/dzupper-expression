@@ -200,6 +200,25 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Object op1 = operands.next();
             argumentList.pop();
             if (null != op1 && !(op1 instanceof NullObject)) {
+
+                Map m = mapListResolver.resolveToMap(op1);
+                if (null==m){
+                    Collection c = mapListResolver.resolveToCollection(op1);
+                    if (null==c){
+                        List l = mapListResolver.resolveToList(op1);
+                        if (null!=l){
+                            return l.size();
+                        }
+                    }else{
+                        return c.size();
+                    }
+                }else{
+                    return m.size();
+                }
+
+                throw new NotSupportedExpressionException("SizeOf function not supported for instance of \"" + op1.getClass() + "\"");
+
+                /*
                 if (op1 instanceof Collection) {
                     Collection c = (Collection) op1;
                     return c.size();
@@ -210,7 +229,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                     return ((String) op1).length();
                 } else {
                     throw new NotSupportedExpressionException("SizeOf function not supported for instance of \"" + op1.getClass() + "\"");
-                }
+                }*/
             }
             return 0;
         } else if (function == REGEX_MATCH) {
