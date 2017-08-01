@@ -404,4 +404,28 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(((String)o).startsWith("<html>"));
         Assert.assertTrue(((String)o).endsWith("</html>"));
     }
+
+    @Test
+    public void testCleanSentence(){
+        Map<String,Object> data =  getData();
+        String expression = "This is regular string";
+        PathExtractor pathExtractor = new PathExtractor(data);
+        Object o =  evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof String);
+
+        Assert.assertTrue(o.equals("This is regular string"));
+    }
+
+    @Test
+    public void testCleanSentenceWithSingleQuotes(){
+        Map<String,Object> data =  getData();
+        String expression = "'This is regular string'";
+        PathExtractor pathExtractor = new PathExtractor(data);
+        Object o =  evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof String);
+
+        Assert.assertTrue(o.equals("This is regular string"));
+    }
 }

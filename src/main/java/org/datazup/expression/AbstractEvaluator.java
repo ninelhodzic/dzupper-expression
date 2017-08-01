@@ -263,7 +263,7 @@ public abstract class AbstractEvaluator<T> {
             }
         }
 
-        if (Pattern.matches("[a-zA-Z0-9 _]+", expression)) { //match string without special characters as string not expression
+        if (Pattern.matches("[a-zA-Z0-9 _:\\./@]+", expression)) { //match string without special characters as string not expression
             T res = (T) expression;
             return res;
         }
