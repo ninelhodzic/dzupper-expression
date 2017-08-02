@@ -9,8 +9,8 @@ import java.util.Map;
  */
 public abstract class AbstractMapListResolver {
 
-    protected abstract Map resolveToMap(Object o);
-    protected abstract List resolveToList(Object o);
-    protected abstract Collection resolveToCollection(Object o);
+    public abstract Map resolveToMap(Object o);
+    public abstract List resolveToList(Object o);
+    public abstract Collection resolveToCollection(Object o);
 
 }

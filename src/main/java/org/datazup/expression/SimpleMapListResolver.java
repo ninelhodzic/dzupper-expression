@@ -9,21 +9,21 @@ import java.util.Map;
  */
 public class SimpleMapListResolver extends AbstractMapListResolver {
     @Override
-    protected Map resolveToMap(Object o) {
+    public Map resolveToMap(Object o) {
         if (o instanceof Map)
             return (Map) o;
         return null;
     }
 
     @Override
-    protected List resolveToList(Object o) {
+    public List resolveToList(Object o) {
         if (o instanceof List)
             return (List) o;
         return null;
     }
 
     @Override
-    protected Collection resolveToCollection(Object o) {
+    public Collection resolveToCollection(Object o) {
         if (o instanceof Collection)
             return (Collection) o;
         return null;
