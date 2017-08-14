@@ -13,4 +13,12 @@ public abstract class AbstractMapListResolver {
     public abstract List resolveToList(Object o);
     public abstract Collection resolveToCollection(Object o);
 
+
+    protected String cleanStartEndHash(String s) {
+        if (s.startsWith("#") && s.endsWith("#")){
+            s = s.substring(1, s.length()-1);
+        }
+        return s;
+    }
+
 }

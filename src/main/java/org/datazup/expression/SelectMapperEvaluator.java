@@ -32,6 +32,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function EXCLUDE_FIELDS = new Function("EXCLUDE_FIELDS",  1, Integer.MAX_VALUE);
 
 
+
+
     private static SelectMapperEvaluator INSTANCE;
 
     public static SelectMapperEvaluator getInstance(){

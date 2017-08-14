@@ -2,6 +2,7 @@ package org.datazup.expression;
 
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.utils.DateTimeUtils;
@@ -42,6 +43,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function SET_NULL = new Function("SET_NULL", 1);
     public final static Function SIZE_OF = new Function("SIZE_OF", 1);
 
+
     // date functions
     public final static Function NOW = new Function("NOW", 0);
     public final static Function STR_TO_DATE_TIMESTAMP = new Function("STR_TO_DATE_TIMESTAMP", 2);
@@ -54,10 +56,16 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function YEAR = new Function("YEAR", 1);
 
     public final static Function TO_DATE = new Function("TO_DATE", 2);
+    public final static Function TO_INT = new Function("TO_INT", 1);
+    public final static Function TO_LONG = new Function("TO_LONG", 1);
+    public final static Function TO_DOUBLE = new Function("TO_DOUBLE", 1);
+    public final static Function TO_STRING = new Function("TO_STRING", 1);
 
     public final static Function REGEX_MATCH= new Function("REGEX_MATCH", 2);
     public final static Function REGEX_EXTRACT= new Function("REGEX_EXTRACT",2,3);
     public final static Function EXTRACT= new Function("EXTRACT",2);
+
+    public final static Function STRING_FORMAT = new Function("STRING_FORMAT", 2, Integer.MAX_VALUE);
 
 
     // public final static Function DATE = new Function("DATE", 2);
@@ -98,6 +106,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(YEAR);
 
         PARAMETERS.add(TO_DATE);
+        PARAMETERS.add(TO_INT);
+        PARAMETERS.add(TO_LONG);
+        PARAMETERS.add(TO_DOUBLE);
+        PARAMETERS.add(TO_STRING);
+
+        PARAMETERS.add(STRING_FORMAT);
 
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
@@ -147,8 +161,23 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     @Override
     protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        if (function == TO_DATE){
+
+        if (function==STRING_FORMAT){
+            return stringFormat(function, operands, argumentList, evaluationContext);
+        }else if (function == TO_DATE){
             return toDate(function, operands, argumentList, evaluationContext);
+        }
+        else if (function == TO_INT){
+            return toInteger(function, operands, argumentList, evaluationContext);
+        }
+        else if (function == TO_DOUBLE){
+            return toDouble(function, operands, argumentList, evaluationContext);
+        }
+        else if (function == TO_LONG){
+            return toLong(function, operands, argumentList, evaluationContext);
+        }
+        else if (function == TO_STRING){
+            return toStringValue(function, operands, argumentList, evaluationContext);
         }
         else if (function == STR_TO_DATE_TIMESTAMP) {
             return strToDateTimeStamp(function, operands, argumentList, evaluationContext);
@@ -248,6 +277,96 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
     }
 
+    private Object stringFormat(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object valueObject = operands.next();
+        argumentList.pop();
+
+        List<Object> payload = new ArrayList<>();
+        while (operands.hasNext()){
+            Object val = operands.next();
+            argumentList.pop();
+            payload.add(val);
+        }
+
+        if (null!=valueObject){
+            if (valueObject instanceof String){
+                Object[] arr = payload.toArray(new Object[payload.size()]);
+                String valueResult = String.format((String)valueObject, arr);
+                if (!StringUtils.isEmpty(valueResult) && valueResult.startsWith("#") && valueResult.endsWith("#")){
+                    valueResult = valueResult.substring(1, valueResult.length()-1);
+                }
+                return  valueResult;
+            }
+        }
+
+
+        return null;
+    }
+
+    private Object toStringValue(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object valueObject = operands.next();
+        argumentList.pop();
+
+        if (null==valueObject)
+            return valueObject;
+
+        return valueObject.toString();
+    }
+
+    private Object toLong(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object valueObject = operands.next();
+        argumentList.pop();
+
+        if (null==valueObject)
+            return valueObject;
+
+        Number number = resolveNumber(valueObject);
+        if (null==number){
+            return number;
+        }
+        return resolveNumber(valueObject).longValue();
+    }
+
+    private Object toDouble(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object valueObject = operands.next();
+        argumentList.pop();
+
+        if (null==valueObject)
+            return valueObject;
+
+        Number number = resolveNumber(valueObject);
+        if (null==number){
+            return number;
+        }
+        return resolveNumber(valueObject).doubleValue();
+    }
+
+    private Object toInteger(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+
+        Object valueObject = operands.next();
+        argumentList.pop();
+
+        if (null==valueObject)
+            return valueObject;
+
+        Number number = resolveNumber(valueObject);
+        if (null==number){
+            return number;
+        }
+        return resolveNumber(valueObject).intValue();
+    }
+
+    private Number resolveNumber(Object valueObject){
+        Number num = null;
+
+        if(valueObject instanceof Number){
+            num = (Number)valueObject;
+        }else if (valueObject instanceof String){
+            num = NumberUtils.createNumber((String)valueObject);
+        }
+
+        return num;
+    }
 
 
     private Object extract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
@@ -512,7 +631,11 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 return l + r;
             } else {
                 Number l = (Number) left;
+                if (null==l)
+                    l=0;
                 Number r = (Number) right;
+                if (null==r)
+                    r = 0;
                 return l.doubleValue() + r.doubleValue();
             }
 
