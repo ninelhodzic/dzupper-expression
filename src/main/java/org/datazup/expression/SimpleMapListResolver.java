@@ -19,7 +19,7 @@ public class SimpleMapListResolver extends AbstractMapListResolver {
             s = s.trim();
             s = cleanStartEndHash(s);
             if (s.startsWith("{") && s.endsWith("}")) {
-                Map m = JsonUtils.getMapFromJson((String) o);
+                Map m = JsonUtils.getMapFromJson(s);
                 return m;
             }
         }

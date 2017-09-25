@@ -77,7 +77,8 @@ public class Tokenizer {
         
         result.append(')');
 
-        return Pattern.compile(result.toString(),Pattern.DOTALL);
+       // return Pattern.compile(result.toString(),Pattern.DOTALL);
+        return Pattern.compile(result.toString());
     }
 
     private void addToTokens(List<String> tokens, String token) {

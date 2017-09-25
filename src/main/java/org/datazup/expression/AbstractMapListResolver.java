@@ -15,8 +15,17 @@ public abstract class AbstractMapListResolver {
 
 
     protected String cleanStartEndHash(String s) {
+
+        if (null==s || s.isEmpty()){
+            return s;
+        }
+        s= s.trim();
+        if (s.startsWith("'") && s.endsWith("'")){
+            s = s.substring(s.indexOf("'")+1, s.lastIndexOf("'"));
+        }
         if (s.startsWith("#") && s.endsWith("#")){
-            s = s.substring(1, s.length()-1);
+            //s = s.substring(1, s.length()-1);
+            s = s.substring(s.indexOf("#")+1, s.lastIndexOf("#"));
         }
         return s;
     }

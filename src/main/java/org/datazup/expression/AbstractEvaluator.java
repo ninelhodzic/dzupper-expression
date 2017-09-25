@@ -97,7 +97,11 @@ public abstract class AbstractEvaluator<T> {
 
         this.functionArgumentSeparator = parameters.getFunctionArgumentSeparator();
         if (needFunctionSeparator1) {
-            tokenDelimitersBuilder.add(this.functionArgumentSeparator);
+            String funcArtSeparator = this.functionArgumentSeparator;
+            if (this.functionArgumentSeparator.equals(",")){
+                //TODO: Handle situation when , is inside JSON string
+            }
+            tokenDelimitersBuilder.add(funcArtSeparator);
         }
 
         this.tokenizer = new Tokenizer(tokenDelimitersBuilder);
@@ -275,6 +279,8 @@ public abstract class AbstractEvaluator<T> {
             T res = (T) expression;
             return res;
         }
+
+        //expression = expression.replaceAll(System.lineSeparator(), " ");
 
         Deque<T> values = new LinkedList();
         ArrayDeque<Token> argumentTokens = new ArrayDeque();

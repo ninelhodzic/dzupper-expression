@@ -17,25 +17,26 @@ import java.util.regex.Pattern;
  */
 public class SelectMapperEvaluatorTest extends TestBase {
 
-    private  static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
     @Test
-    public void isFilterFieldsRuns(){
+    public void isFilterFieldsRuns() {
 
-        Map<String,Object> data =  getData();
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
 
         Object evaluated = evaluator.evaluate("EXCLUDE_FIELDS($child$, $text$)", pathExtractor);
         Assert.assertNotNull(evaluated);
         Assert.assertTrue(evaluated instanceof Map);
-        Map m = (Map)evaluated;
+        Map m = (Map) evaluated;
         Assert.assertTrue(!m.containsKey("child"));
         Assert.assertTrue(!m.containsKey("text"));
     }
+
     @Test
-    public void isThisExpressionRuns(){
+    public void isThisExpressionRuns() {
         String expression = "THIS()";
-        Map<String,Object> objectMap = new HashMap<String,Object>();
+        Map<String, Object> objectMap = new HashMap<String, Object>();
         objectMap.put("dateString", "nesto nebitno");
 
         PathExtractor pathExtractor = new PathExtractor(objectMap);
@@ -43,22 +44,22 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Object evaluated = evaluator.evaluate(expression, pathExtractor);
         Assert.assertNotNull(evaluated);
         Assert.assertTrue(evaluated instanceof Map);
-        Map m = (Map)evaluated;
+        Map m = (Map) evaluated;
         Assert.assertTrue(m.get("dateString").equals("nesto nebitno"));
     }
 
     @Test
-    public void isPatternMatch(){
+    public void isPatternMatch() {
         String expression = "SELECT";
         boolean match = false;
-        if (Pattern.matches("[a-zA-Z0-9]+", expression)){
+        if (Pattern.matches("[a-zA-Z0-9]+", expression)) {
             match = true;
         }
         Assert.assertTrue(match);
 
         match = false;
         expression = "SELECT(";
-        if (Pattern.matches("[a-zA-Z0-9]+", expression)){
+        if (Pattern.matches("[a-zA-Z0-9]+", expression)) {
             match = true;
         }
         Assert.assertTrue(!match);
@@ -66,9 +67,9 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isEvaluatingComplexStringAsString(){
+    public void isEvaluatingComplexStringAsString() {
 
-        Map<String,Object> objectMap = new HashMap<String,Object>();
+        Map<String, Object> objectMap = new HashMap<String, Object>();
         objectMap.put("dateString", "nesto nebitno");
 
         //SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -81,11 +82,11 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isParsingDateFormatFunction(){
-        Map<String,Object> objectMap = new HashMap<String,Object>();
+    public void isParsingDateFormatFunction() {
+        Map<String, Object> objectMap = new HashMap<String, Object>();
         objectMap.put("dateString", "Wed May 21 00:00:00 EDT 2008");
 
-       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
         PathExtractor pathExtractor = new PathExtractor(objectMap);
 
         // NOTE: this is working as there is no - (minus) in these strings
@@ -96,11 +97,11 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isParsingNowDateTimestampFunction(){
-        Map<String,Object> objectMap = new HashMap<String,Object>();
+    public void isParsingNowDateTimestampFunction() {
+        Map<String, Object> objectMap = new HashMap<String, Object>();
 
 
-      //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
         PathExtractor pathExtractor = new PathExtractor(objectMap);
 
         // NOTE: this is working as there is no - (minus) in these strings
@@ -112,14 +113,14 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
     @Test
     public void isMovingAndRemovingAndPuttingTest() {
-        Map<String,Object> data =  getData();
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SIZE_OF(child.list)", pathExtractor);
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof Integer);
-        Assert.assertTrue(((Integer)o)==4);
+        Assert.assertTrue(((Integer) o) == 4);
 
         o = evaluator.evaluate("REMOVE(child.list[last])", pathExtractor);
         Assert.assertNotNull(o);
@@ -127,15 +128,15 @@ public class SelectMapperEvaluatorTest extends TestBase {
         o = evaluator.evaluate("SIZE_OF(child.list)==3", pathExtractor);
         Assert.assertTrue(o instanceof Boolean);
 
-        Boolean b =(Boolean)o;
+        Boolean b = (Boolean) o;
         Assert.assertTrue(b);
     }
 
     @Test
-    public void isSelectingSimpleItemsTest(){
-        Map<String,Object> data =  getData();
+    public void isSelectingSimpleItemsTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SELECT(1,2,3)", pathExtractor);
         Assert.assertNotNull(o);
@@ -143,182 +144,180 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
 
     @Test
-    public void isSelectingItemsFromMapTest(){
-        Map<String,Object> data =  getData();
+    public void isSelectingItemsFromMapTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-      //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SELECT($child.list$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof Map);
 
-        Map<String,Object> objectMap = (Map)o;
+        Map<String, Object> objectMap = (Map) o;
         Assert.assertNotNull(objectMap.get("childList"));
         Assert.assertNotNull(objectMap.get("list"));
     }
 
     @Test
-    public void isSelectingItemsFromMapWhereListLastTest(){
-        Map<String,Object> data =  getData();
+    public void isSelectingItemsFromMapWhereListLastTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SELECT($child.list[last]$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof Map);
 
-        Map<String,Object> objectMap = (Map)o;
+        Map<String, Object> objectMap = (Map) o;
         Assert.assertNotNull(objectMap.get("childList[last]"));
         Assert.assertNotNull(objectMap.get("list"));
     }
 
     @Test
-    public void isSelectingItemsFromMapWhereListIndex0Test(){
-        Map<String,Object> data =  getData();
+    public void isSelectingItemsFromMapWhereListIndex0Test() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-       // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("SELECT($child.list[0]$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof Map);
 
-        Map<String,Object> objectMap = (Map)o;
+        Map<String, Object> objectMap = (Map) o;
         Assert.assertNotNull(objectMap.get("childList[0]"));
         Assert.assertNotNull(objectMap.get("list"));
     }
 
     @Test
-    public void isSelectingItemsFromMapWhereListIndex0TestBenchmark(){
-        Map<String,Object> data =  getData();
+    public void isSelectingItemsFromMapWhereListIndex0TestBenchmark() {
+        Map<String, Object> data = getData();
 
         PathExtractor pathExtractor = new PathExtractor(data);
-       // SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+        // SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         long start = System.currentTimeMillis();
         int num = 1000;
-        for (int i=0;i<num;i++) {
+        for (int i = 0; i < num; i++) {
             evaluator.evaluate("SELECT($child.list[0]$, $list$)", pathExtractor);
             //   Assert.assertNotNull(compiled);
         }
         long end = System.currentTimeMillis();
-        System.out.println("Num: "+num+" executed in: "+(end-start)+" ms, average: "+((end-start)/num)+" ms");
+        System.out.println("Num: " + num + " executed in: " + (end - start) + " ms, average: " + ((end - start) / num) + " ms");
 
     }
 
 
-
-
     @Test
-    public void isUnionListItemsFromMapTest(){
-        Map<String,Object> data =  getData();
+    public void isUnionListItemsFromMapTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-      //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("UNION($child.list$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof List);
 
-        List l = (List)o;
-        Assert.assertTrue(l.size()==5);
+        List l = (List) o;
+        Assert.assertTrue(l.size() == 5);
     }
 
     @Test
-    public void isUnioMapItemsFromMapTest(){
-        Map<String,Object> data =  getData();
+    public void isUnioMapItemsFromMapTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-     //   SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        //   SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         Object o = evaluator.evaluate("UNION($child$, $list$)", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof List);
 
-        List l = (List)o;
-        Assert.assertTrue(l.size()==2);
+        List l = (List) o;
+        Assert.assertTrue(l.size() == 2);
     }
 
     @Test
-    public void isKeysItemsFromMapTest(){
-        Map<String,Object> data =  getData();
+    public void isKeysItemsFromMapTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-     //   SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+        //   SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("KEYS($child$)", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof List);
 
-        List l = (List)o;
-        Assert.assertTrue(l.size()==3);
+        List l = (List) o;
+        Assert.assertTrue(l.size() == 3);
 
     }
 
     @Test
-    public void isValuesItemsFromMapTest(){
-        Map<String,Object> data =  getData();
+    public void isValuesItemsFromMapTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-     //   SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+        //   SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("VALUES($child$)", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof List);
 
-        List l = (List)o;
-        Assert.assertTrue(l.size()==3);
+        List l = (List) o;
+        Assert.assertTrue(l.size() == 3);
 
     }
 
     @Test
-    public void isUnionKeyValuesItemsFromMapTest(){
-        Map<String,Object> data =  getData();
+    public void isUnionKeyValuesItemsFromMapTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-      //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+        //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("UNION(KEYS($child$), VALUES($child$))", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof List);
 
-        List l = (List)o;
-        Assert.assertTrue(l.size()==6);
+        List l = (List) o;
+        Assert.assertTrue(l.size() == 6);
 
     }
 
     @Test
-    public void isToMapTest(){
-        Map<String,Object> data =  getData();
+    public void isToMapTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-      //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+        //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("MAP(FIELD('firstChildListItem', $child.list[0]$), FIELD('list', $list$))", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof Map);
 
-        Map<String,Object> objectMap = (Map)o;
+        Map<String, Object> objectMap = (Map) o;
         Assert.assertNotNull(objectMap.get("firstChildListItem"));
         Assert.assertNotNull(objectMap.get("list"));
     }
 
     @Test
-    public void isToListTest(){
-        Map<String,Object> data =  getData();
+    public void isToListTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-      //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
+        //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
 
         Object o = evaluator.evaluate("LIST(FIELD('firstChildListItem', $child.list[0]$), FIELD('list', $list$))", pathExtractor);
         Assert.assertNotNull(o);
 
         Assert.assertTrue(o instanceof List);
 
-        List<Object> objectList = (List)o;
+        List<Object> objectList = (List) o;
 
-        Assert.assertTrue(objectList.size()==2);
+        Assert.assertTrue(objectList.size() == 2);
         Assert.assertNotNull(objectList.get(0));
         Assert.assertNotNull(objectList.get(1));
 
@@ -328,13 +327,13 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Object secondObject = objectList.get(1);
         Assert.assertTrue(secondObject instanceof Map);
 
-        Assert.assertNotNull(((Map)firstObject).get("firstChildListItem"));
-        Assert.assertNotNull(((Map)secondObject).get("list"));
+        Assert.assertNotNull(((Map) firstObject).get("firstChildListItem"));
+        Assert.assertNotNull(((Map) secondObject).get("list"));
     }
 
     @Test
-    public void doesFieldIncludeNull(){
-        Map<String,Object> data =  getData();
+    public void doesFieldIncludeNull() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
 
 
@@ -344,15 +343,15 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof Map);
-        Map r = (Map)o;
-        Assert.assertTrue(r.size()==0);
+        Map r = (Map) o;
+        Assert.assertTrue(r.size() == 0);
     }
 
     @Test
-    public void hierarchicalExtractionTest(){
-        Map<String,Object> data =  getData();
+    public void hierarchicalExtractionTest() {
+        Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data);
-    //    SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+        //    SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
         String expression = "KEYS(MAP(FIELD('this',EXTRACT($text$, '#this#'), 'false'), FIELD('longer',EXTRACT($text$, '#longer, test#'), 'false'), FIELD('has', EXTRACT($text$, '#longer,  test, has purposes#'),'false')))";
 
@@ -361,8 +360,8 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof List);
 
-        List l = (List)o;
-        Assert.assertTrue(l.size()==3);
+        List l = (List) o;
+        Assert.assertTrue(l.size() == 3);
         Assert.assertTrue(l.get(0).equals("this"));
         Assert.assertTrue(l.get(1).equals("longer"));
         Assert.assertTrue(l.get(2).equals("has"));
@@ -371,46 +370,46 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void templateSimpleTest(){
-        Map<String,Object> data =  getData();
+    public void templateSimpleTest() {
+        Map<String, Object> data = getData();
         String strToCompile = "T('ovo je moj text {{child.name}}')";
         PathExtractor pathExtractor = new PathExtractor(data);
-        Object o =  evaluator.evaluate(strToCompile, pathExtractor);
+        Object o = evaluator.evaluate(strToCompile, pathExtractor);
         Assert.assertNotNull(o);
         Assert.assertTrue(o.equals("ovo je moj text child"));
     }
 
     @Test
-    public void templateHtmlTest(){
-        Map<String,Object> data =  getData();
+    public void templateHtmlTest() {
+        Map<String, Object> data = getData();
         String strToCompile = "T('#<html>This is Twitter results </br> \n" +
                 "    <pre> {{json child}}</pre>\n" +
                 "</html>#')";
         //String strToCompile = "T('#<html>ovo je moj text {{child.name}}</html>#')";
         PathExtractor pathExtractor = new PathExtractor(data);
-        Object o =  evaluator.evaluate(strToCompile, pathExtractor);
+        Object o = evaluator.evaluate(strToCompile, pathExtractor);
         Assert.assertNotNull(o);
-        Assert.assertTrue(((String)o).startsWith("<html>"));
-        Assert.assertTrue(((String)o).endsWith("</html>"));
+        Assert.assertTrue(((String) o).startsWith("<html>"));
+        Assert.assertTrue(((String) o).endsWith("</html>"));
     }
 
     @Test
-    public void templateHtmlMultiLineTest(){
-        Map<String,Object> data =  getData();
+    public void templateHtmlMultiLineTest() {
+        Map<String, Object> data = getData();
         String strToCompile = "T('#<html>ovo je moj </br> text <pre> {{child.name}} </pre> </html>#')";
         PathExtractor pathExtractor = new PathExtractor(data);
-        Object o =  evaluator.evaluate(strToCompile, pathExtractor);
+        Object o = evaluator.evaluate(strToCompile, pathExtractor);
         Assert.assertNotNull(o);
-        Assert.assertTrue(((String)o).startsWith("<html>"));
-        Assert.assertTrue(((String)o).endsWith("</html>"));
+        Assert.assertTrue(((String) o).startsWith("<html>"));
+        Assert.assertTrue(((String) o).endsWith("</html>"));
     }
 
     @Test
-    public void testCleanSentence(){
-        Map<String,Object> data =  getData();
+    public void testCleanSentence() {
+        Map<String, Object> data = getData();
         String expression = "This is regular string";
         PathExtractor pathExtractor = new PathExtractor(data);
-        Object o =  evaluator.evaluate(expression, pathExtractor);
+        Object o = evaluator.evaluate(expression, pathExtractor);
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof String);
 
@@ -418,14 +417,67 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void testCleanSentenceWithSingleQuotes(){
-        Map<String,Object> data =  getData();
+    public void testCleanSentenceWithSingleQuotes() {
+        Map<String, Object> data = getData();
         String expression = "'This is regular string'";
         PathExtractor pathExtractor = new PathExtractor(data);
-        Object o =  evaluator.evaluate(expression, pathExtractor);
+        Object o = evaluator.evaluate(expression, pathExtractor);
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof String);
 
         Assert.assertTrue(o.equals("This is regular string"));
     }
+
+    @Test
+    public void testJsonStringParse() {
+        Map<String, Object> data = getData();
+        String expression = "'{\"prop1\":\"val1\", \"prop2\":23}'";
+        PathExtractor pathExtractor = new PathExtractor(data);
+        Object o = evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof String);
+        Map processed = JsonUtils.getMapFromJson((String) o);
+        Assert.assertNotNull(processed);
+        Assert.assertTrue(processed.get("prop2").equals(23));
+    }
+   /* @Test - TODO: This should work as well - how to prarse JSON as "," is splitter and tokenizer will split
+    public void testJsonStringMap(){
+        Map<String,Object> data =  getData();
+        String expression = "MAP('{\"prop1\":\"val1\", \"prop2\":23}')";
+        PathExtractor pathExtractor = new PathExtractor(data);
+        Object o =  evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof Map);
+        Assert.assertTrue(((Map)o).get("prop2").equals(23));
+    }*/
+
+    @Test
+    public void multiStepJsonTemplateMapTest() {
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data);
+
+        String expression = "'{\"prop1\":\"val1\", \"prop2\":23}, \"dt\":\"{{dateTime}}\"}'";
+        Object o = evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof String);
+
+        data.put("toTemplate", expression);
+        pathExtractor = new PathExtractor(data);
+
+        expression = "T($toTemplate$)";
+        o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof String);
+        data.put("toMap", o);
+        pathExtractor = new PathExtractor(data);
+
+        expression = "MAP($toMap$)";
+        o = evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof Map);
+        Assert.assertTrue(((Map)o).get("prop2").equals(23));
+
+    }
+
 }

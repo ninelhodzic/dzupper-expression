@@ -163,7 +163,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         Token token1 = argumentList.pop();
 
         if (operands.hasNext()){
-            Object value2 = operands.next(); // this could be used in future do define template engine
+            Object value2 = operands.next(); // this could be used in future to define template engine
             Token token2 = argumentList.pop();
         }
 
