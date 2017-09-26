@@ -64,7 +64,7 @@ public class Tokenizer {
 
         StringBuilder result = new StringBuilder();
         result.append('(');
-        result.append("'#.*?#'"); //special case
+        result.append("'#(.|\\n\\r|\\r|\\n)*?#'"); //special case
         String delim;
         for(Iterator i$ = delimiters.iterator(); i$.hasNext(); result.append("\\Q").append(delim).append("\\E")) {
             delim = (String)i$.next();

@@ -379,8 +379,8 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(o.equals("ovo je moj text child"));
     }
 
-    @Test
-    public void templateHtmlTest() {
+    @Test //- MULTILINE TEST NOT ALLOWED
+    public void templateHtmlMultiLineTest () {
         Map<String, Object> data = getData();
         String strToCompile = "T('#<html>This is Twitter results </br> \n" +
                 "    <pre> {{json child}}</pre>\n" +
@@ -394,7 +394,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void templateHtmlMultiLineTest() {
+    public void templateHtmlTest() {
         Map<String, Object> data = getData();
         String strToCompile = "T('#<html>ovo je moj </br> text <pre> {{child.name}} </pre> </html>#')";
         PathExtractor pathExtractor = new PathExtractor(data);
