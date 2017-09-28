@@ -78,6 +78,15 @@ public class BasicTest extends TestBase {
     }
 
     @Test
+    public void testSumWithPlusObjectStrings(){
+        String expression = "$child.value$ + '-World'";
+        Object r = evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof String);
+        Assert.assertTrue(r.toString().equals("1-World"));
+    }
+
+    @Test
     public void testSum(){
         String expression = "5+10";
         Object r= evaluateOnMap(expression);

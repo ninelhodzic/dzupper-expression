@@ -64,7 +64,10 @@ public class Tokenizer {
 
         StringBuilder result = new StringBuilder();
         result.append('(');
-        result.append("'#(.|\\n\\r|\\r|\\n)*?#'"); //special case
+        //result.append("'#(.|\\n\\r|\\r|\\n)*?#'"); //special case
+        result.append("'#.*?#'"); //special case
+        result.append('|');
+        result.append("'.*?'");
         String delim;
         for(Iterator i$ = delimiters.iterator(); i$.hasNext(); result.append("\\Q").append(delim).append("\\E")) {
             delim = (String)i$.next();
@@ -77,8 +80,8 @@ public class Tokenizer {
         
         result.append(')');
 
-       // return Pattern.compile(result.toString(),Pattern.DOTALL);
-        return Pattern.compile(result.toString());
+        return Pattern.compile(result.toString(),Pattern.DOTALL);
+        //return Pattern.compile(result.toString());
     }
 
     private void addToTokens(List<String> tokens, String token) {
