@@ -252,7 +252,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(o instanceof List);
 
         List l = (List) o;
-        Assert.assertTrue(l.size() == 3);
+        Assert.assertTrue(l.size() == 4);
 
     }
 
@@ -268,7 +268,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(o instanceof List);
 
         List l = (List) o;
-        Assert.assertTrue(l.size() == 3);
+        Assert.assertTrue(l.size() == 4);
 
     }
 
@@ -284,7 +284,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(o instanceof List);
 
         List l = (List) o;
-        Assert.assertTrue(l.size() == 6);
+        Assert.assertTrue(l.size() == 8);
 
     }
 
