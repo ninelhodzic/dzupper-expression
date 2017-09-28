@@ -7,6 +7,8 @@ import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.*;
@@ -17,6 +19,7 @@ import java.util.regex.Pattern;
  * Created by ninel on 3/14/16.
  */
 public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
+    protected static final Logger LOG = LoggerFactory.getLogger(SimpleObjectEvaluator.class);
     /**
      * The negate unary operator.
      */
@@ -42,6 +45,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function IS_NULL = new Function("IS_NULL", 1);
     public final static Function SET_NULL = new Function("SET_NULL", 1);
     public final static Function SIZE_OF = new Function("SIZE_OF", 1);
+
+    public final static Function IF = new Function("IF", 3);
 
 
     // date functions
@@ -95,6 +100,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(IS_NULL);
         PARAMETERS.add(SET_NULL);
         PARAMETERS.add(SIZE_OF);
+        PARAMETERS.add(IF);
 
         PARAMETERS.add(STR_TO_DATE_TIMESTAMP);
 
@@ -162,7 +168,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     @Override
     protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
 
-        if (function==STRING_FORMAT){
+        if (function == IF){
+            return ifTrueFalse(function, operands, argumentList, evaluationContext);
+        }else if (function==STRING_FORMAT){
             return stringFormat(function, operands, argumentList, evaluationContext);
         }else if (function == TO_DATE){
             return toDate(function, operands, argumentList, evaluationContext);
@@ -274,6 +282,39 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
         else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
+        }
+    }
+
+    private Object ifTrueFalse(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+
+        Object trueFalseObject = operands.next();
+        argumentList.pop();
+
+        Object leftValue = operands.next();
+        argumentList.pop();
+
+        Object rightValue = operands.next();
+        argumentList.pop();
+
+        Boolean isTrue = true;
+        if (trueFalseObject instanceof Boolean){
+            isTrue = (Boolean)trueFalseObject;
+        }else if (trueFalseObject instanceof String){
+            try{
+                isTrue = Boolean.parseBoolean((String)trueFalseObject);
+            }catch (Exception e){
+                LOG.warn("Error processing Boolean in ifTrueFalse - value is: "+trueFalseObject, e);
+            }
+        }else if (trueFalseObject instanceof Number){
+            Number n = (Number)trueFalseObject;
+            if (null!=n){
+                isTrue = n.intValue()>0;
+            }
+        }
+        if (isTrue){
+            return leftValue;
+        }else{
+            return rightValue;
         }
     }
 

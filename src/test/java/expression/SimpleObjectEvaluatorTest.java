@@ -260,4 +260,22 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==1);//dt.get(ChronoField.DAY_OF_MONTH)==1);//dt.getDayOfMonth()==1);
     }
 
+    @Test
+    public void evaluateIfTrueFalsValueTest(){
+        String expression = "IF(!IS_NULL($child.name$), TO_INT('10'), '20')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Integer);
+        Assert.assertTrue(evaluaged.equals(10));
+    }
+
+    @Test
+    public void evaluateIfTrueFalsValueAsIntegerTest(){
+        String expression = "IF(TO_INT('0')-TO_INT('1'), TO_INT('10'), '20')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        Assert.assertTrue(evaluaged.equals("20"));
+    }
+
 }
