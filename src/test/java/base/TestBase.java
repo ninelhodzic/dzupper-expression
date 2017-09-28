@@ -58,6 +58,7 @@ public abstract class TestBase {
         Map<String, Object> child = new HashMap<>();
         child.put("name", "child");
         child.put("value", 1);
+        child.put("value2", 15);
 
         Map<String, Object> parent = new HashMap<>();
 

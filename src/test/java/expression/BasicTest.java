@@ -86,6 +86,58 @@ public class BasicTest extends TestBase {
         Assert.assertTrue(((Double)r)==15d);
     }
 
+    @Test
+    public void testMultiply(){
+        String expression = "5 * 10";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==50d);
+    }
+
+    @Test
+    public void testMultiplyObjects(){
+        String expression = "$child.value$ * 10";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==10d);
+    }
+
+    @Test
+    public void testDivide(){
+        String expression = "10 / 5";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==2d);
+    }
+    @Test
+    public void testDivideNumberString(){
+        String expression = "'10' / '5'";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==2d);
+    }
+
+    @Test
+    public void testDivideObject(){
+        String expression = "10 / $child.value$";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==10d);
+    }
+
+    @Test
+    public void testComplexEquation(){
+        String expression = "10 / 2 + (3-1) * 5";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==15d);
+    }
 
     @Test
     public void testDate(){

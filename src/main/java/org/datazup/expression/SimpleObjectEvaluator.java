@@ -40,6 +40,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     public final static Operator PLUS = new Operator("+", 2, Operator.Associativity.LEFT, 8);
     public final static Operator MINUS = new Operator("-", 2, Operator.Associativity.LEFT, 9);
+    public final static Operator MULTIPLY = new Operator("*", 2, Operator.Associativity.LEFT, 10);
+    public final static Operator DIVIDE = new Operator("/", 2, Operator.Associativity.LEFT, 11);
 
 
     public final static Function IS_NULL = new Function("IS_NULL", 1);
@@ -93,6 +95,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         PARAMETERS.add(PLUS);
         PARAMETERS.add(MINUS);
+        PARAMETERS.add(MULTIPLY);
+        PARAMETERS.add(DIVIDE);
 
         PARAMETERS.addExpressionBracket(BracketPair.PARENTHESES);
         PARAMETERS.addFunctionBracket(BracketPair.PARENTHESES);
@@ -599,7 +603,47 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     @Override
     protected Object evaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
-        if (operator == NEGATE) {
+        if (operator == DIVIDE){
+            Object left = operands.next();
+            Object right = operands.next();
+            Number lN = null;
+            Number rN = null;
+            if (left instanceof Number){
+                lN = (Number)left;
+            }else if (left instanceof String){
+                lN = resolveNumber(left);
+            }
+
+            if (right instanceof Number){
+                rN = (Number)right;
+            }else if (right instanceof String){
+                rN = resolveNumber(right);
+            }
+            if (null!=lN && null!=rN){
+                return lN.doubleValue() / rN.doubleValue();
+            }
+            return 0;
+        }else if (operator == MULTIPLY){
+            Object left = operands.next();
+            Object right = operands.next();
+            Number lN = null;
+            Number rN = null;
+            if (left instanceof Number){
+                lN = (Number)left;
+            }else if (left instanceof String){
+                lN = resolveNumber(left);
+            }
+
+            if (right instanceof Number){
+                rN = (Number)right;
+            }else if (right instanceof String){
+                rN = resolveNumber(right);
+            }
+            if (null!=lN && null!=rN){
+                return lN.doubleValue() * rN.doubleValue();
+            }
+            return 0;
+        }else if (operator == NEGATE) {
             Object next = operands.next();
             if (next == null) {
                 return false;
