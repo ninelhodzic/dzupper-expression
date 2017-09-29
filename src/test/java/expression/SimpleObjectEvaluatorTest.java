@@ -278,4 +278,12 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged.equals("20"));
     }
 
+    @Test
+    public void evaluateBooleanSimple(){
+        String expression = "'true'=='true'";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
 }

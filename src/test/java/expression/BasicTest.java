@@ -96,6 +96,23 @@ public class BasicTest extends TestBase {
     }
 
     @Test
+    public void testSubtraction(){
+        String expression = "5-10";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==-5d);
+    }
+    @Test
+    public void testSubtractionObjects(){
+        String expression = "$child.value$ + $child.value3$";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==-4d);
+    }
+
+    @Test
     public void testMultiply(){
         String expression = "5 * 10";
         Object r= evaluateOnMap(expression);

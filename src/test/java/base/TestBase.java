@@ -59,6 +59,9 @@ public abstract class TestBase {
         child.put("name", "child");
         child.put("value", 1);
         child.put("value2", 15);
+        child.put("value3", -5);
+        child.put("valueTrue", true);
+        child.put("valueStringFalse", "false");
 
         Map<String, Object> parent = new HashMap<>();
 
