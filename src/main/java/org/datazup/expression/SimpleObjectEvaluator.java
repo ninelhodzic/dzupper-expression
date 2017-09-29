@@ -662,10 +662,21 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else if (operator == EQUAL) {
             Object left = operands.next();
             Object right = operands.next();
+            if (null==left || right==null){
+                return left.equals(right);
+            }
             if (left instanceof Number && right instanceof Number) {
                 return ((Number) left).doubleValue() == ((Number) right).doubleValue();
             } else {
-                return left.equals(right);
+                if (left instanceof Boolean || right instanceof Boolean){
+                    Boolean l = Boolean.parseBoolean(left.toString());
+                    Boolean r = Boolean.parseBoolean(right.toString());
+                    return l.equals(r);
+                }else if (left instanceof String || right instanceof String) {
+                    return left.toString().equals(right.toString());
+                }else{
+                    return left.equals(right);
+                }
             }
         } else if (operator == GREATER_THEN) {
             Object left = operands.next();

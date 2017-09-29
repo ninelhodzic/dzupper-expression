@@ -286,4 +286,21 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof Boolean);
         Assert.assertTrue((Boolean)evaluaged);
     }
+    @Test
+    public void evaluateBooleanObjectSimple(){
+        String expression = "$child.valueTrue$=='true'";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateBooleanObjectComplex(){
+        String expression = "!IS_NULL($child.valueTrue$) && $child.valueTrue$=='true'";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
 }
