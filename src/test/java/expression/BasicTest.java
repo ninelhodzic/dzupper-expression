@@ -7,6 +7,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.time.Instant;
+
 
 /**
  * Created by ninel on 11/13/16.
@@ -174,5 +176,23 @@ public class BasicTest extends TestBase {
         Assert.assertTrue(bres);
     }
 
+    @Test
+    public void testDateOlx(){
+        String expression = "TO_DATE(REPLACE_ALL('01.10.2017. u 00:40', ' u', ''), '#dd.MM.yyyy. HH:mm#')";
+        Object res = evaluateOnMap(expression);
+        Assert.assertNotNull(res);
+        Assert.assertTrue(res instanceof Instant);
 
+    }
+
+
+    @Test
+    public void testReplaceAllString(){
+        String s = "01.10.2017. 00:40";
+        String expression = "REPLACE_ALL('01.10.2017. u 00:40', 'u ', '')";
+        Object res = evaluateOnMap(expression);
+        Assert.assertTrue(res instanceof String);
+        Assert.assertTrue(res.equals(s));
+
+    }
 }

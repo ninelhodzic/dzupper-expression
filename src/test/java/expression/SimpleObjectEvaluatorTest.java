@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ninel on 3/15/16.
@@ -85,7 +86,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     
     @Test
     public void evaluateRegexFunctionExpressionTest(){
-        String expression = "REGEX_MATCH($child.name$, '\bchild\b')";
+        String expression = "REGEX_MATCH($child.name$, '\\bchild\\b')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
@@ -99,6 +100,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof String);
+        Assert.assertTrue(evaluaged.equals("hil"));
     }
     
     @Test
@@ -107,6 +109,33 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof String);
+    }
+
+    @Test
+    public void evaluateRegexExtractNumber(){
+        String expression = "TO_INT(REGEX_EXTRACT($fieldPrice$, '#\\d+#',1))";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+        Assert.assertTrue(evaluaged.equals(20));
+    }
+
+    @Test
+    public void evaluateRegexExtractNumberWithSeparator(){
+        String expression = "TO_DOUBLE(REGEX_EXTRACT($fieldPrice1$, '#\\d+,.\\d+#'))";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+        Assert.assertTrue(evaluaged.equals(20.15));
+    }
+
+    @Test
+    public void evaluateRegexExtractNumberWithSeparator2(){
+        String expression = "TO_DOUBLE(REGEX_EXTRACT($fieldPrice2$, '#\\d+(,|.)\\d+#'))";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+        Assert.assertTrue(evaluaged.equals(20.15d));
     }
 
     /*
@@ -302,5 +331,47 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
         Assert.assertTrue((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateSimplePathExtractor(){
+        String expression = "$child.name$";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+    }
+
+    @Test
+    public void evaluateSimplePathExtractorList(){
+        String expression = "$child.list$";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof List);
+    }
+    @Test
+    public void evaluateSimplePathExtractorLisParams(){
+        String expression = "$child.list[0]$";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        Assert.assertTrue("Hello".equals(evaluaged));
+    }
+
+    @Test
+    public void evaluateSimplePathExtractorLisParamsLast(){
+        String expression = "$child.list[last]$";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Map);
+        //Assert.assertTrue("Hello".equals(evaluaged));
+    }
+
+    @Test
+    public void evaluateSimplePathExtractorLisParamsLastChil(){
+        String expression = "$child.list[last].third.thirdlist[0]$";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        Assert.assertTrue("thirdhaha".equals(evaluaged));
     }
 }

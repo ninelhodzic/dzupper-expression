@@ -1,6 +1,7 @@
 package org.datazup.expression;
 
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.PathExtractor;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function EXCLUDE_FIELDS = new Function("EXCLUDE_FIELDS",  1, Integer.MAX_VALUE);
 
 
-
+    public final static Function GET = new Function("GET",  2, 3);
 
     private static SelectMapperEvaluator INSTANCE;
 
@@ -76,20 +77,22 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         SimpleObjectEvaluator.PARAMETERS.add(TEMPLATE);
         SimpleObjectEvaluator.PARAMETERS.add(EXCLUDE_FIELDS);
 
+        SimpleObjectEvaluator.PARAMETERS.add(GET);
+
     }
 
     @Override
     protected Object nextFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        if (function == TEMPLATE) {
+
+            if (function == GET) {
+            return getGet(function, operands, argumentList, (PathExtractor)evaluationContext);
+        }else if (function == TEMPLATE) {
             return getTemplate(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }
-        if (function == LIST) {
+        }else if (function == LIST) {
             return getList(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }
-        if (function == MAP) {
+        }else if (function == MAP) {
             return getMap(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }
-        if (function == SELECT) {
+        }else  if (function == SELECT) {
             return getSelect(function, operands, argumentList, (PathExtractor) evaluationContext);
         }
         else if (function == REMOVE) {
@@ -113,6 +116,47 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }else {
             return superFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private Object getGet(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+
+        Object value1 = operands.next();
+        Token token1 = argumentList.pop();
+
+        if (null==value1){
+            throw new ExpressionValidationException("Key as first parameter cannot be null or empty");
+        }
+
+        Object value2 = operands.next();
+        Token token2 = argumentList.pop();
+
+        if (null==value2){
+            throw new ExpressionValidationException("Value as second parameter cannot be null or empty");
+        }
+
+        Map map = mapListResolver.resolveToMap(value2);
+        if (null!=map){
+            if (map.containsKey(value1)){
+                return map.get(value1);
+            }
+        }else{
+            List list = mapListResolver.resolveToList(value2);
+            if (null!=list){
+                Number n = null;
+                if (value1 instanceof Number){
+                    n = (Number)value1;
+                }else if (value1 instanceof String){
+                    n = NumberUtils.createNumber((String) value1);
+                }else{
+                    throw new ExpressionValidationException("In case of List, first parameter has to be Integer");
+                }
+                if (null!=n){
+                    List l = (List)value2;
+                    return l.get(n.intValue());
+                }
+            }
+        }
+        return null;
     }
 
     private Object getExcludeFields(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {

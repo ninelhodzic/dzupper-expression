@@ -10,6 +10,8 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -73,6 +75,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function EXTRACT= new Function("EXTRACT",2);
 
     public final static Function STRING_FORMAT = new Function("STRING_FORMAT", 2, Integer.MAX_VALUE);
+    public final static Function REPLACE_ALL = new Function("REPLACE_ALL", 3, 4);
 
 
     // public final static Function DATE = new Function("DATE", 2);
@@ -122,6 +125,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(TO_STRING);
 
         PARAMETERS.add(STRING_FORMAT);
+        PARAMETERS.add(REPLACE_ALL);
+
 
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
@@ -235,6 +240,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Token token = argumentList.pop();
             if (null == op1 || op1 instanceof NullObject || op1.toString() == token.getContent().toString()) {
                 return true;
+            }else if (op1 instanceof String){
+                return ((String) op1).isEmpty();
             }
             return op1 == null;
         } else if (function == SIZE_OF) {
@@ -281,12 +288,39 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return regexExtract(function, operands, argumentList, evaluationContext);
         }
     	else if (function==EXTRACT){
-            
             return extract(function, operands, argumentList, evaluationContext);
-        }
-        else {
+        }else if (function == REPLACE_ALL){
+    	    return replaceAll(function, operands, argumentList, evaluationContext);
+        } else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private Object replaceAll(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+
+        Object objectFieldValue = operands.next();
+        Token token = argumentList.pop();
+
+        Object whatToReplaceIn = operands.next();
+        Token token1 = argumentList.pop();
+
+        Object valueToReplaceIn = operands.next();
+        Token token2 = argumentList.pop();
+
+        Object place = null;
+        if (operands.hasNext()) {
+            place = operands.next();
+            Token token3 = argumentList.pop();
+        }
+
+        if (objectFieldValue instanceof String){
+            String strToReplace = whatToReplaceIn.toString();
+            String objectValue = (String)objectFieldValue;
+            return objectValue.replaceAll(strToReplace, valueToReplaceIn.toString());
+        }
+
+
+        return null;
     }
 
     private Object ifTrueFalse(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -369,7 +403,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         if (null==number){
             return number;
         }
-        return resolveNumber(valueObject).longValue();
+        return number.longValue(); //resolveNumber(valueObject).longValue();
     }
 
     private Object toDouble(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -383,7 +417,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         if (null==number){
             return number;
         }
-        return resolveNumber(valueObject).doubleValue();
+        Double d =  new Double(number.toString()); //resolveNumber(valueObject).doubleValue();
+        return d;
     }
 
     private Object toInteger(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -398,7 +433,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         if (null==number){
             return number;
         }
-        return resolveNumber(valueObject).intValue();
+        //return resolveNumber(valueObject).intValue();
+        return number.intValue();
     }
 
     private Number resolveNumber(Object valueObject){
@@ -407,7 +443,17 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         if(valueObject instanceof Number){
             num = (Number)valueObject;
         }else if (valueObject instanceof String){
-            num = NumberUtils.createNumber((String)valueObject);
+            String valueObjectStr = (String)valueObject;
+            if (valueObjectStr.contains(",")){
+                NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.GERMAN);
+                try {
+                    num =    numberFormat.parse(valueObjectStr);
+                } catch (ParseException e) {
+                    num = NumberUtils.createNumber(valueObjectStr);
+                }
+            }else {
+                num = NumberUtils.createNumber(valueObjectStr);
+            }
         }
 
         return num;
@@ -477,7 +523,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         	
         for(pos = 0; matcher.find(); pos = matcher.end()) {
         	
-        	if( null != group){
+        	if( null != group && matcher.groupCount()>0){
         		list.add(matcher.group(((Double)group).intValue()));
         	}
         	else{
@@ -489,7 +535,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         	return list;
         }
         
-        return list.size() !=0 ? list.get(0).toString():"";
+        return list.size() !=0 ? list.get(0):"";
 	}
 
 	private Object regexMatch(Function function, Iterator<Object> operands, Deque<Token> argumentList,

@@ -158,7 +158,14 @@ public abstract class AbstractEvaluator<T> {
             values.push(value);// != null ? value : (T) new NullObject());
         } else if (token.isLiteralValue()) {
             String value = token.getLiteralValue();
-            value = value.replaceAll("'", "").trim();
+            boolean shouldTrim = true;
+            if (value.contains("'")){
+                shouldTrim = false;
+            }
+            value = value.replaceAll("'", "");
+            if (shouldTrim)
+                value = value.trim();
+
             values.push((T) value);
         } else if (token.isNumber()) {
             Number value = token.getNumber();
@@ -249,7 +256,7 @@ public abstract class AbstractEvaluator<T> {
 
     public T evaluate(String expression, Object evaluationContext) {
 
-        expression = expression.trim();
+       // expression = expression.trim();
         if (StringUtils.isEmpty(expression)) {
             return (T) Boolean.TRUE;
         }

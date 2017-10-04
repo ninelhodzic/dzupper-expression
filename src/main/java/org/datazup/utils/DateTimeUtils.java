@@ -31,6 +31,12 @@ public class DateTimeUtils {
         return fmt;
     }
 
+    private static DateTimeFormatter getFormatter(String format, Locale locale) {
+
+        DateTimeFormatter fmt = DateTimeFormat.forPattern(format).withZoneUTC().withLocale(locale);
+        return fmt;
+    }
+
     public static Instant resolve(Object obj) {
         if (obj instanceof DateTime) {
             return from((DateTime)obj);

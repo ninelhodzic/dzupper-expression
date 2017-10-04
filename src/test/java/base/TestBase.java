@@ -99,6 +99,9 @@ public abstract class TestBase {
 
 
         parent.put("child", child);
+        parent.put("fieldPrice", "20 KM");
+        parent.put("fieldPrice1", "20,15 KM");
+        parent.put("fieldPrice2", "20.15 KM");
         parent.put("list", list1);
         parent.put("dateTime", new DateTime());
         parent.put("date", new Date());
