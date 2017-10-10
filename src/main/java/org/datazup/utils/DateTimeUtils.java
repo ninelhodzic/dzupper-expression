@@ -23,6 +23,7 @@ public class DateTimeUtils {
 
     private static List<DateTimeFormatter> COMMON_DATE_TIME_FORMATS =
             Arrays.asList(ISODateTimeFormat.dateTime(),
+                    getFormatter("yyyy-MM-dd'T'hh:mm:ss"),
                     getFormatter("EEE MMM dd HH:mm:ss Z yyyy"),
                     getFormatter("EEE MMM dd HH:mm:ss z yyyy"));
 
@@ -43,10 +44,20 @@ public class DateTimeUtils {
         } else if (obj instanceof Long)
             return Instant.ofEpochMilli((Long) obj);
         else if (obj instanceof String) {
-            for (DateTimeFormatter fmt: COMMON_DATE_TIME_FORMATS){
-                Instant dt = resolve(fmt, (String)obj);
-                if (null!=dt){
-                    return dt;
+            Instant dt = null;
+            try {
+                dt = Instant.parse((String)obj);
+                return dt;
+            }catch (Exception e){
+               // nothing
+            }
+
+            if (null==dt) {
+                for (DateTimeFormatter fmt : COMMON_DATE_TIME_FORMATS) {
+                    dt = resolve(fmt, (String) obj);
+                    if (null != dt) {
+                        return dt;
+                    }
                 }
             }
         }
