@@ -727,6 +727,11 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else if (operator == GREATER_THEN) {
             Object left = operands.next();
             Object right = operands.next();
+
+            if (null == left || null == right) {
+                return false;
+            }
+
             // check this: http://stackoverflow.com/questions/2683202/comparing-the-values-of-two-generic-numbers
             Number l = (Number) left;
             Number r = (Number) right;
@@ -736,6 +741,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else if (operator == LOWER_THEN) {
             Object left = operands.next();
             Object right = operands.next();
+            if (null == left || null == right) {
+                return false;
+            }
             // check this: http://stackoverflow.com/questions/2683202/comparing-the-values-of-two-generic-numbers
             Number l = (Number) left;
             Number r = (Number) right;
@@ -745,12 +753,22 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else if (operator == AND) {
             Object left = operands.next();
             Object right = operands.next();
+
+            if (null == left || null == right) {
+                return false;
+            }
+
             boolean l = (Boolean) left;
             boolean r = (Boolean) right;
             return l && r; //Boolean.logicalAnd(l,r);
         } else if (operator == OR) {
             Object left = operands.next();
             Object right = operands.next();
+
+            if (null == left || null == right) {
+                return false;
+            }
+
             boolean l = (Boolean) left;
             boolean r = (Boolean) right;
             return l || r; //Boolean.logicalOr(l,r);
