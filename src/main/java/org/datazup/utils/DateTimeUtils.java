@@ -1,6 +1,7 @@
 
 package org.datazup.utils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -28,7 +29,13 @@ public class DateTimeUtils {
                     getFormatter("EEE MMM dd HH:mm:ss z yyyy"));
 
     private static DateTimeFormatter getFormatter(String format) {
-       DateTimeFormatter fmt = DateTimeFormat.forPattern(format).withZoneUTC().withLocale(Locale.ENGLISH);
+        DateTimeFormatter fmt =null;
+        if (StringUtils.isEmpty(format)){
+            fmt = DateTimeFormat.fullDateTime().withZoneUTC().withLocale(Locale.ENGLISH);
+        }else {
+            fmt = DateTimeFormat.forPattern(format).withZoneUTC().withLocale(Locale.ENGLISH);
+
+        }
         return fmt;
     }
 

@@ -3,6 +3,7 @@ package expression;
 import base.TestBase;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.pathextractor.PathExtractor;
+import org.datazup.pathextractor.SimpleMapListResolver;
 import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -79,7 +80,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     public Object evaluate(String expression){
-        PathExtractor pathExtractor = new PathExtractor(getData());
+        PathExtractor pathExtractor = new PathExtractor(getData(),new SimpleMapListResolver());
         SimpleObjectEvaluator evaluator = SimpleObjectEvaluator.getInstance(); //new SimpleObjectEvaluator();
         return  evaluator.evaluate(expression,pathExtractor);
     }

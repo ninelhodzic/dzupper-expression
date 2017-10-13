@@ -3,7 +3,9 @@ package org.datazup.expression;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.expression.exceptions.ExpressionValidationException;
+import org.datazup.pathextractor.AbstractMapListResolver;
 import org.datazup.pathextractor.PathExtractor;
+import org.datazup.pathextractor.SimpleMapListResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

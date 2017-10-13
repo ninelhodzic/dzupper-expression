@@ -3,6 +3,7 @@ package org.datazup.expression;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.datazup.pathextractor.AbstractMapListResolver;
 import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.utils.JsonUtils;
 
@@ -158,13 +159,15 @@ public abstract class AbstractEvaluator<T> {
             values.push(value);// != null ? value : (T) new NullObject());
         } else if (token.isLiteralValue()) {
             String value = token.getLiteralValue();
-            boolean shouldTrim = true;
-            if (value.contains("'")){
+           // boolean shouldTrim = true;
+            /*if (value.contains("'")){
                 shouldTrim = false;
             }
-            value = value.replaceAll("'", "");
-            if (shouldTrim)
-                value = value.trim();
+            value = value.replaceAll("'", "");*/
+            if (value.startsWith("'") && value.endsWith("'")){
+                value = value.substring(1, value.length() - 1).trim();
+            }
+
 
             values.push((T) value);
         } else if (token.isNumber()) {
