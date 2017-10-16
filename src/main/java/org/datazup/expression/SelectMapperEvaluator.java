@@ -153,8 +153,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     throw new ExpressionValidationException("In case of List, first parameter has to be Integer");
                 }
                 if (null!=n){
-                    List l = (List)value2;
-                    return l.get(n.intValue());
+                    return list.get(n.intValue());
                 }
             }
         }

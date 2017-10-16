@@ -66,7 +66,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function MONTH = new Function("MONTH", 1);
     public final static Function YEAR = new Function("YEAR", 1);
 
-    public final static Function TO_DATE = new Function("TO_DATE", 2);
+    public final static Function TO_DATE = new Function("TO_DATE", 1, 2);
     public final static Function TO_INT = new Function("TO_INT", 1);
     public final static Function TO_LONG = new Function("TO_LONG", 1);
     public final static Function TO_DOUBLE = new Function("TO_DOUBLE", 1);
@@ -560,9 +560,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         Object valueObject = operands.next();
         Token valueObjectToken = argumentList.pop();
-        String formatObject = (String) operands.next();
-        Token formatObjectToken = argumentList.pop();
+        String formatObject = null;
+        if (operands.hasNext()) {
+            formatObject =   (String) operands.next();
+            Token formatObjectToken = argumentList.pop();
 
+        }
         String format = null;
         if (null!=formatObject){
             format = formatObject.replace("#", "");
