@@ -165,7 +165,7 @@ public abstract class AbstractEvaluator<T> {
             }
             value = value.replaceAll("'", "");*/
             if (value.startsWith("'") && value.endsWith("'")){
-                value = value.substring(1, value.length() - 1).trim();
+                value = value.substring(1, value.length() - 1);
             }
 
 

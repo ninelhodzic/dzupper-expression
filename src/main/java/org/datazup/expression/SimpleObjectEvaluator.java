@@ -318,7 +318,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         if (objectFieldValue instanceof String){
             String strToReplace = whatToReplaceIn.toString();
             String objectValue = (String)objectFieldValue;
-            return objectValue.replaceAll(strToReplace, valueToReplaceIn.toString());
+            String replaced = objectValue.replaceAll(strToReplace, valueToReplaceIn.toString());
+            return replaced;
         }
 
 
