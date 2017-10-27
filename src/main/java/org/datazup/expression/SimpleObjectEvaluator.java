@@ -658,6 +658,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         if (operator == DIVIDE){
             Object left = operands.next();
             Object right = operands.next();
+
+
             Number lN = null;
             Number rN = null;
             if (left instanceof Number){
@@ -706,6 +708,11 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else if (operator == NOT_EQUAL) {
             Object left = operands.next();
             Object right = operands.next();
+            if (null==left && null==right)
+                return false;
+            if (null==left || null==right)
+                return true;
+
             if (left instanceof Number && right instanceof Number) {
                 return ((Number) left).doubleValue() != ((Number) right).doubleValue();
             } else {
@@ -715,7 +722,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Object left = operands.next();
             Object right = operands.next();
             if (null==left || right==null){
-                return left.equals(right);
+                return false; //left.equals(right);
+            }
+            if (null==left && null == right){
+                return true;
             }
             if (left instanceof Number && right instanceof Number) {
                 return ((Number) left).doubleValue() == ((Number) right).doubleValue();

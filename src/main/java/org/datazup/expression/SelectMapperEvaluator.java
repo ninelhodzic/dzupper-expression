@@ -19,6 +19,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectMapperEvaluator.class);
 
+    @Deprecated
+    public final static Function FOREACH = new Function("FOREACH", 3, Integer.MAX_VALUE);
+
     public final static Function SELECT = new Function("SELECT", 1, Integer.MAX_VALUE);
     public final static Function LIST = new Function("LIST", 1, Integer.MAX_VALUE);
     public final static Function MAP = new Function("MAP", 1, Integer.MAX_VALUE);
@@ -65,6 +68,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
 
     static {
+
+        SimpleObjectEvaluator.PARAMETERS.add(FOREACH);
         SimpleObjectEvaluator.PARAMETERS.add(SELECT);
         SimpleObjectEvaluator.PARAMETERS.add(LIST);
         SimpleObjectEvaluator.PARAMETERS.add(MAP);
@@ -86,7 +91,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     @Override
     protected Object nextFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
 
-            if (function == GET) {
+        if (function == FOREACH){
+            return foreach(function, operands, argumentList, (PathExtractor)evaluationContext);
+        }else if (function == GET) {
             return getGet(function, operands, argumentList, (PathExtractor)evaluationContext);
         }else if (function == TEMPLATE) {
             return getTemplate(function, operands, argumentList, (PathExtractor) evaluationContext);
@@ -118,6 +125,22 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }else {
             return superFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    @Deprecated
+    private Object foreach(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object fieldForeachValue = operands.next();
+        Token tokenFieldValue = argumentList.pop();
+
+        String actionValue = (String) operands.next();
+        Token tokenAction = argumentList.pop();
+
+       /* switch (actionValue){
+            case "TO_MAP"
+        }
+*/
+
+        return null;
     }
 
     private Object getGet(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
