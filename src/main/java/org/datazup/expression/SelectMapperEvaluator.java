@@ -91,6 +91,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     @Override
     protected Object nextFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
 
+        Random random = new Random();
+
         if (function == FOREACH){
             return foreach(function, operands, argumentList, (PathExtractor)evaluationContext);
         }else if (function == GET) {
@@ -125,6 +127,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }else {
             return superFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+
     }
 
     @Deprecated
@@ -336,7 +339,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             Token token = argumentList.pop();
             Map newMap = mapListResolver.resolveToMap(value);
             if (null!=newMap) {
-                map.putAll((Map) value);
+                map.putAll((Map) newMap);
             }
 
         }
