@@ -548,6 +548,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
          String regexPattern = operands.next().toString();
          Token token1 = argumentList.pop();
+
+        regexPattern = regexPattern.replace("#", "");
          
          Pattern r = Pattern.compile(regexPattern);
          Matcher matcher = r.matcher(regexFieldValue);

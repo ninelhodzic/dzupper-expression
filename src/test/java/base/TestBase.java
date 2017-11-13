@@ -96,7 +96,7 @@ public abstract class TestBase {
         list1.add((new HashMap<>().put("n", "n")));
 
         child.put("list", list);
-
+        child.put("html", "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>");
 
         parent.put("child", child);
         parent.put("fieldPrice", "20 KM");

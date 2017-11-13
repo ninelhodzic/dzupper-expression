@@ -103,6 +103,30 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof String);
         Assert.assertTrue(evaluaged.equals("hil"));
     }
+
+    @Test
+    public void evaluateRegexExtractHtmlTest(){
+
+         // #<a[^>]*?>(.*?)<\/a>#
+        // #<a.*>(.*?)<#
+        String expression = "REGEX_EXTRACT($child.html$, '#<a[^>]*?>(.*?)</a>#', 1)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        Assert.assertTrue(evaluaged.equals("Twitter for iPhone"));
+    }
+
+    @Test
+    public void evaluateRegexMatchHtmlTest(){
+
+        // #<a[^>]*?>(.*?)<\/a>#
+        // #<a.*>(.*?)<#
+        String expression = "REGEX_MATCH($child.html$, '#<a.*#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue(evaluaged.equals(Boolean.TRUE));
+    }
     
     @Test
     public void evaluateRegexExtractByGroupFunctionExpressionTest(){
