@@ -324,6 +324,36 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertNotNull(objectMap.get("upsertValue"));
     }
 
+    @Test
+    public void simpleListTest(){
+        String expression = "LIST('item1', 2, 'item2,', 23.43)";
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof List);
+
+        List<Object> objectList = (List) o;
+        Assert.assertTrue(objectList.size() == 4);
+    }
+
+    @Test
+    public void complexListTest(){
+        String expression = "MAP(FIELD('locations',LIST('Seoul','Busan','Daegu','Incheon','Gwangju','Daejeon','Ulsan','Gyeonggido','Gangwondo','N.Chungcheongdo','S.Chungcheongdo','N.Jeonrado','S.Jeonrado','N.Gyeongsangdo','S.Gyeongsangdo','Jejudo')))";
+
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof Map);
+        Map map = (Map)o;
+
+        List l = (List) map.get("locations");
+        Assert.assertNotNull(l);
+        Assert.assertTrue(l.get(0).equals("Seoul"));
+    }
 
     @Test
     public void isToListTest() {
