@@ -224,7 +224,13 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
        List<Object> list = new ArrayList<>();
         while (operands.hasNext()) {
             Object value = operands.next();
-            list.add(value);
+            argumentList.removeLast();
+            List listChild = mapListResolver.resolveToList(value);
+            if (null!=listChild){
+                list.addAll(listChild);
+            }else {
+                list.add(value);
+            }
         }
         return list;
     }

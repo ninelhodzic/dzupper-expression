@@ -285,6 +285,16 @@ public abstract class AbstractEvaluator<T> {
             }catch (Exception e){}
         }
 
+        if (expression.startsWith("[") && expression.endsWith("]")){
+            try{
+                T value = (T) mapListResolver.resolveToList(expression);
+                if (null!=value){
+                    return value;
+                }
+            }catch (Exception e){}
+
+        }
+
         if (Pattern.matches("[a-zA-Z0-9 _:\\.@]+", expression)) { //match string without special characters as string not expression
             T res = (T) expression;
             return res;
