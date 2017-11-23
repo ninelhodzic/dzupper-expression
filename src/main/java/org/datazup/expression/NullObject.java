@@ -1,7 +1,7 @@
 package org.datazup.expression;
 
 /**
- * Created by ninel on 11/25/16.
+ * Created by admin@datazup on 11/25/16.
  */
 public class NullObject {
     public Object get(){

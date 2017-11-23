@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * Created by ninel on 3/14/16.
+ * Created by admin@datazup on 3/14/16.
  */
 public abstract class AbstractEvaluator<T> {
     private final Tokenizer tokenizer;

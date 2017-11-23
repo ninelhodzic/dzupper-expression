@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by ninel on 11/22/17.
+ * Created by admin@datazup on 11/22/17.
  */
 public abstract class ApiServiceBase implements ApiService {
 

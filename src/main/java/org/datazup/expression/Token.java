@@ -4,7 +4,7 @@ package org.datazup.expression;
 import java.util.Map;
 
 /**
- * Created by ninel on 3/14/16.
+ * Created by admin@datazup on 3/14/16.
  */
 public class Token {
     static final Token FUNCTION_ARG_SEPARATOR;

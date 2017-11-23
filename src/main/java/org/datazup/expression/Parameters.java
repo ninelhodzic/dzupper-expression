@@ -3,7 +3,7 @@ package org.datazup.expression;
 import java.util.*;
 
 /**
- * Created by ninel on 3/14/16.
+ * Created by admin@datazup on 3/14/16.
  */
 
 public class Parameters {

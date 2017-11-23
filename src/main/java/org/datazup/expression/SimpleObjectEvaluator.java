@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by ninel on 3/14/16.
+ * Created by admin@datazup on 3/14/16.
  */
 public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     protected static final Logger LOG = LoggerFactory.getLogger(SimpleObjectEvaluator.class);

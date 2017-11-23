@@ -1,7 +1,7 @@
 package org.datazup.expression.exceptions;
 
 /**
- * Created by ninel on 3/19/16.
+ * Created by admin@datazup on 3/19/16.
  */
 public class InvalidActionListDefinition extends RuntimeException {
 

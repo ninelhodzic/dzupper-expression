@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Created by ninel on 3/21/16.
+ * Created by admin@datazup on 3/21/16.
  */
 public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 

@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * Created by ninel on 3/21/16.
+ * Created by admin@datazup on 3/21/16.
  */
 public class SelectMapperEvaluatorTest extends TestBase {
 

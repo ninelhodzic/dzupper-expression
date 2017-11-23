@@ -8,7 +8,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Created by ninel on 11/13/16.
+ * Created by admin@datazup on 11/13/16.
  */
 public class BasicTest  extends TestBase {
 

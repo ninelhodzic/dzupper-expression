@@ -1,7 +1,7 @@
 package org.datazup.apiinternal;
 
 /**
- * Created by ninel on 11/22/17.
+ * Created by admin@datazup on 11/22/17.
  */
 public class CommonApiResponse {
     private Object result;
