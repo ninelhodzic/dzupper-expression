@@ -2,10 +2,10 @@ package org.datazup.expression;
 
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.datazup.apiinternal.ApiService;
 import org.datazup.expression.exceptions.ExpressionValidationException;
-import org.datazup.pathextractor.AbstractMapListResolver;
+import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.PathExtractor;
-import org.datazup.pathextractor.SimpleMapListResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +28,6 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function REMOVE = new Function("REMOVE", 1);
     public final static Function THIS = new Function("THIS", 0);
     public final static Function COPY = new Function("COPY", 1);
-    /* public final static Function REMOVE = new Function("remove", 1);*/
     public final static Function UNION = new Function("UNION", 1, Integer.MAX_VALUE);
     public final static Function EXTEND = new Function("EXTEND", 1, Integer.MAX_VALUE);
     public final static Function KEYS = new Function("KEYS", 1);
@@ -36,17 +35,13 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function FIELD = new Function("FIELD",  2, 3);
     public final static Function TEMPLATE = new Function("T", 1, 2);
     public final static Function EXCLUDE_FIELDS = new Function("EXCLUDE_FIELDS",  1, Integer.MAX_VALUE);
-
+    public final static Function API = new Function("API", 2, 2);
 
     public final static Function GET = new Function("GET",  2, 3);
 
     private static SelectMapperEvaluator INSTANCE;
 
-    public static SelectMapperEvaluator getInstance(){
-        SimpleMapListResolver simpleMapListResolver = new SimpleMapListResolver();
-        return getInstance(simpleMapListResolver);
-    }
-    public static SelectMapperEvaluator getInstance(AbstractMapListResolver mapListResolver){
+    public static SelectMapperEvaluator getInstance(AbstractResolverHelper mapListResolver){
         synchronized (SelectMapperEvaluator.class){
             if (null==INSTANCE){
                 synchronized (SelectMapperEvaluator.class){
@@ -58,14 +53,15 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         return INSTANCE;
     }
 
-    public SelectMapperEvaluator(){
-        super();
-    }
-
-    public SelectMapperEvaluator(AbstractMapListResolver mapListResolver){
+    protected SelectMapperEvaluator(AbstractResolverHelper mapListResolver){
         super(mapListResolver);
     }
 
+    private ApiService apiService;
+
+    public void setApiService(ApiService apiService) {
+        this.apiService = apiService;
+    }
 
     static {
 
@@ -83,6 +79,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         SimpleObjectEvaluator.PARAMETERS.add(VALUES);
         SimpleObjectEvaluator.PARAMETERS.add(TEMPLATE);
         SimpleObjectEvaluator.PARAMETERS.add(EXCLUDE_FIELDS);
+        SimpleObjectEvaluator.PARAMETERS.add(API);
 
         SimpleObjectEvaluator.PARAMETERS.add(GET);
 
@@ -91,7 +88,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     @Override
     protected Object nextFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
 
-        Random random = new Random();
+        //Random random = new Random();
 
         if (function == FOREACH){
             return foreach(function, operands, argumentList, (PathExtractor)evaluationContext);
@@ -124,11 +121,41 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getValues(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == EXCLUDE_FIELDS) {
             return getExcludeFields(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }else {
+        } else if (function == API){
+            return evaluateApiFunction(function, operands, argumentList, (PathExtractor)evaluationContext);
+        }
+        else {
             return superFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
 
     }
+
+    private Object evaluateApiFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+
+        Object value1 = operands.next();
+        Token token1 = argumentList.pop();
+
+        if (null==value1){
+            throw new ExpressionValidationException("Key as first parameter cannot be null or empty");
+        }
+        if (!(value1 instanceof String)){
+            throw new ExpressionValidationException("Key as first parameter has to be type of String: "+value1.getClass().getName()+", value: "+value1);
+        }
+
+        String apiKeyName = (String)value1;
+
+        Object value2 = operands.next();
+        Token token3 = argumentList.pop();
+
+        if (null==apiService)
+            return null;
+
+        if (apiService.contains(apiKeyName)){
+            return apiService.execute(apiKeyName, value2);
+        }
+        return null;
+    }
+
 
     @Deprecated
     private Object foreach(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
@@ -421,4 +448,6 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
         return map;
     }
+
+
 }

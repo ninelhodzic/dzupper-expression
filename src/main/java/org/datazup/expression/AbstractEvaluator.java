@@ -3,7 +3,7 @@ package org.datazup.expression;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.datazup.pathextractor.AbstractMapListResolver;
+import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.utils.JsonUtils;
 
@@ -22,9 +22,9 @@ public abstract class AbstractEvaluator<T> {
     private final Map<String, BracketPair> functionBrackets;
     private final Map<String, BracketPair> expressionBrackets;
 
-    protected AbstractMapListResolver mapListResolver;
+    protected AbstractResolverHelper mapListResolver;
 
-    protected AbstractEvaluator(Parameters parameters, AbstractMapListResolver mapListResolver) {
+    protected AbstractEvaluator(Parameters parameters, AbstractResolverHelper mapListResolver) {
         this.mapListResolver = mapListResolver;
 
         ArrayList tokenDelimitersBuilder = new ArrayList();

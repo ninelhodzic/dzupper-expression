@@ -2,9 +2,9 @@ package mapperevaluator;
 
 import base.TestBase;
 import org.datazup.expression.SelectMapperEvaluator;
-import org.datazup.pathextractor.AbstractMapListResolver;
+import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.PathExtractor;
-import org.datazup.pathextractor.SimpleMapListResolver;
+import org.datazup.pathextractor.SimpleResolverHelper;
 import org.datazup.utils.JsonUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -19,9 +19,8 @@ import java.util.regex.Pattern;
  */
 public class SelectMapperEvaluatorTest extends TestBase {
 
-    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
-
-    private static AbstractMapListResolver mapListResolver = new SimpleMapListResolver();
+    private static AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
+    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(mapListResolver);
 
     @Test
     public void isFilterFieldsRuns() {
@@ -43,7 +42,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Map<String, Object> objectMap = new HashMap<String, Object>();
         objectMap.put("dateString", "nesto nebitno");
 
-        PathExtractor pathExtractor = new PathExtractor(objectMap, new SimpleMapListResolver());
+        PathExtractor pathExtractor = new PathExtractor(objectMap, new SimpleResolverHelper());
 
         Object evaluated = evaluator.evaluate(expression, pathExtractor);
         Assert.assertNotNull(evaluated);

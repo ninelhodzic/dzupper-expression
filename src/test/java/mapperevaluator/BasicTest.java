@@ -3,7 +3,7 @@ package mapperevaluator;
 import base.TestBase;
 import org.datazup.expression.SelectMapperEvaluator;
 import org.datazup.pathextractor.PathExtractor;
-import org.datazup.pathextractor.SimpleMapListResolver;
+import org.datazup.pathextractor.SimpleResolverHelper;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -13,14 +13,15 @@ import org.junit.Test;
 public class BasicTest  extends TestBase {
 
     private static SelectMapperEvaluator evaluator;
+    private static SimpleResolverHelper mapListResolver = new SimpleResolverHelper();
 
     @BeforeClass
     public static void init(){
-        evaluator = new SelectMapperEvaluator();
+        evaluator = SelectMapperEvaluator.getInstance(mapListResolver);
     }
 
     private Object evaluateOnMap(String expression){
-        return evaluator.evaluate(expression, new PathExtractor(getData(), new SimpleMapListResolver()));
+        return evaluator.evaluate(expression, new PathExtractor(getData(), mapListResolver));
     }
 
     private Object evaluateOnListOfMaps(String expression){

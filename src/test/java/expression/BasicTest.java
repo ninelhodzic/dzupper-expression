@@ -3,7 +3,7 @@ package expression;
 import base.TestBase;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.pathextractor.PathExtractor;
-import org.datazup.pathextractor.SimpleMapListResolver;
+import org.datazup.pathextractor.SimpleResolverHelper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -17,14 +17,15 @@ import java.time.Instant;
 public class BasicTest extends TestBase {
 
     private static SimpleObjectEvaluator evaluator;
+    private static SimpleResolverHelper mapListResolver =new SimpleResolverHelper();
 
     @BeforeClass
     public static void init(){
-        evaluator = SimpleObjectEvaluator.getInstance();
+        evaluator = SimpleObjectEvaluator.getInstance(mapListResolver);
     }
 
     private Object evaluateOnMap(String expression){
-        return evaluator.evaluate(expression,new PathExtractor(getData(), new SimpleMapListResolver()));
+        return evaluator.evaluate(expression,new PathExtractor(getData(), mapListResolver));
     }
 
     private Object evaluateOnListOfMaps(String expression){

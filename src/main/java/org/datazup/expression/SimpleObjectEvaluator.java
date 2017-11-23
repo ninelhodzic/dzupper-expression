@@ -4,9 +4,9 @@ package org.datazup.expression;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
-import org.datazup.pathextractor.AbstractMapListResolver;
+import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
-import org.datazup.pathextractor.SimpleMapListResolver;
+import org.datazup.pathextractor.SimpleResolverHelper;
 import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -137,13 +137,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     private static SimpleObjectEvaluator INSTANCE;
 
-    public static SimpleObjectEvaluator getInstance(){
-        SimpleMapListResolver simpleMapListResolver = new SimpleMapListResolver();
-        return getInstance(simpleMapListResolver);
-    }
-
-
-    public static SimpleObjectEvaluator getInstance(AbstractMapListResolver mapListResolver){
+    public static SimpleObjectEvaluator getInstance(AbstractResolverHelper mapListResolver){
         synchronized (SimpleObjectEvaluator.class){
             if (null==INSTANCE){
                 synchronized (SimpleObjectEvaluator.class){
@@ -155,10 +149,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         return INSTANCE;
     }
 
-    public SimpleObjectEvaluator() {
-        super(PARAMETERS, new SimpleMapListResolver());
+    private SimpleObjectEvaluator() {
+        super(PARAMETERS, new SimpleResolverHelper());
     }
-    public SimpleObjectEvaluator(AbstractMapListResolver mapListResolver) {
+    protected SimpleObjectEvaluator(AbstractResolverHelper mapListResolver) {
         super(PARAMETERS, mapListResolver);
     }
 
@@ -834,9 +828,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         return super.evaluate(operator, operands, evaluationContext);
     }
 
-    protected Object superOperatorEvaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
+    /*protected Object superOperatorEvaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
         return super.evaluate(operator, operands, evaluationContext);
-    }
+    }*/
 
     protected String normalizeTokenName(String tokenName) {
         if (tokenName.startsWith("$") && tokenName.endsWith("$")) {
