@@ -53,7 +53,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         return INSTANCE;
     }
 
-    protected SelectMapperEvaluator(AbstractResolverHelper mapListResolver){
+    public SelectMapperEvaluator(AbstractResolverHelper mapListResolver){
         super(mapListResolver);
     }
 

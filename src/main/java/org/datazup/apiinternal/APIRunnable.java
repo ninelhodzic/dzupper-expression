@@ -6,4 +6,5 @@ package org.datazup.apiinternal;
 public interface APIRunnable {
     CommonApiResponse run(CommonApiParams params);
     String getName();
+    //void init();
 }
