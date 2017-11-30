@@ -29,4 +29,6 @@ public abstract class ApiServiceBase implements ApiService {
         }
         return null;
     }
+
+    public abstract void load();
 }
