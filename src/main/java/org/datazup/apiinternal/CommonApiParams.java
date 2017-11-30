@@ -1,8 +1,11 @@
+/*
 package org.datazup.apiinternal;
 
+*/
 /**
  * Created by admin@datazup on 11/22/17.
- */
+ *//*
+
 public class CommonApiParams {
     private Object payload;
 
@@ -14,3 +17,4 @@ public class CommonApiParams {
         this.payload = payload;
     }
 }
+*/

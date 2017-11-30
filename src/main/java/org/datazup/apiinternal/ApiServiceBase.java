@@ -22,9 +22,7 @@ public abstract class ApiServiceBase implements ApiService {
 
         if (apis.containsKey(apiName)){
             APIRunnable api = apis.get(apiName);
-            CommonApiParams params1 = new CommonApiParams();
-            params1.setPayload(params);
-            CommonApiResponse apiResponse = api.run(params1);
+            Object apiResponse = api.run(params);
             return apiResponse;
         }
         return null;
