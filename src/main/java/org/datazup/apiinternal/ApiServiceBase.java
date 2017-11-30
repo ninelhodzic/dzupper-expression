@@ -1,5 +1,7 @@
 package org.datazup.apiinternal;
 
+import org.datazup.pathextractor.PathExtractor;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,11 +20,11 @@ public abstract class ApiServiceBase implements ApiService {
         return apis.containsKey(apiName);
     }
 
-    public Object execute(String apiName, Object params){
+    public Object execute(String apiName, Object params, PathExtractor context){
 
         if (apis.containsKey(apiName)){
             APIRunnable api = apis.get(apiName);
-            Object apiResponse = api.run(params);
+            Object apiResponse = api.run(params, context);
             return apiResponse;
         }
         return null;

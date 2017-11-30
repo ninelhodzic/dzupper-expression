@@ -151,7 +151,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return null;
 
         if (apiService.contains(apiKeyName)){
-            return apiService.execute(apiKeyName, value2);
+            return apiService.execute(apiKeyName, value2, evaluationContext);
         }
         return null;
     }
