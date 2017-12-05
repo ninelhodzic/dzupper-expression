@@ -452,7 +452,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 	private Object extract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
 			Object evaluationContext) {
 
-		String fieldValue = operands.next().toString();
+		Object fieldValueObject = operands.next();
+		if (null==fieldValueObject)
+			return null;
+
+		String fieldValue = fieldValueObject.toString().toLowerCase();
+
 		// String[] fieldValueSplited = fieldValue.toLowerCase().split("\\b");
 		Token token = argumentList.pop();
 
@@ -464,7 +469,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
 		ArrayList list = new ArrayList();
 		for (int i = 0; i < searchedTopics.length; i++) {
-			String k = searchedTopics[i].trim();
+			String k = searchedTopics[i].trim().toLowerCase();
 			boolean exists = false;
 			if (k.contains(" ")) {
 				String[] sk = k.split(" ");
@@ -476,7 +481,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 					}
 				}
 			} else {
-				if (fieldValue.toLowerCase().contains(k)) {
+				if (fieldValue.contains(k)) {
 					exists = true;
 				}
 			}
