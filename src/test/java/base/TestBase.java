@@ -1,6 +1,7 @@
 package base;
 
 import org.joda.time.DateTime;
+import org.joda.time.Hours;
 
 import java.util.*;
 
@@ -104,6 +105,7 @@ public abstract class TestBase {
         parent.put("fieldPrice2", "20.15 KM");
         parent.put("list", list1);
         parent.put("dateTime", new DateTime());
+        parent.put("dateTime1", (new DateTime()).minus(Hours.hours(12)));
         parent.put("date", new Date());
         parent.put("dateTimeString", (new DateTime()).toString());
         parent.put("tweetCreatedAt", "Tue Apr 18 18:35:35 +0000 2017");

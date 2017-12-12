@@ -12,9 +12,14 @@ import org.joda.time.format.DateTimeFormatter;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * Created by admin@datazup on 3/15/16.
@@ -242,6 +247,74 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
         Instant dt = (Instant)evaluaged;
         assertDayDates(dt);
+    }
+
+    @Test
+    public void evaluateDateTimeToHourExpressionTest(){
+        String expression = "HOUR($dateTime$)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Integer);
+
+        System.out.println(evaluaged);
+
+        expression = "HOUR($dateTime1$)";
+        evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Integer);
+
+        System.out.println(evaluaged);
+    }
+
+    @Test
+    public void evaluateDateTimeToDateHourAMPMFormatExpressionTest(){
+        String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd hh ZZZ a#')";
+        Object evaluated1 = evaluate(expression);
+
+        Assert.assertTrue(evaluated1 instanceof Instant);
+        Instant instant = (Instant)evaluated1;
+
+        LocalDateTime l = LocalDateTime.ofInstant(instant, ZoneId.of("UTC")); //new LocalDateTime(instant);
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("hh a").withZone(ZoneId.of("UTC"));
+
+        DateFormat df = new SimpleDateFormat("hh a");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        java.sql.Date date = new java.sql.Date(instant.toEpochMilli());
+
+
+        System.out.println("Instant: "+evaluated1);
+        System.out.println("Formatted Instant: "+formatter.format(instant));
+        System.out.println("Formatted sql.Date: "+df.format(date));
+
+
+        expression = "HOUR($dateTime$)";
+        evaluated1 = evaluate(expression);
+        System.out.println("Hour: "+evaluated1);
+
+
+        expression = "TO_DATE($dateTime1$, '#YYYY-MM-dd hh a#')";
+        evaluated1 = evaluate(expression);
+
+        Assert.assertTrue(evaluated1 instanceof Instant);
+        instant = (Instant)evaluated1;
+
+        date = new java.sql.Date(instant.toEpochMilli());
+
+        System.out.println(evaluated1);
+        System.out.println(formatter.format(instant));
+        System.out.println(df.format(date));
+
+
+        expression = "HOUR($dateTime1$)";
+        evaluated1 = evaluate(expression);
+        System.out.println("Hour1: "+evaluated1);
+
+        /*Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Instant);
+
+        Instant dt = (Instant)evaluaged;
+        assertDayDates(dt);*/
     }
 
     @Test
