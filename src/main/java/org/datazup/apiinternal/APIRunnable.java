@@ -8,5 +8,4 @@ import org.datazup.pathextractor.PathExtractor;
 public interface APIRunnable {
     Object run(Object params, PathExtractor context);
     String getName();
-    //void init();
 }
