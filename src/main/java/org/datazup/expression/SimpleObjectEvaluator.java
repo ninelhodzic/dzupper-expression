@@ -296,9 +296,11 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
 		Object containerOrString = operands.next();
 		Token token1 = argumentList.pop();
-		if (null==containerOrString){
-		    while(operands.hasNext())
+		if (null==containerOrString || containerOrString instanceof NullObject){
+		    while(operands.hasNext()) {
+		        operands.next();
                 argumentList.pop();
+            }
 
 		    return false;
         }
