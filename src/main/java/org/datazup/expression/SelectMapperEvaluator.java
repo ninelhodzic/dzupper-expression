@@ -372,13 +372,22 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         }else{
             set = new HashSet<>();
-            set.add(value1);
+            if (value1 instanceof Collection){
+                set.addAll((Collection)value1);
+            }else {
+                set.add(value1);
+            }
         }
 
         while (operands.hasNext()) {
             Object value = operands.next();
             argumentList.removeLast();
-            set.add(value);
+
+            if (value instanceof Collection){
+                set.addAll((Collection)value);
+            }else {
+                set.add(value);
+            }
         }
 
         return new ArrayList(set);
