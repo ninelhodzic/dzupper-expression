@@ -624,7 +624,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 		}
 
 		regexPattern = regexPattern.replace("#", "");
-		Pattern r = Pattern.compile(regexPattern);
+		Pattern r = Pattern.compile(regexPattern, Pattern.DOTALL);
 		Matcher matcher = r.matcher(regexFieldValue);
 
 		int pos;
@@ -661,7 +661,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
 		regexPattern = regexPattern.replace("#", "");
 
-		Pattern r = Pattern.compile(regexPattern);
+		Pattern r = Pattern.compile(regexPattern, Pattern.DOTALL);
 		Matcher matcher = r.matcher(regexFieldValue);
 
 		boolean matches = matcher.matches();
