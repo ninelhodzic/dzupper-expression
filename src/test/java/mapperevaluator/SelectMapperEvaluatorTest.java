@@ -324,7 +324,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void simpleListTest(){
+    public void simpleListTest() {
         String expression = "LIST('item1', 2, 'item2,', 23.43)";
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -338,7 +338,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void complexListTest(){
+    public void complexListTest() {
         String expression = "MAP(FIELD('locations',LIST('Seoul','Busan','Daegu','Incheon','Gwangju','Daejeon','Ulsan','Gyeonggido','Gangwondo','N.Chungcheongdo','S.Chungcheongdo','N.Jeonrado','S.Jeonrado','N.Gyeongsangdo','S.Gyeongsangdo','Jejudo')))";
 
         Map<String, Object> data = getData();
@@ -347,7 +347,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof Map);
-        Map map = (Map)o;
+        Map map = (Map) o;
 
         List l = (List) map.get("locations");
         Assert.assertNotNull(l);
@@ -382,6 +382,51 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void isSetSimpleStringTest() {
+        String expression = "SORTED_SET('FIELD_STRING','Seoul','Busan','Daegu','Incheon','Gwangju','Daejeon','Ulsan','Gyeonggido','Gangwondo','N.Chungcheongdo','S.Chungcheongdo','N.Jeonrado','S.Jeonrado','N.Gyeongsangdo','S.Gyeongsangdo','Jejudo')";
+
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof List);
+        List l = (List) o;
+
+        Assert.assertTrue(l.get(0).equals("Busan"));
+    }
+
+    @Test
+    public void isSetSimpleIntegerTest() {
+        String expression = "SORTED_SET('FIELD_NUMBER',100, 23, 4324, 5)";
+
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof List);
+        List l = (List) o;
+
+        Assert.assertTrue(l.get(0).equals(5d)); // output with Numbers will be in Double format
+    }
+
+    @Test
+    public void isSetSimpleTest() {
+        String expression = "SORTED_SET('Seoul','Seoul','Seoul','Busan','Daegu','Incheon','Gwangju')";
+
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof List);
+        List l = (List) o;
+
+        Assert.assertTrue(l.size()==5);
+    }
+
+    @Test
     public void doesFieldIncludeNull() {
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -413,7 +458,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         data.putAll(r);
         pathExtractor = new PathExtractor(data, mapListResolver);
 
-        expression =  "GET($newFieldName$, $child$)";
+        expression = "GET($newFieldName$, $child$)";
 
         o = evaluator.evaluate(expression, pathExtractor);
 
@@ -455,7 +500,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test //- MULTILINE TEST NOT ALLOWED
-    public void templateHtmlMultiLineTest () {
+    public void templateHtmlMultiLineTest() {
         Map<String, Object> data = getData();
         String strToCompile = "T('#<html>This is Twitter results </br> \n" +
                 "    <pre> {{json child}}</pre>\n" +
@@ -551,10 +596,9 @@ public class SelectMapperEvaluatorTest extends TestBase {
         o = evaluator.evaluate(expression, pathExtractor);
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof Map);
-        Assert.assertTrue(((Map)o).get("prop2").equals(23));
+        Assert.assertTrue(((Map) o).get("prop2").equals(23));
 
     }
-
 
 
 }
