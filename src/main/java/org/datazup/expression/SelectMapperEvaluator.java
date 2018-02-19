@@ -1,6 +1,7 @@
 package org.datazup.expression;
 
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.apiinternal.ApiService;
 import org.datazup.expression.exceptions.ExpressionValidationException;
@@ -36,6 +37,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function TEMPLATE = new Function("T", 1, 2);
     public final static Function EXCLUDE_FIELDS = new Function("EXCLUDE_FIELDS",  1, Integer.MAX_VALUE);
     public final static Function API = new Function("API", 2, 2);
+
+
 
     public final static Function GET = new Function("GET",  2, 3);
 
@@ -83,6 +86,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         SimpleObjectEvaluator.PARAMETERS.add(GET);
 
+
     }
 
     @Override
@@ -124,11 +128,13 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         } else if (function == API){
             return evaluateApiFunction(function, operands, argumentList, (PathExtractor)evaluationContext);
         }
+
         else {
             return superFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
 
     }
+
 
     private Object evaluateApiFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 

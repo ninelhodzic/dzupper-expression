@@ -1,10 +1,12 @@
 package org.datazup.expression;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
+import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
 import org.datazup.utils.DateTimeUtils;
 import org.joda.time.DateTime;
@@ -76,7 +78,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 	public final static Function STRING_FORMAT = new Function("STRING_FORMAT", 2, Integer.MAX_VALUE);
 	public final static Function REPLACE_ALL = new Function("REPLACE_ALL", 3, 4);
 
-	// public final static Function DATE = new Function("DATE", 2);
+    public final static Function CONTAINS = new Function("CONTAINS", 2, Integer.MAX_VALUE);
+
+    // public final static Function DATE = new Function("DATE", 2);
 
 	protected static final Parameters PARAMETERS;
 
@@ -127,6 +131,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 		PARAMETERS.add(REGEX_MATCH);
 		PARAMETERS.add(REGEX_EXTRACT);
 		PARAMETERS.add(EXTRACT);
+
+
+        PARAMETERS.add(CONTAINS);
 	}
 
 	private static SimpleObjectEvaluator INSTANCE;
@@ -275,10 +282,110 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 			return extract(function, operands, argumentList, evaluationContext);
 		} else if (function == REPLACE_ALL) {
 			return replaceAll(function, operands, argumentList, evaluationContext);
-		} else {
+		}
+        else if (function == CONTAINS){
+            return evaluateContainsFunction(function, operands, argumentList, (PathExtractor)evaluationContext);
+        }
+        else {
 			return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
 		}
 	}
+
+	private Object evaluateContainsFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList,
+                                            Object evaluationContext) {
+
+		Object containerOrString = operands.next();
+		Token token1 = argumentList.pop();
+		if (null==containerOrString){
+		    while(operands.hasNext())
+                argumentList.pop();
+
+		    return false;
+        }
+
+		Object containsType = operands.next();
+		Token token2 = argumentList.pop();
+
+		Object value = null;
+		String allOrAnyType = "ALL"; // can be ALL, ANY, ALL_INSENSITIVE, ANY_INSENSITIVE
+		Boolean hasMore = false;
+		if (!operands.hasNext()){
+			value = containsType;
+		}else{
+			hasMore = true;
+			allOrAnyType = containsType.toString().toUpperCase();
+		}
+
+		if (containerOrString instanceof String){
+			if (!hasMore){
+				return ((String) containerOrString).contains(value.toString());
+			}else{
+
+				List<Boolean> bList = new ArrayList<>();
+				while(operands.hasNext()){
+					Object o = operands.next();
+					argumentList.pop();
+
+					if (allOrAnyType.contains("INSENSITIVE")){
+						bList.add(((String) containerOrString).toLowerCase().contains(o.toString().toLowerCase()));
+					}else{
+						bList.add(((String) containerOrString).contains(o.toString()));
+					}
+
+				}
+				if (allOrAnyType.startsWith("ALL")){
+					return BooleanUtils.and(bList.toArray(new Boolean[bList.size()]));
+				}else{
+					return BooleanUtils.or(bList.toArray(new Boolean[bList.size()]));
+				}
+			}
+		}else{
+			List l = mapListResolver.resolveToList(containerOrString);
+			if (null!=l){
+				if (!hasMore){
+					return l.contains(value);
+				}else{
+
+					List<Boolean> bList = new ArrayList<>();
+					while(operands.hasNext()){
+						Object o = operands.next();
+						argumentList.pop();
+						bList.add(l.contains(o));
+					}
+					if (allOrAnyType.startsWith("ALL")){
+						return BooleanUtils.and(bList.toArray(new Boolean[bList.size()]));
+					}else{
+						return BooleanUtils.or(bList.toArray(new Boolean[bList.size()]));
+					}
+				}
+			}else{
+				Map m = mapListResolver.resolveToMap(containerOrString);
+				if (null!=l){
+					if (!hasMore){
+						return m.containsKey(value);
+					}
+				}else{
+
+					List<Boolean> bList = new ArrayList<>();
+					while(operands.hasNext()){
+						Object o = operands.next();
+						argumentList.pop();
+
+						bList.add(m.containsKey(o));
+					}
+					if (allOrAnyType.startsWith("ALL")){
+						return BooleanUtils.and(bList.toArray(new Boolean[bList.size()]));
+					}else{
+						return BooleanUtils.or(bList.toArray(new Boolean[bList.size()]));
+					}
+				}
+			}
+		}
+
+
+		return false;
+	}
+
 
 	private Object replaceAll(Function function, Iterator<Object> operands, Deque<Token> argumentList,
 			Object evaluationContext) {

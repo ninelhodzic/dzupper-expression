@@ -100,6 +100,16 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Boolean b = (Boolean)evaluaged;
         Assert.assertTrue(b);
     }
+
+   /* @Test
+    public void evaluateRegexFunctionExpressionStringTest(){
+        String expression = "REGEX_MATCH('this is [ERROR] of something', '\\SERROR\\S')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Boolean b = (Boolean)evaluaged;
+        Assert.assertTrue(b);
+    }*/
     
     @Test
     public void evaluateRegexExtractFunctionExpressionTest(){
@@ -201,6 +211,99 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue("test".equals(l.get(2)));
         Assert.assertTrue("has purposes".equals(l.get(3)));
     }
+
+    @Test
+    public void evaluateContainsStringSimpleTest(){
+
+        String expression = "CONTAINS($text$, 'longer text')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateContainsStringSimpleCaseInsensitiveTest(){
+
+        String expression = "CONTAINS($text$,'ALL_INSENSITIVE', 'longer TEXT')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateContainsStringSimpleCaseInsensitiveMoreTest(){
+
+        String expression = "CONTAINS($text$,'ALL_INSENSITIVE', 'longer TEXT', 'Test', 'tesTing purposes')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateContainsStringSimpleCaseInsensitiveFalseTest(){
+
+        String expression = "CONTAINS($text$,'ALL', 'longer TEXT')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertFalse((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateContainsStringSimpleNotMatchTest(){
+
+        String expression = "CONTAINS($text$, 'longer text 1')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertFalse((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateContainsListSimpleTest(){
+
+        String expression = "CONTAINS($child.list$, 'Hello')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateContainsListSimpleFalseTest(){
+
+        String expression = "CONTAINS($child.list$, 'Hello 1')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertFalse((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateContainsListAnyTest(){
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "CONTAINS($child.list$,'ANY', 'Hello', 'ahoj')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
+
+    @Test
+    public void evaluateContainMapKeyAllTest(){
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "CONTAINS($child$,'ALL', 'list', 'html')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Assert.assertTrue((Boolean)evaluaged);
+    }
+
 
     @Test
     public void evaluateSimpleDateConversionBasedOnFormatTest(){
