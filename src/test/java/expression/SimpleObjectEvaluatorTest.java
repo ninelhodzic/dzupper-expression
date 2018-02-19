@@ -101,15 +101,15 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(b);
     }
 
-   /* @Test
+    @Test
     public void evaluateRegexFunctionExpressionStringTest(){
-        String expression = "REGEX_MATCH('this is [ERROR] of something', '\\SERROR\\S')";
+        String expression = "REGEX_MATCH('this is [ERROR] of something', '#\\[ERROR\\]#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
         Boolean b = (Boolean)evaluaged;
         Assert.assertTrue(b);
-    }*/
+    }
     
     @Test
     public void evaluateRegexExtractFunctionExpressionTest(){

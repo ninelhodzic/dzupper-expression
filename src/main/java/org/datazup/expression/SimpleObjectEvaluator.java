@@ -273,10 +273,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 			}
 			return 0;
 		} else if (function == REGEX_MATCH) {
-
 			return regexMatch(function, operands, argumentList, evaluationContext);
 		} else if (function == REGEX_EXTRACT) {
-
 			return regexExtract(function, operands, argumentList, evaluationContext);
 		} else if (function == EXTRACT) {
 			return extract(function, operands, argumentList, evaluationContext);
@@ -664,7 +662,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 		Pattern r = Pattern.compile(regexPattern, Pattern.DOTALL);
 		Matcher matcher = r.matcher(regexFieldValue);
 
-		boolean matches = matcher.matches();
+		boolean matches = matcher.find();
 
 		return matches;
 	}
