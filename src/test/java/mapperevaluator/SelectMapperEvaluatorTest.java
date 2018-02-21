@@ -1,6 +1,7 @@
 package mapperevaluator;
 
 import base.TestBase;
+import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SelectMapperEvaluator;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.PathExtractor;
@@ -23,7 +24,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(mapListResolver);
 
     @Test
-    public void isFilterFieldsRuns() {
+    public void isFilterFieldsRuns() throws EvaluatorException {
 
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -37,7 +38,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isThisExpressionRuns() {
+    public void isThisExpressionRuns() throws EvaluatorException{
         String expression = "THIS()";
         Map<String, Object> objectMap = new HashMap<String, Object>();
         objectMap.put("dateString", "nesto nebitno");
@@ -70,7 +71,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isEvaluatingComplexStringAsString() {
+    public void isEvaluatingComplexStringAsString() throws EvaluatorException{
 
         Map<String, Object> objectMap = new HashMap<String, Object>();
         objectMap.put("dateString", "nesto nebitno");
@@ -85,7 +86,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isParsingDateFormatFunction() {
+    public void isParsingDateFormatFunction() throws EvaluatorException{
         Map<String, Object> objectMap = new HashMap<String, Object>();
         objectMap.put("dateString", "Wed May 21 00:00:00 EDT 2008");
 
@@ -100,7 +101,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isParsingNowDateTimestampFunction() {
+    public void isParsingNowDateTimestampFunction() throws EvaluatorException{
         Map<String, Object> objectMap = new HashMap<String, Object>();
 
 
@@ -115,7 +116,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isMovingAndRemovingAndPuttingTest() {
+    public void isMovingAndRemovingAndPuttingTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -136,7 +137,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isSelectingSimpleItemsTest() {
+    public void isSelectingSimpleItemsTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -147,7 +148,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
 
     @Test
-    public void isSelectingItemsFromMapTest() {
+    public void isSelectingItemsFromMapTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -163,7 +164,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isSelectingItemsFromMapWhereListLastTest() {
+    public void isSelectingItemsFromMapWhereListLastTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -179,7 +180,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isSelectingItemsFromMapWhereListIndex0Test() {
+    public void isSelectingItemsFromMapWhereListIndex0Test() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -195,7 +196,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isSelectingItemsFromMapWhereListIndex0TestBenchmark() {
+    public void isSelectingItemsFromMapWhereListIndex0TestBenchmark() throws EvaluatorException{
         Map<String, Object> data = getData();
 
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -214,7 +215,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
 
     @Test
-    public void isUnionListItemsFromMapTest() {
+    public void isUnionListItemsFromMapTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //  SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -229,7 +230,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isUnioMapItemsFromMapTest() {
+    public void isUnioMapItemsFromMapTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //   SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -244,7 +245,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isKeysItemsFromMapTest() {
+    public void isKeysItemsFromMapTest()throws EvaluatorException {
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //   SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
@@ -260,7 +261,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isValuesItemsFromMapTest() {
+    public void isValuesItemsFromMapTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //   SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
@@ -276,7 +277,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isUnionKeyValuesItemsFromMapTest() {
+    public void isUnionKeyValuesItemsFromMapTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
@@ -292,7 +293,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isToMapTest() {
+    public void isToMapTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
@@ -308,7 +309,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isToMapTestNegative() {
+    public void isToMapTestNegative() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
@@ -324,7 +325,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void simpleListTest() {
+    public void simpleListTest()throws EvaluatorException {
         String expression = "LIST('item1', 2, 'item2,', 23.43)";
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -338,7 +339,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void complexListTest() {
+    public void complexListTest() throws EvaluatorException{
         String expression = "MAP(FIELD('locations',LIST('Seoul','Busan','Daegu','Incheon','Gwangju','Daejeon','Ulsan','Gyeonggido','Gangwondo','N.Chungcheongdo','S.Chungcheongdo','N.Jeonrado','S.Jeonrado','N.Gyeongsangdo','S.Gyeongsangdo','Jejudo')))";
 
         Map<String, Object> data = getData();
@@ -355,7 +356,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isToListTest() {
+    public void isToListTest()throws EvaluatorException {
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //  SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance();
@@ -382,7 +383,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isSetSimpleStringTest() {
+    public void isSetSimpleStringTest() throws EvaluatorException{
         String expression = "SORTED_SET('FIELD_STRING','Seoul','Busan','Daegu','Incheon','Gwangju','Daejeon','Ulsan','Gyeonggido','Gangwondo','N.Chungcheongdo','S.Chungcheongdo','N.Jeonrado','S.Jeonrado','N.Gyeongsangdo','S.Gyeongsangdo','Jejudo')";
 
         Map<String, Object> data = getData();
@@ -397,7 +398,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isSetSimpleIntegerTest() {
+    public void isSetSimpleIntegerTest() throws EvaluatorException{
         String expression = "SORTED_SET('FIELD_NUMBER',100, 23, 4324, 5)";
 
         Map<String, Object> data = getData();
@@ -412,7 +413,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isSetSimpleTest() {
+    public void isSetSimpleTest() throws EvaluatorException{
         String expression = "SORTED_SET('Seoul','Seoul','Seoul','Busan','Daegu','Incheon','Gwangju')";
 
         Map<String, Object> data = getData();
@@ -427,7 +428,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void doesFieldIncludeNull() {
+    public void doesFieldIncludeNull()throws EvaluatorException {
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
 
@@ -442,7 +443,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void doesResolveGetByKeyDynamically() {
+    public void doesResolveGetByKeyDynamically() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
 
@@ -468,7 +469,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void hierarchicalExtractionTest() {
+    public void hierarchicalExtractionTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //    SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
@@ -490,7 +491,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void templateSimpleTest() {
+    public void templateSimpleTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         String strToCompile = "T('ovo je moj text {{child.name}}')";
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -500,7 +501,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test //- MULTILINE TEST NOT ALLOWED
-    public void templateHtmlMultiLineTest() {
+    public void templateHtmlMultiLineTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         String strToCompile = "T('#<html>This is Twitter results </br> \n" +
                 "    <pre> {{json child}}</pre>\n" +
@@ -514,7 +515,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void templateHtmlTest() {
+    public void templateHtmlTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         String strToCompile = "T('#<html>ovo je moj </br> text <pre> {{child.name}} </pre> </html>#')";
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -525,7 +526,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void testCleanSentence() {
+    public void testCleanSentence()throws EvaluatorException{
         Map<String, Object> data = getData();
         String expression = "This is regular string";
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -537,7 +538,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void testCleanSentenceWithSingleQuotes() {
+    public void testCleanSentenceWithSingleQuotes() throws EvaluatorException {
         Map<String, Object> data = getData();
         String expression = "'This is regular string'";
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -549,7 +550,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void testJsonStringParse() {
+    public void testJsonStringParse() throws EvaluatorException{
         Map<String, Object> data = getData();
         String expression = "'{\"prop1\":\"val1\", \"prop2\":23}'";
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
@@ -572,7 +573,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }*/
 
     @Test
-    public void multiStepJsonTemplateMapTest() {
+    public void multiStepJsonTemplateMapTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
 

@@ -3,6 +3,7 @@ package org.datazup.expression;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.datazup.exceptions.EvaluatorException;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.utils.JsonUtils;
@@ -130,7 +131,7 @@ public abstract class AbstractEvaluator<T> {
         return operator;
     }
 
-    private void output(Deque<T> values, Token token, Object evaluationContext) {
+    private void output(Deque<T> values, Token token, Object evaluationContext) throws EvaluatorException {
         if (token.isLiteral()) {
             String operator = token.getLiteral();
             Constant ct = (Constant) this.constants.get(operator);
@@ -147,7 +148,11 @@ public abstract class AbstractEvaluator<T> {
             T value = ct == null ? null : this.evaluate(ct, evaluationContext);
             if (value == null && evaluationContext != null && evaluationContext instanceof AbstractVariableSet) {
                 AbstractVariableSet abstractVariableSet = (AbstractVariableSet) evaluationContext;
-                value = (T) abstractVariableSet.get(operator);
+                try {
+                    value = (T) abstractVariableSet.get(operator);
+                }catch (Throwable e){
+                    throw new EvaluatorException("Cannot evaluate operator: "+operator, e);
+                }
             }
             if (value instanceof String) {
                 String strVal = (String) value;
@@ -257,7 +262,7 @@ public abstract class AbstractEvaluator<T> {
         return contains;
     }*/
 
-    public T evaluate(String expression, Object evaluationContext) {
+    public T evaluate(String expression, Object evaluationContext) throws EvaluatorException {
 
        // expression = expression.trim();
         if (StringUtils.isEmpty(expression)) {
