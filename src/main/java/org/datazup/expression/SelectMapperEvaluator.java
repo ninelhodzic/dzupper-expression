@@ -293,6 +293,15 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         Set<Object> set;
         Object value1 = operands.next();
         Token token1 = argumentList.pop();
+
+        if (null==value1) {
+            while (operands.hasNext()){
+                operands.next();
+                argumentList.pop();
+            }
+            return null;
+        }
+
         String fieldsToSortBy = null;
         if (value1 instanceof String && ((String) value1).startsWith("FIELD_")){
             fieldsToSortBy = (String)value1;

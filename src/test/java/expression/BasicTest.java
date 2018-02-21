@@ -1,6 +1,7 @@
 package expression;
 
 import base.TestBase;
+import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
@@ -25,15 +26,30 @@ public class BasicTest extends TestBase {
     }
 
     private Object evaluateOnMap(String expression){
-        return evaluator.evaluate(expression,new PathExtractor(getData(), mapListResolver));
+        try {
+            return evaluator.evaluate(expression,new PathExtractor(getData(), mapListResolver));
+        } catch (EvaluatorException e) {
+            throw new RuntimeException(e);
+
+        }
     }
 
     private Object evaluateOnListOfMaps(String expression){
-        return evaluator.evaluate(expression, getListOfMaps());
+        try {
+            return evaluator.evaluate(expression, getListOfMaps());
+        } catch (EvaluatorException e) {
+            throw new RuntimeException(e);
+
+        }
     }
 
     private Object evaluateOnNestedListOfMaps(String expression){
-        return evaluator.evaluate(expression, getNestedListOfMaps());
+        try {
+            return evaluator.evaluate(expression, getNestedListOfMaps());
+        } catch (EvaluatorException e) {
+            throw new RuntimeException(e);
+
+        }
     }
 
     @Test

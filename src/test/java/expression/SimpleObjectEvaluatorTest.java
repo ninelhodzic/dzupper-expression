@@ -1,6 +1,7 @@
 package expression;
 
 import base.TestBase;
+import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
@@ -28,7 +29,7 @@ import java.util.TimeZone;
 public class SimpleObjectEvaluatorTest extends TestBase {
 
     @Test
-    public void isEmptyExpressionEvaluatedAsTrueTest(){
+    public void isEmptyExpressionEvaluatedAsTrueTest() throws EvaluatorException{
         String expression = "";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -38,7 +39,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSizeOfListExpressionTest(){
+    public void evaluateSizeOfListExpressionTest() throws EvaluatorException{
         String expression = "SIZE_OF($list$)==1";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -48,7 +49,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateNullFunctionMissingExpressionTest(){
+    public void evaluateNullFunctionMissingExpressionTest() throws EvaluatorException{
         String expression = "IS_NULL(child.name.nemaovo)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -58,7 +59,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateNullFunctionExpressionTest(){
+    public void evaluateNullFunctionExpressionTest() throws EvaluatorException{
         String expression = "IS_NULL(child.name1)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -68,7 +69,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateNotNullFunctionExpressionTest(){
+    public void evaluateNotNullFunctionExpressionTest() throws EvaluatorException{
         String expression = "!IS_NULL(child.name)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -77,14 +78,14 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(b);
     }
 
-    public void resolveComplexExpressionTest(){
+    public void resolveComplexExpressionTest() throws EvaluatorException {
         String expression = "($child.name$ == 'child' && $number$==5.30 && 6.30-1 == $number$) && (NOW() < NOW() || NOW()==NOW())";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
     }
 
-    public Object evaluate(String expression){
+    public Object evaluate(String expression) throws EvaluatorException {
         SimpleResolverHelper mapListResolver = new SimpleResolverHelper();
         PathExtractor pathExtractor = new PathExtractor(getData(),mapListResolver);
         SimpleObjectEvaluator evaluator = SimpleObjectEvaluator.getInstance(mapListResolver); //new SimpleObjectEvaluator();
@@ -92,7 +93,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
     
     @Test
-    public void evaluateRegexFunctionExpressionTest(){
+    public void evaluateRegexFunctionExpressionTest()  throws EvaluatorException{
         String expression = "REGEX_MATCH($child.name$, '\\bchild\\b')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -101,18 +102,18 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(b);
     }
 
-   /* @Test
-    public void evaluateRegexFunctionExpressionStringTest(){
-        String expression = "REGEX_MATCH('this is [ERROR] of something', '\\SERROR\\S')";
+    @Test
+    public void evaluateRegexFunctionExpressionStringTest()  throws EvaluatorException{
+        String expression = "REGEX_MATCH('this is [ERROR] of something', '#\\[ERROR\\]#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
         Boolean b = (Boolean)evaluaged;
         Assert.assertTrue(b);
-    }*/
+    }
     
     @Test
-    public void evaluateRegexExtractFunctionExpressionTest(){
+    public void evaluateRegexExtractFunctionExpressionTest()  throws EvaluatorException{
         String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -121,7 +122,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexExtractHtmlTest(){
+    public void evaluateRegexExtractHtmlTest() throws EvaluatorException{
 
          // #<a[^>]*?>(.*?)<\/a>#
         // #<a.*>(.*?)<#
@@ -133,7 +134,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexMatchHtmlTest(){
+    public void evaluateRegexMatchHtmlTest() throws EvaluatorException{
 
         // #<a[^>]*?>(.*?)<\/a>#
         // #<a.*>(.*?)<#
@@ -145,7 +146,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
     
     @Test
-    public void evaluateRegexExtractByGroupFunctionExpressionTest(){
+    public void evaluateRegexExtractByGroupFunctionExpressionTest() throws EvaluatorException{
         String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#',1)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -153,7 +154,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexExtractNumber(){
+    public void evaluateRegexExtractNumber() throws EvaluatorException{
         String expression = "TO_INT(REGEX_EXTRACT($fieldPrice$, '#\\d+#',1))";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -162,7 +163,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexExtractNumberWithSeparator(){
+    public void evaluateRegexExtractNumberWithSeparator() throws EvaluatorException{
         String expression = "TO_DOUBLE(REGEX_EXTRACT($fieldPrice1$, '#\\d+,.\\d+#'))";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -171,7 +172,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexExtractNumberWithSeparator2(){
+    public void evaluateRegexExtractNumberWithSeparator2() throws EvaluatorException{
         String expression = "TO_DOUBLE(REGEX_EXTRACT($fieldPrice2$, '#\\d+(,|.)\\d+#'))";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -199,7 +200,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     */
 
     @Test
-    public void evaluateExtractorFnTest(){
+    public void evaluateExtractorFnTest() throws EvaluatorException{
         String expression = "EXTRACT($text$, '#this,longer,   test, has purposes#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -213,7 +214,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsStringSimpleTest(){
+    public void evaluateContainsStringSimpleTest() throws EvaluatorException{
 
         String expression = "CONTAINS($text$, 'longer text')";
         Object evaluaged = evaluate(expression);
@@ -223,7 +224,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsStringSimpleCaseInsensitiveTest(){
+    public void evaluateContainsStringSimpleCaseInsensitiveTest() throws EvaluatorException{
 
         String expression = "CONTAINS($text$,'ALL_INSENSITIVE', 'longer TEXT')";
         Object evaluaged = evaluate(expression);
@@ -233,7 +234,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsStringSimpleCaseInsensitiveMoreTest(){
+    public void evaluateContainsStringSimpleCaseInsensitiveMoreTest() throws EvaluatorException{
 
         String expression = "CONTAINS($text$,'ALL_INSENSITIVE', 'longer TEXT', 'Test', 'tesTing purposes')";
         Object evaluaged = evaluate(expression);
@@ -243,7 +244,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsStringSimpleCaseInsensitiveFalseTest(){
+    public void evaluateContainsStringSimpleCaseInsensitiveFalseTest() throws EvaluatorException{
 
         String expression = "CONTAINS($text$,'ALL', 'longer TEXT')";
         Object evaluaged = evaluate(expression);
@@ -253,7 +254,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsStringSimpleNotMatchTest(){
+    public void evaluateContainsStringSimpleNotMatchTest() throws EvaluatorException{
 
         String expression = "CONTAINS($text$, 'longer text 1')";
         Object evaluaged = evaluate(expression);
@@ -263,7 +264,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsListSimpleTest(){
+    public void evaluateContainsListSimpleTest() throws EvaluatorException{
 
         String expression = "CONTAINS($child.list$, 'Hello')";
         Object evaluaged = evaluate(expression);
@@ -273,7 +274,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsListSimpleFalseTest(){
+    public void evaluateContainsListSimpleFalseTest() throws EvaluatorException{
 
         String expression = "CONTAINS($child.list$, 'Hello 1')";
         Object evaluaged = evaluate(expression);
@@ -283,7 +284,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsListAnyTest(){
+    public void evaluateContainsListAnyTest() throws EvaluatorException{
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "CONTAINS($child.list$,'ANY', 'Hello', 'ahoj')";
@@ -294,7 +295,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainMapKeyAllTest(){
+    public void evaluateContainMapKeyAllTest() throws EvaluatorException{
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "CONTAINS($child$,'ALL', 'list', 'html')";
@@ -342,7 +343,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateTimeToDateFormatExpressionTest(){
+    public void evaluateDateTimeToDateFormatExpressionTest() throws EvaluatorException{
         String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -353,7 +354,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateTimeToHourExpressionTest(){
+    public void evaluateDateTimeToHourExpressionTest() throws EvaluatorException{
         String expression = "HOUR($dateTime$)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -370,7 +371,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateTimeToDateHourAMPMFormatExpressionTest(){
+    public void evaluateDateTimeToDateHourAMPMFormatExpressionTest() throws EvaluatorException{
         String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd hh ZZZ a#')";
         Object evaluated1 = evaluate(expression);
 
@@ -421,7 +422,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateToDateFormatExpressionTest(){
+    public void evaluateDateToDateFormatExpressionTest() throws EvaluatorException{
         String expression = "TO_DATE($date$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -432,7 +433,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateTimeStringToDateFormatExpressionTest(){
+    public void evaluateDateTimeStringToDateFormatExpressionTest() throws EvaluatorException{
         String expression = "TO_DATE($dateTimeString$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -443,7 +444,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateTimeToDateHourFormatExpressionTest(){
+    public void evaluateDateTimeToDateHourFormatExpressionTest() throws EvaluatorException{
         String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd hh#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -455,7 +456,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
 
     @Test
-    public void evaluateDateTimeToDateYearFormatExpressionTest(){
+    public void evaluateDateTimeToDateYearFormatExpressionTest() throws EvaluatorException{
         String expression = "TO_DATE($dateTime$, '#YYYY#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -468,7 +469,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateTimeStringToDateMonthFormatExpressionTest(){
+    public void evaluateDateTimeStringToDateMonthFormatExpressionTest() throws EvaluatorException{
         String expression = "TO_DATE($dateTimeString$, '#YYYY-MM#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -480,7 +481,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateTweetStringToDateMonthFormatExpressionTest(){
+    public void evaluateTweetStringToDateMonthFormatExpressionTest() throws EvaluatorException{
         String expression = "TO_DATE($tweetCreatedAt$, '#YYYY-MM#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -492,7 +493,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateIfTrueFalsValueTest(){
+    public void evaluateIfTrueFalsValueTest() throws EvaluatorException{
         String expression = "IF(!IS_NULL($child.name$), TO_INT('10'), '20')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -501,7 +502,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateIfTrueFalsValueAsIntegerTest(){
+    public void evaluateIfTrueFalsValueAsIntegerTest() throws EvaluatorException{
         String expression = "IF(TO_INT('0')-TO_INT('1'), TO_INT('10'), '20')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -510,7 +511,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateBooleanSimple(){
+    public void evaluateBooleanSimple() throws EvaluatorException{
         String expression = "'true'=='true'";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -518,7 +519,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue((Boolean)evaluaged);
     }
     @Test
-    public void evaluateBooleanObjectSimple(){
+    public void evaluateBooleanObjectSimple() throws EvaluatorException{
         String expression = "$child.valueTrue$=='true'";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -527,7 +528,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateBooleanObjectComplex(){
+    public void evaluateBooleanObjectComplex() throws EvaluatorException{
         String expression = "!IS_NULL($child.valueTrue$) && $child.valueTrue$=='true'";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -536,7 +537,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSimplePathExtractor(){
+    public void evaluateSimplePathExtractor() throws EvaluatorException{
         String expression = "$child.name$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -544,14 +545,14 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSimplePathExtractorList(){
+    public void evaluateSimplePathExtractorList() throws EvaluatorException{
         String expression = "$child.list$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof List);
     }
     @Test
-    public void evaluateSimplePathExtractorLisParams(){
+    public void evaluateSimplePathExtractorLisParams() throws EvaluatorException{
         String expression = "$child.list[0]$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -560,7 +561,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSimplePathExtractorLisParamsLast(){
+    public void evaluateSimplePathExtractorLisParamsLast() throws EvaluatorException{
         String expression = "$child.list[last]$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -569,7 +570,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSimplePathExtractorLisParamsLastChil(){
+    public void evaluateSimplePathExtractorLisParamsLastChil() throws EvaluatorException{
         String expression = "$child.list[last].third.thirdlist[0]$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
