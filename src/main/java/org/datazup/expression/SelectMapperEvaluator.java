@@ -203,35 +203,15 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             throw new ExpressionValidationException("Key as first parameter cannot be null or empty");
         }
 
-        Object value2 = operands.next();
-        Token token2 = argumentList.pop();
-
-        if (null==value2){
-            throw new ExpressionValidationException("Value as second parameter cannot be null or empty");
-        }
-
-        List l = mapListResolver.resolveToList(token1);
-        if (null!=l){
-            if (value2 instanceof Collection){
-                Collection collection = (Collection)value2;
-                if (null!=collection)
-                    l.addAll(collection);
-            }else{
-                l.add(value2);
+        Collection col = mapListResolver.resolveToCollection(value1);
+        if (null!=col){
+            while(operands.hasNext()){
+                Object o = operands.next();
+                argumentList.pop();
+                col.add(o);
             }
-            return l;
-
-        }else{
-            Map m = mapListResolver.resolveToMap(token1);
-            if (null!=m){
-                if (value2 instanceof Map){
-                    Map m1 = (Map)value2;
-                    m.putAll(m1);
-                }
-                return m;
-            }
+            return col;
         }
-
         return value1;
     }
 
