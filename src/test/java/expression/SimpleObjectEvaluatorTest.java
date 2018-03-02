@@ -114,11 +114,22 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     
     @Test
     public void evaluateRegexExtractFunctionExpressionTest()  throws EvaluatorException{
-        String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#')";
+        String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#',0)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof String);
         Assert.assertTrue(evaluaged.equals("hil"));
+
+    }
+
+
+    @Test
+    public void evaluateRegexExtractMulitFunctionExpressionTest()  throws EvaluatorException{
+        String expression = "REGEX_EXTRACT($log$, '#(?<class>[^\\s]+)+\\s(?<thread>[^\\s]+)+\\s(?<level>[^\\s]+)+\\s(?<message>.*)#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof List);
+        Assert.assertTrue(((List)evaluaged).size()==5);
     }
 
     @Test
@@ -173,7 +184,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
     @Test
     public void evaluateRegexExtractNumberWithSeparator2() throws EvaluatorException{
-        String expression = "TO_DOUBLE(REGEX_EXTRACT($fieldPrice2$, '#\\d+(,|.)\\d+#'))";
+        String expression = "TO_DOUBLE(REGEX_EXTRACT($fieldPrice2$, '#\\d+(,|.)\\d+#',0))";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Number);
