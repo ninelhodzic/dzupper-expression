@@ -383,6 +383,44 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void evaluateToDate() throws EvaluatorException{
+        String expression = "TO_DATE('2018-02-26 14:42:04')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Instant);
+
+        Instant dt = (Instant)evaluaged;
+
+        Assert.assertTrue(DateTimeUtils.getYear(dt)==2018);
+        Assert.assertTrue(DateTimeUtils.getMonth(dt)==02);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==26);
+        Assert.assertTrue(DateTimeUtils.getHour(dt)==14);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt)==42);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt)==04);
+
+    }
+
+    @Test
+    public void evaluateToDateFormated() throws EvaluatorException{
+        String expression = "TO_DATE('2018-02-26 14:42:04', '#YYYY-MM-dd hh a#')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Instant);
+
+        Instant dt = (Instant)evaluaged;
+
+        Assert.assertTrue(DateTimeUtils.getYear(dt)==2018);
+        Assert.assertTrue(DateTimeUtils.getMonth(dt)==02);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==26);
+        Assert.assertTrue(DateTimeUtils.getHour(dt)==14);
+
+        Assert.assertTrue(DateTimeUtils.getMinute(dt)==0);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt)==0);
+    }
+
+    //
+
+    @Test
     public void evaluateDateTimeToHourExpressionTest() throws EvaluatorException{
         String expression = "HOUR($dateTime$)";
         Object evaluaged = evaluate(expression);
