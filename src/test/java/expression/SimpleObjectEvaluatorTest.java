@@ -365,6 +365,24 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void evaluateDateTimeToDateFormatExpressionLdapFormatTest() throws EvaluatorException{
+        String expression = "TO_DATE('20171219121750.783Z')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Instant);
+
+        Instant dt = (Instant)evaluaged;
+
+        Assert.assertTrue(DateTimeUtils.getYear(dt)==2017);
+        Assert.assertTrue(DateTimeUtils.getMonth(dt)==12);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==19);
+        Assert.assertTrue(DateTimeUtils.getHour(dt)==12);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt)==17);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt)==50);
+
+    }
+
+    @Test
     public void evaluateDateTimeToHourExpressionTest() throws EvaluatorException{
         String expression = "HOUR($dateTime$)";
         Object evaluaged = evaluate(expression);

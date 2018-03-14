@@ -26,7 +26,8 @@ public class DateTimeUtils {
             Arrays.asList(ISODateTimeFormat.dateTime(),
                     getFormatter("yyyy-MM-dd'T'hh:mm:ss"),
                     getFormatter("EEE MMM dd HH:mm:ss Z yyyy"),
-                    getFormatter("EEE MMM dd HH:mm:ss z yyyy"));
+                    getFormatter("EEE MMM dd HH:mm:ss z yyyy"),
+                    getFormatter("YYYYMMddHHmmss.SSSZ"));
 
     private static DateTimeFormatter getFormatter(String format) {
         DateTimeFormatter fmt =null;
