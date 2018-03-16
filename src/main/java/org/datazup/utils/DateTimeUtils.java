@@ -50,6 +50,9 @@ public class DateTimeUtils {
     }
 
     public static Instant resolve(Object obj) {
+        if (obj instanceof Instant){
+            return (Instant)obj;
+        }else
         if (obj instanceof DateTime) {
             return from((DateTime)obj);
         } else if (obj instanceof Long)
