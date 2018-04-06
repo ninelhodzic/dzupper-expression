@@ -1,6 +1,7 @@
 package mapperevaluator;
 
 import base.TestBase;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SelectMapperEvaluator;
 import org.datazup.pathextractor.AbstractResolverHelper;
@@ -425,6 +426,27 @@ public class SelectMapperEvaluatorTest extends TestBase {
         List l = (List) o;
 
         Assert.assertTrue(l.size()==5);
+    }
+
+    @Test
+    public void isListParitionedTest() throws EvaluatorException{
+        String expression = "LIST_PARTITION(LIST(TO_INT(1), TO_INT(23), 5, 100), 2)";
+
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluator.evaluate(expression, pathExtractor);
+
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof List);
+        List l = (List) o;
+        Assert.assertTrue(l.size()==2); // output with Numbers will be in Double format
+        Assert.assertTrue(l.get(0) instanceof List);
+        Assert.assertTrue(l.get(1) instanceof List);
+
+        List l1 = (List)l.get(0);
+        Assert.assertTrue(l1.get(1) instanceof Number);
+        Assert.assertTrue(l1.get(1).equals(23));
+
     }
 
     @Test
