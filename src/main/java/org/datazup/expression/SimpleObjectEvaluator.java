@@ -1,6 +1,7 @@
 package org.datazup.expression;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
@@ -10,6 +11,7 @@ import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
 import org.datazup.utils.DateTimeUtils;
 import org.datazup.utils.Tuple;
+import org.datazup.utils.TypeUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +85,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     public final static Function CONTAINS = new Function("CONTAINS", 2, Integer.MAX_VALUE);
 
+    public final static Function RANDOM_NUM = new Function("RANDOM_NUM", 0, 2);
+
+
     // public final static Function DATE = new Function("DATE", 2);
 
     protected static final Parameters PARAMETERS;
@@ -140,6 +145,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
 
         PARAMETERS.add(CONTAINS);
+        PARAMETERS.add(RANDOM_NUM);
+
     }
 
     private static SimpleObjectEvaluator INSTANCE;
@@ -288,8 +295,46 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return replaceAll(function, operands, argumentList, evaluationContext);
         } else if (function == CONTAINS) {
             return evaluateContainsFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == RANDOM_NUM) {
+            return evaluateRandomNumFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
+        }
+    }
+
+    private Object evaluateRandomNumFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        if (operands.hasNext()) {
+
+
+            Object containerOrString = operands.next();
+            Token token1 = argumentList.pop();
+
+            if (null == containerOrString) {
+                return RandomUtils.nextInt();
+            } else {
+                Number n = TypeUtils.resolveNumber(containerOrString);
+                if (null == n) {
+                    return RandomUtils.nextInt();
+                }
+
+                if (operands.hasNext()) {
+                    Object max = operands.next();
+                    Token t2 = argumentList.pop();
+
+                    Number maxN = TypeUtils.resolveNumber(max);
+                    if (null == maxN) {
+                        return RandomUtils.nextInt(n.intValue(), Integer.MAX_VALUE);
+                    }
+
+                    // we'll support nextLong only if both values are specified
+                    return RandomUtils.nextLong(n.intValue(), maxN.intValue());
+
+                } else {
+                    return RandomUtils.nextInt(0, n.intValue());
+                }
+            }
+        }else{
+            return RandomUtils.nextInt();
         }
     }
 

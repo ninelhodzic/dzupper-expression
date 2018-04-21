@@ -316,6 +316,38 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue((Boolean)evaluaged);
     }
 
+    @Test
+    public void evaluateRandomTest() throws EvaluatorException{
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "RANDOM_NUM()";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Integer);
+        System.out.println(evaluaged);
+    }
+
+    @Test
+    public void evaluateRandomMaxTest() throws EvaluatorException{
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "RANDOM_NUM(50)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Integer);
+        System.out.println(evaluaged);
+    }
+
+    @Test
+    public void evaluateRandomMinMaxTest() throws EvaluatorException{
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "RANDOM_NUM(1, 10)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+        System.out.println(evaluaged);
+    }
 
     @Test
     public void evaluateSimpleDateConversionBasedOnFormatTest(){
