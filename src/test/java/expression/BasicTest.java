@@ -142,6 +142,33 @@ public class BasicTest extends TestBase {
     }
 
     @Test
+    public void testModulo(){
+        String expression = "10 % 3";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==1d);
+    }
+
+    @Test
+    public void testMultiplyObjectsModulo(){
+        String expression = "($child.value$ * 10) % 4";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==2d);
+    }
+
+    @Test
+    public void testDivideNumberStringModulo(){
+        String expression = "('10' / '5') % '2'";
+        Object r= evaluateOnMap(expression);
+        Assert.assertNotNull(r);
+        Assert.assertTrue(r instanceof Double);
+        Assert.assertTrue(((Double)r)==0d);
+    }
+
+    @Test
     public void testMultiplyObjects(){
         String expression = "$child.value$ * 10";
         Object r= evaluateOnMap(expression);

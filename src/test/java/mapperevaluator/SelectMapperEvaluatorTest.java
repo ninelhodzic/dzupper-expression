@@ -522,6 +522,16 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(o.equals("ovo je moj text child"));
     }
 
+    @Test
+    public void templateSimpleTestNumberModulo() throws EvaluatorException{
+        Map<String, Object> data = getData();
+        String strToCompile = "T('#10#') % T('#3#')";
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluator.evaluate(strToCompile, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o.equals(1d));
+    }
+
     @Test //- MULTILINE TEST NOT ALLOWED
     public void templateHtmlMultiLineTest() throws EvaluatorException{
         Map<String, Object> data = getData();

@@ -9,6 +9,7 @@ import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
 import org.datazup.utils.DateTimeUtils;
+import org.datazup.utils.Tuple;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Operator MINUS = new Operator("-", 2, Operator.Associativity.LEFT, 9);
     public final static Operator MULTIPLY = new Operator("*", 2, Operator.Associativity.LEFT, 10);
     public final static Operator DIVIDE = new Operator("/", 2, Operator.Associativity.LEFT, 11);
+
+    public final static Operator MODULO = new Operator("%", 2, Operator.Associativity.LEFT, 12);
 
     public final static Function IS_NULL = new Function("IS_NULL", 1);
     public final static Function SET_NULL = new Function("SET_NULL", 1);
@@ -101,6 +104,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(MINUS);
         PARAMETERS.add(MULTIPLY);
         PARAMETERS.add(DIVIDE);
+
+        PARAMETERS.add(MODULO);
+
 
         PARAMETERS.addExpressionBracket(BracketPair.PARENTHESES);
         PARAMETERS.addFunctionBracket(BracketPair.PARENTHESES);
@@ -791,7 +797,16 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     @Override
     protected Object evaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
-        if (operator == DIVIDE) {
+        if (operator==MODULO){
+            Tuple<Number, Number> numberTuple = getNumberTuple(operands);
+
+            // TODO - write test ases for Modulo
+            if (null != numberTuple.getKey() && null != numberTuple.getValue()) {
+                return numberTuple.getKey().doubleValue() % numberTuple.getValue().doubleValue();
+            }
+            return 0;
+
+        }else if (operator == DIVIDE) {
             Object left = operands.next();
             Object right = operands.next();
 
@@ -963,6 +978,27 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return nextOperatorEvaluate(operator, operands, evaluationContext);
         }
         return false;
+    }
+
+    private Tuple<Number, Number> getNumberTuple(Iterator<Object> operands) {
+        Object left = operands.next();
+        Object right = operands.next();
+
+        Number lN = null;
+        Number rN = null;
+        if (left instanceof Number) {
+            lN = (Number) left;
+        } else if (left instanceof String) {
+            lN = resolveNumber(left);
+        }
+
+        if (right instanceof Number) {
+            rN = (Number) right;
+        } else if (right instanceof String) {
+            rN = resolveNumber(right);
+        }
+
+        return new Tuple<>(lN, rN);
     }
 
     protected Object nextOperatorEvaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
