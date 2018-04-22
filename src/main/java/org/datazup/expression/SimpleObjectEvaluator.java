@@ -1,10 +1,9 @@
 package org.datazup.expression;
 
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
-import org.apache.commons.lang3.StringUtils;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
@@ -17,6 +16,7 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.ValidationException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Instant;
@@ -91,6 +91,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function RANDOM_WORD = new Function("RANDOM_WORD", 0, 1);
     public final static Function RANDOM_CHAR = new Function("RANDOM_CHAR", 0, 1);
 
+    public final static Function SPLITTER = new Function("SPLITTER", 1, 4);
 
 
     // public final static Function DATE = new Function("DATE", 2);
@@ -143,6 +144,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         PARAMETERS.add(STRING_FORMAT);
         PARAMETERS.add(REPLACE_ALL);
+        PARAMETERS.add(SPLITTER);
+
 
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
@@ -300,19 +303,80 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return extract(function, operands, argumentList, evaluationContext);
         } else if (function == REPLACE_ALL) {
             return replaceAll(function, operands, argumentList, evaluationContext);
+        } else if (function == SPLITTER) {
+            return splitter(function, operands, argumentList, evaluationContext);
         } else if (function == CONTAINS) {
             return evaluateContainsFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }else if (function == RANDOM_NUM) {
+        } else if (function == RANDOM_NUM) {
             return evaluateRandomNumFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }else if (function == RANDOM_SENTENCE) {
+        } else if (function == RANDOM_SENTENCE) {
             return evaluateRandomSentenceFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }else if (function == RANDOM_WORD) {
+        } else if (function == RANDOM_WORD) {
             return evaluateRandomWordFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }else if (function == RANDOM_CHAR) {
+        } else if (function == RANDOM_CHAR) {
             return evaluateRandomCharFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }else {
+        } else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private Object splitter(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        if (operands.hasNext()) {
+            Object stringToSplitObj = operands.next();
+            Token token1 = argumentList.pop();
+
+            if (null == stringToSplitObj || !(stringToSplitObj instanceof String)) {
+                while (operands.hasNext())
+                    argumentList.pop(); // just to clean in case there is more arguments
+
+                return stringToSplitObj;
+            }
+
+            String stringToSplit = (String) stringToSplitObj;
+            if (operands.hasNext()) {
+                Object splitterObj = operands.next();
+                token1 = argumentList.pop();
+                String splitter = (String) splitterObj;
+
+                String language = "en";
+                if (operands.hasNext()) {
+                    Object splitterLang = operands.next();
+                    token1 = argumentList.pop();
+                    language = (String) splitterLang;
+                }
+
+                Boolean removeEmpty = false;
+                if (operands.hasNext()){
+                    Object removeEmptyObj = operands.next();
+                    token1 = argumentList.pop();
+                    removeEmpty = TypeUtils.resolveBoolean(removeEmptyObj);
+                }
+
+                switch (language) {
+                    case "en":
+                        String[] splitted = stringToSplit.split(splitter);
+                        List<String> l = new ArrayList<>();
+                        for (int i=0;i<splitted.length;i++){
+                            if (removeEmpty) {
+                                if (!StringUtils.isEmpty(splitted[i])) {
+                                    l.add(splitted[i]);
+                                }
+                            }else{
+                                l.add(splitted[i]);
+                            }
+                        }
+
+                        return l;
+                    default:
+                        throw new ExpressionValidationException("There is no splitter for language: " + language + " implemented");
+                }
+
+            } else {
+                return stringToSplit;
+            }
+
+        }
+        return null;
     }
 
     private Object evaluateRandomCharFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
@@ -324,18 +388,18 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             if (null == containerOrString || !(containerOrString instanceof String)) {
                 return RandomStringUtils.random(1);
             } else {
-                String s = (String)containerOrString;
-                if (s.contains(" ")){
+                String s = (String) containerOrString;
+                if (s.contains(" ")) {
                     s = s.replaceAll(" ", "").trim();
                 }
                 int random = RandomUtils.nextInt(0, s.length());
-                if (s.length()>random) {
+                if (s.length() > random) {
                     return String.valueOf(s.charAt(random));
-                }else{
+                } else {
                     return containerOrString;
                 }
             }
-        }else{
+        } else {
             return RandomStringUtils.random(1);
         }
     }
@@ -347,23 +411,23 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
             if (null == containerOrString || !(containerOrString instanceof String)) {
                 return RandomStringUtils.random(10);
-            }else{
-                String words = (String)containerOrString;
-                if (words.contains(" ")){
+            } else {
+                String words = (String) containerOrString;
+                if (words.contains(" ")) {
                     String[] s = words.split(" ");
                     List<String> clean = new ArrayList();
-                    for (int i =0;i<s.length;i++){
-                        if (!StringUtils.isEmpty(s[i])){
+                    for (int i = 0; i < s.length; i++) {
+                        if (!StringUtils.isEmpty(s[i])) {
                             clean.add(s[i].trim());
                         }
                     }
                     int random = RandomUtils.nextInt(0, clean.size());
                     return clean.get(random);
-                }else{
+                } else {
                     return words;
                 }
             }
-        }else{
+        } else {
             return RandomStringUtils.random(5);
         }
     }
@@ -375,19 +439,19 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
             if (null == containerOrString || !(containerOrString instanceof String)) {
                 return RandomStringUtils.random(10);
-            }else{
-                String sentences = (String)containerOrString;
-                if (sentences.contains(".")){
-                   String[] s = sentences.split("\\.");
-                   List clean = new ArrayList();
-                   for (int i=0;i<s.length;i++){
-                       if (!StringUtils.isEmpty(s[i])){
-                           clean.add(s[i].trim());
-                       }
-                   }
-                   int random = RandomUtils.nextInt(0, clean.size());
-                   return clean.get(random);
-                }else{
+            } else {
+                String sentences = (String) containerOrString;
+                if (sentences.contains(".")) {
+                    String[] s = sentences.split("\\.");
+                    List clean = new ArrayList();
+                    for (int i = 0; i < s.length; i++) {
+                        if (!StringUtils.isEmpty(s[i])) {
+                            clean.add(s[i].trim());
+                        }
+                    }
+                    int random = RandomUtils.nextInt(0, clean.size());
+                    return clean.get(random);
+                } else {
                     return sentences;
                 }
             }
@@ -424,7 +488,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                     return RandomUtils.nextInt(0, n.intValue());
                 }
             }
-        }else{
+        } else {
             return RandomUtils.nextInt();
         }
     }
@@ -782,7 +846,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             for (int i = 0; i < groupCount + 1; i++) {
                 String gr = matcher.group(i);
                 list.add(gr);
-               // System.out.println(gr);
+                // System.out.println(gr);
             }
         }
 
@@ -933,7 +997,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     @Override
     protected Object evaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
-        if (operator==MODULO){
+        if (operator == MODULO) {
             Tuple<Number, Number> numberTuple = getNumberTuple(operands);
 
             // TODO - write test ases for Modulo
@@ -942,7 +1006,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             }
             return 0;
 
-        }else if (operator == DIVIDE) {
+        } else if (operator == DIVIDE) {
             Object left = operands.next();
             Object right = operands.next();
 

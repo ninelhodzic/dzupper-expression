@@ -383,6 +383,17 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void evaluateSplitterDocTest() throws EvaluatorException{
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "SPLITTER('This is the word. Another Sentence. Third to check... more to solve.. this is interesting','\\.', 'en', 'true')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof List);
+        System.out.println(evaluaged);
+    }
+
+    @Test
     public void evaluateSimpleDateConversionBasedOnFormatTest(){
         DateTime dt = DateTime.now(DateTimeZone.UTC);
         String format = "YYYY";
