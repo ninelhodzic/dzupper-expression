@@ -350,6 +350,39 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void evaluateRandomChartTest() throws EvaluatorException{
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "RANDOM_CHAR(' ')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        System.out.println(evaluaged);
+    }
+
+    @Test
+    public void evaluateRandomWordTest() throws EvaluatorException{
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "RANDOM_WORD('This is the word')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        System.out.println(evaluaged);
+    }
+
+    @Test
+    public void evaluateRandomSentenceTest() throws EvaluatorException{
+
+        // Note: Insensitive doesn't workf ro lists or maps
+        String expression = "RANDOM_SENTENCE('This is the word. Another Sentence. Third to check... more to solve.. this is interesting')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        System.out.println(evaluaged);
+    }
+
+    @Test
     public void evaluateSimpleDateConversionBasedOnFormatTest(){
         DateTime dt = DateTime.now(DateTimeZone.UTC);
         String format = "YYYY";

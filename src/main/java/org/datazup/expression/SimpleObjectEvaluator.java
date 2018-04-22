@@ -1,6 +1,7 @@
 package org.datazup.expression;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -86,6 +87,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function CONTAINS = new Function("CONTAINS", 2, Integer.MAX_VALUE);
 
     public final static Function RANDOM_NUM = new Function("RANDOM_NUM", 0, 2);
+    public final static Function RANDOM_SENTENCE = new Function("RANDOM_SENTENCE", 0, 1);
+    public final static Function RANDOM_WORD = new Function("RANDOM_WORD", 0, 1);
+    public final static Function RANDOM_CHAR = new Function("RANDOM_CHAR", 0, 1);
+
 
 
     // public final static Function DATE = new Function("DATE", 2);
@@ -146,7 +151,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         PARAMETERS.add(CONTAINS);
         PARAMETERS.add(RANDOM_NUM);
-
+        PARAMETERS.add(RANDOM_SENTENCE);
+        PARAMETERS.add(RANDOM_WORD);
+        PARAMETERS.add(RANDOM_CHAR);
     }
 
     private static SimpleObjectEvaluator INSTANCE;
@@ -297,15 +304,99 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return evaluateContainsFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
         }else if (function == RANDOM_NUM) {
             return evaluateRandomNumFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
-        } else {
+        }else if (function == RANDOM_SENTENCE) {
+            return evaluateRandomSentenceFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == RANDOM_WORD) {
+            return evaluateRandomWordFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == RANDOM_CHAR) {
+            return evaluateRandomCharFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
     }
 
+    private Object evaluateRandomCharFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+
+        if (operands.hasNext()) {
+            Object containerOrString = operands.next();
+            Token token1 = argumentList.pop();
+
+            if (null == containerOrString || !(containerOrString instanceof String)) {
+                return RandomStringUtils.random(1);
+            } else {
+                String s = (String)containerOrString;
+                if (s.contains(" ")){
+                    s = s.replaceAll(" ", "").trim();
+                }
+                int random = RandomUtils.nextInt(0, s.length());
+                if (s.length()>random) {
+                    return String.valueOf(s.charAt(random));
+                }else{
+                    return containerOrString;
+                }
+            }
+        }else{
+            return RandomStringUtils.random(1);
+        }
+    }
+
+    private Object evaluateRandomWordFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        if (operands.hasNext()) {
+            Object containerOrString = operands.next();
+            Token token1 = argumentList.pop();
+
+            if (null == containerOrString || !(containerOrString instanceof String)) {
+                return RandomStringUtils.random(10);
+            }else{
+                String words = (String)containerOrString;
+                if (words.contains(" ")){
+                    String[] s = words.split(" ");
+                    List<String> clean = new ArrayList();
+                    for (int i =0;i<s.length;i++){
+                        if (!StringUtils.isEmpty(s[i])){
+                            clean.add(s[i].trim());
+                        }
+                    }
+                    int random = RandomUtils.nextInt(0, clean.size());
+                    return clean.get(random);
+                }else{
+                    return words;
+                }
+            }
+        }else{
+            return RandomStringUtils.random(5);
+        }
+    }
+
+    private Object evaluateRandomSentenceFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        if (operands.hasNext()) {
+            Object containerOrString = operands.next();
+            Token token1 = argumentList.pop();
+
+            if (null == containerOrString || !(containerOrString instanceof String)) {
+                return RandomStringUtils.random(10);
+            }else{
+                String sentences = (String)containerOrString;
+                if (sentences.contains(".")){
+                   String[] s = sentences.split("\\.");
+                   List clean = new ArrayList();
+                   for (int i=0;i<s.length;i++){
+                       if (!StringUtils.isEmpty(s[i])){
+                           clean.add(s[i].trim());
+                       }
+                   }
+                   int random = RandomUtils.nextInt(0, clean.size());
+                   return clean.get(random);
+                }else{
+                    return sentences;
+                }
+            }
+        }
+        return RandomStringUtils.random(10);
+    }
+
     private Object evaluateRandomNumFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         if (operands.hasNext()) {
-
-
             Object containerOrString = operands.next();
             Token token1 = argumentList.pop();
 
