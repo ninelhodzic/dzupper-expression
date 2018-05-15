@@ -101,8 +101,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function RANDOM_CHAR = new Function("RANDOM_CHAR", 0, 1);
 
     public final static Function SPLITTER = new Function("SPLITTER", 1, 4);
-
-
+    public final static Function SUBSTRING = new Function("SUBSTRING", 2, 3);
     // public final static Function DATE = new Function("DATE", 2);
 
     protected static final Parameters PARAMETERS;
@@ -158,7 +157,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(STRING_FORMAT);
         PARAMETERS.add(REPLACE_ALL);
         PARAMETERS.add(SPLITTER);
-
+        PARAMETERS.add(SUBSTRING);
 
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
@@ -334,6 +333,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return evaluateRandomWordFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == RANDOM_CHAR) {
             return evaluateRandomCharFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if(function == SUBSTRING){
+            return substring(function, operands, argumentList, evaluationContext);
         } else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
@@ -461,6 +462,36 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         }
         return null;
+    }
+
+    private Object substring(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext){
+        if(operands.hasNext()){
+            String result = "";
+            Object input = operands.next();
+            Token token1 = argumentList.pop();
+            if(input == null || !(input instanceof  String)) {
+                while (operands.hasNext())
+                    argumentList.pop();
+                return input;
+            }
+            String inputText = input.toString();
+            if(operands.hasNext())
+            {
+                int startIndex = (int)Double.parseDouble(operands.next().toString());
+                token1 = argumentList.pop();
+                if(operands.hasNext())
+                {
+                    int endIndex = (int)Double.parseDouble(operands.next().toString());
+                    token1 = argumentList.pop();
+                    result = inputText.substring(startIndex, endIndex);
+                }else{
+                    result = inputText.substring(startIndex);
+                }
+            }
+            return result;
+        }else{
+            return null;
+        }
     }
 
     private Object evaluateRandomCharFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
@@ -1316,5 +1347,6 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
         return tokenName;
     }
+
 
 }

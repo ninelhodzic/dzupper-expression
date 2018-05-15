@@ -412,9 +412,27 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Number);
 
-        Number val = (Number)evaluaged;
-        Assert.assertTrue(val.doubleValue()==10d);
+        Number val = (Number) evaluaged;
+        Assert.assertTrue(val.doubleValue() == 10d);
 
+    }
+    public void evaluateSubstringTest1() throws EvaluatorException{
+        String expression = "SUBSTRING('Hello world!', 2, 5)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        Assert.assertTrue(evaluaged.equals("llo"));
+        System.out.println(evaluaged);
+    }
+
+    @Test
+    public void evaluateSubstringTest2() throws EvaluatorException{
+        String expression = "SUBSTRING('Hello world!', 2)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof String);
+        Assert.assertTrue(evaluaged.equals("llo world!"));
+        System.out.println(evaluaged);
     }
 
     @Test
