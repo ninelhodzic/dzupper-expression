@@ -394,6 +394,30 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void testAbsValue() throws EvaluatorException {
+        String expression = "ABS($child.value3$)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Integer);
+
+        Integer val = (Integer)evaluaged;
+        Assert.assertTrue(val==5);
+
+    }
+
+    @Test
+    public void testAbsStringValue() throws EvaluatorException {
+        String expression = "ABS('-10')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+
+        Number val = (Number)evaluaged;
+        Assert.assertTrue(val.doubleValue()==10d);
+
+    }
+
+    @Test
     public void evaluateSimpleDateConversionBasedOnFormatTest(){
         DateTime dt = DateTime.now(DateTimeZone.UTC);
         String format = "YYYY";
@@ -473,6 +497,18 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(DateTimeUtils.getHour(dt)==14);
         Assert.assertTrue(DateTimeUtils.getMinute(dt)==42);
         Assert.assertTrue(DateTimeUtils.getSecond(dt)==04);
+
+    }
+
+    @Test
+    public void testDiffSeconds() throws EvaluatorException {
+        String expression = "ABS(DATE_DIFF(TO_DATE('2018-02-26 14:42:24'), TO_DATE('2018-02-26 14:42:14'), 'SECONDS'))";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Long);
+
+        Long val = (Long)evaluaged;
+        Assert.assertTrue(val==10);
 
     }
 

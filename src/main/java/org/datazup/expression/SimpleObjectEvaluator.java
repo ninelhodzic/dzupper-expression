@@ -3,6 +3,7 @@ package org.datazup.expression;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang3.*;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.math3.util.MathUtils;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractResolverHelper;
@@ -19,8 +20,11 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.ValidationException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,11 +75,16 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function MONTH = new Function("MONTH", 1);
     public final static Function YEAR = new Function("YEAR", 1);
 
+    public final static Function DATE_DIFF = new Function("DATE_DIFF", 3);//firstDate, secondDate, TimeUnit
+
     public final static Function TO_DATE = new Function("TO_DATE", 1, 2);
     public final static Function TO_INT = new Function("TO_INT", 1);
     public final static Function TO_LONG = new Function("TO_LONG", 1);
     public final static Function TO_DOUBLE = new Function("TO_DOUBLE", 1);
     public final static Function TO_STRING = new Function("TO_STRING", 1);
+
+    public final static Function ABS = new Function("ABS", 1);
+
 
     public final static Function REGEX_MATCH = new Function("REGEX_MATCH", 2);
     public final static Function REGEX_EXTRACT = new Function("REGEX_EXTRACT", 2, 3);
@@ -136,11 +145,15 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(MONTH);
         PARAMETERS.add(YEAR);
 
+        PARAMETERS.add(DATE_DIFF);
+
         PARAMETERS.add(TO_DATE);
         PARAMETERS.add(TO_INT);
         PARAMETERS.add(TO_LONG);
         PARAMETERS.add(TO_DOUBLE);
         PARAMETERS.add(TO_STRING);
+
+        PARAMETERS.add(ABS);
 
         PARAMETERS.add(STRING_FORMAT);
         PARAMETERS.add(REPLACE_ALL);
@@ -201,7 +214,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         if (function == IF) {
             return ifTrueFalse(function, operands, argumentList, evaluationContext);
-        } else if (function == STRING_FORMAT) {
+        }else if (function == DATE_DIFF) {
+            return timeDiff(function, operands, argumentList, evaluationContext);
+        }
+        else if (function == ABS) {
+            return abs(function, operands, argumentList, evaluationContext);
+        }
+        else if (function == STRING_FORMAT) {
             return stringFormat(function, operands, argumentList, evaluationContext);
         } else if (function == TO_DATE) {
             return toDate(function, operands, argumentList, evaluationContext);
@@ -318,6 +337,71 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private Object abs(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object firstObj = operands.next();
+        argumentList.pop();
+
+        if (operands.hasNext()){
+            throw new ExpressionValidationException("We expect three arguments for ABS expression");
+        }
+
+
+        if (firstObj instanceof String){
+            String v = (String) firstObj;
+            Number n = NumberUtils.createNumber(v);
+            firstObj = n;
+        }
+
+        if (firstObj instanceof Integer){
+            return Math.abs((Integer)firstObj);
+        }else if (firstObj instanceof Long){
+            return Math.abs((Long)firstObj);
+        }else if (firstObj instanceof Float){
+            return Math.abs((Float)firstObj);
+        }else if (firstObj instanceof Double){
+            return Math.abs((Double)firstObj);
+        }else if (firstObj instanceof Number){
+             Number n = (Number)firstObj;
+             Double d = n.doubleValue();
+             if (d<0){
+                 d = -d;
+             }
+             return d;
+        }
+        return null;
+    }
+
+    private Object timeDiff(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object firstDTObj = operands.next();
+        argumentList.pop();
+        Object secondDTObj = operands.next();
+        argumentList.pop();
+        Object timeUnitObj = operands.next();
+        argumentList.pop();
+
+        if (operands.hasNext()){
+            throw new ExpressionValidationException("We expect three arguments for TimeDiff expression");
+        }
+
+        Instant firstDt =   DateTimeUtils.resolve(firstDTObj);
+        Instant secondDt =   DateTimeUtils.resolve(secondDTObj);
+        String timeUnitString = null;
+        if (timeUnitObj instanceof String){
+            timeUnitString = (String)timeUnitObj;
+        }else{
+            timeUnitString = timeUnitObj.toString();
+        }
+        if (StringUtils.isEmpty(timeUnitString)){
+            throw new ExpressionValidationException("We cannot recognize TimeUnit value: "+timeUnitString);
+        }
+        ChronoUnit timeUnit = ChronoUnit.valueOf(timeUnitString.toUpperCase());
+
+        long timeDiff = timeUnit.between(firstDt, secondDt);
+
+
+        return timeDiff;
     }
 
     private Object splitter(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
