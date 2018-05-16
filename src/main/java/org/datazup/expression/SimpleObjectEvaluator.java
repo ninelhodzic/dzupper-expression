@@ -49,7 +49,11 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Operator NOT_EQUAL = new Operator("!=", 2, Operator.Associativity.LEFT, 4);
     public final static Operator EQUAL = new Operator("==", 2, Operator.Associativity.LEFT, 5);
     public final static Operator GREATER_THEN = new Operator(">", 2, Operator.Associativity.LEFT, 6);
+    public final static Operator GREATER_THEN_OR_EQUAL = new Operator(">=", 2, Operator.Associativity.LEFT, 6);
+
     public final static Operator LOWER_THEN = new Operator("<", 2, Operator.Associativity.LEFT, 7);
+    public final static Operator LOWER_THEN_OR_EQUAL = new Operator("<=", 2, Operator.Associativity.LEFT, 7);
+
 
     public final static Operator PLUS = new Operator("+", 2, Operator.Associativity.LEFT, 8);
     public final static Operator MINUS = new Operator("-", 2, Operator.Associativity.LEFT, 9);
@@ -117,6 +121,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(NOT_EQUAL);
         PARAMETERS.add(EQUAL);
         PARAMETERS.add(GREATER_THEN);
+        PARAMETERS.add(GREATER_THEN_OR_EQUAL);
+        PARAMETERS.add(LOWER_THEN_OR_EQUAL);
         PARAMETERS.add(LOWER_THEN);
 
         PARAMETERS.add(PLUS);
@@ -1205,7 +1211,35 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                     return left.equals(right);
                 }
             }
-        } else if (operator == GREATER_THEN) {
+        } else if (operator == LOWER_THEN_OR_EQUAL){
+
+            Object left = operands.next();
+            Object right = operands.next();
+
+            if (null == left || null == right) {
+                return false;
+            }
+
+            Number l = (Number) left;
+            Number r = (Number) right;
+            // if (null!=l && null!=r)
+            return l.doubleValue() <= r.doubleValue();
+
+        }
+        else if (operator == GREATER_THEN_OR_EQUAL){
+
+            Object left = operands.next();
+            Object right = operands.next();
+
+            if (null == left || null == right) {
+                return false;
+            }
+
+            Number l = (Number) left;
+            Number r = (Number) right;
+            return l.doubleValue() >= r.doubleValue();
+        }
+        else if (operator == GREATER_THEN) {
             Object left = operands.next();
             Object right = operands.next();
 

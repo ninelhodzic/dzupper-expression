@@ -520,7 +520,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
     @Test
     public void testDiffSeconds() throws EvaluatorException {
-        String expression = "ABS(DATE_DIFF(TO_DATE('2018-02-26 14:42:24'), TO_DATE('2018-02-26 14:42:14'), 'SECONDS'))";
+        String expression = "DATE_DIFF(TO_DATE('2018-02-26 14:42:04'), TO_DATE('2018-02-26 14:42:14'), 'SECONDS')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Long);

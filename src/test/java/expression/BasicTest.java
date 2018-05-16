@@ -71,6 +71,24 @@ public class BasicTest extends TestBase {
     }
 
     @Test
+    public void testLowerOrEqualTRUE(){
+        String expression = "1<=1";
+        Object res = evaluateOnMap(expression);
+        Assert.assertTrue (res instanceof Boolean);
+        Boolean bres = (Boolean)res;
+        Assert.assertTrue(bres);
+    }
+
+    @Test
+    public void testGreaterOrEqualTRUE(){
+        String expression = "1>=1";
+        Object res = evaluateOnMap(expression);
+        Assert.assertTrue (res instanceof Boolean);
+        Boolean bres = (Boolean)res;
+        Assert.assertTrue(bres);
+    }
+
+    @Test
     public void testComplexBooleanTrue(){
         String expression = "1==1 && (10>(5+2) || (23+42)<21)";
         Object res = evaluateOnMap(expression);
