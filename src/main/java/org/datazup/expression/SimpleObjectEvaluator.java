@@ -414,11 +414,14 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     private Object splitter(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
         if (operands.hasNext()) {
             Object stringToSplitObj = operands.next();
-            Token token1 = argumentList.pop();
+            argumentList.pop();
 
             if (null == stringToSplitObj || !(stringToSplitObj instanceof String)) {
-                while (operands.hasNext())
-                    argumentList.pop(); // just to clean in case there is more arguments
+                while (operands.hasNext()) {
+                    operands.next();
+                    if (argumentList.size()>0)
+                        argumentList.pop(); // just to clean in case there is more arguments
+                }
 
                 return stringToSplitObj;
             }
@@ -426,20 +429,20 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             String stringToSplit = (String) stringToSplitObj;
             if (operands.hasNext()) {
                 Object splitterObj = operands.next();
-                token1 = argumentList.pop();
+                argumentList.pop();
                 String splitter = (String) splitterObj;
 
                 String language = "en";
                 if (operands.hasNext()) {
                     Object splitterLang = operands.next();
-                    token1 = argumentList.pop();
+                    argumentList.pop();
                     language = (String) splitterLang;
                 }
 
                 Boolean removeEmpty = false;
                 if (operands.hasNext()){
                     Object removeEmptyObj = operands.next();
-                    token1 = argumentList.pop();
+                    argumentList.pop();
                     removeEmpty = TypeUtils.resolveBoolean(removeEmptyObj);
                 }
 
@@ -1177,7 +1180,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 return !((Boolean) next);
             }
         } else if (operator == NOT_EQUAL) {
-            Object left = operands.next();
+            /*Object left = operands.next();
             Object right = operands.next();
             if (null == left && null == right)
                 return false;
@@ -1188,29 +1191,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 return ((Number) left).doubleValue() != ((Number) right).doubleValue();
             } else {
                 return !left.equals(right);
-            }
+            }*/
+            return !getEqual(operator, operands,evaluationContext);
         } else if (operator == EQUAL) {
-            Object left = operands.next();
-            Object right = operands.next();
-            if (null == left || right == null) {
-                return false; // left.equals(right);
-            }
-            if (null == left && null == right) {
-                return true;
-            }
-            if (left instanceof Number && right instanceof Number) {
-                return ((Number) left).doubleValue() == ((Number) right).doubleValue();
-            } else {
-                if (left instanceof Boolean || right instanceof Boolean) {
-                    Boolean l = Boolean.parseBoolean(left.toString());
-                    Boolean r = Boolean.parseBoolean(right.toString());
-                    return l.equals(r);
-                } else if (left instanceof String || right instanceof String) {
-                    return left.toString().equals(right.toString());
-                } else {
-                    return left.equals(right);
-                }
-            }
+            return getEqual(operator, operands,evaluationContext);
         } else if (operator == LOWER_THEN_OR_EQUAL){
 
             Object left = operands.next();
@@ -1327,6 +1311,30 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return nextOperatorEvaluate(operator, operands, evaluationContext);
         }
         return false;
+    }
+
+    private Boolean getEqual(Operator operator, Iterator<Object> operands, Object evaluationContext) {
+        Object left = operands.next();
+        Object right = operands.next();
+        if (null == left || right == null) {
+            return false; // left.equals(right);
+        }
+        if (null == left && null == right) {
+            return true;
+        }
+        if (left instanceof Number && right instanceof Number) {
+            return ((Number) left).doubleValue() == ((Number) right).doubleValue();
+        } else {
+            if (left instanceof Boolean || right instanceof Boolean) {
+                Boolean l = Boolean.parseBoolean(left.toString());
+                Boolean r = Boolean.parseBoolean(right.toString());
+                return l.equals(r);
+            } else if (left instanceof String || right instanceof String) {
+                return left.toString().equalsIgnoreCase(right.toString());
+            } else {
+                return left.equals(right);
+            }
+        }
     }
 
     private Tuple<Number, Number> getNumberTuple(Iterator<Object> operands) {
