@@ -27,7 +27,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function SELECT = new Function("SELECT", 1, Integer.MAX_VALUE);
     public final static Function LIST = new Function("LIST", 1, Integer.MAX_VALUE);
     public final static Function SORTED_SET = new Function("SORTED_SET", 1, Integer.MAX_VALUE);
-    public final static Function LIST_PARTITION = new Function("LIST_PARTITION", 1, Integer.MAX_VALUE);
+    public final static Function LIST_PARTITION = new Function("LIST_PARTITION", 1, 2);
 
 
     public final static Function MAP = new Function("MAP", 0, Integer.MAX_VALUE);
@@ -46,6 +46,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     public final static Function GET = new Function("GET", 2, 3);
     public final static Function ADD = new Function("ADD", 2, Integer.MAX_VALUE);
+    public final static Function PUT = new Function("PUT", 2, Integer.MAX_VALUE);
 
     private static SelectMapperEvaluator INSTANCE;
 
@@ -95,8 +96,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         SimpleObjectEvaluator.PARAMETERS.add(GET);
         SimpleObjectEvaluator.PARAMETERS.add(ADD);
-
-
+        SimpleObjectEvaluator.PARAMETERS.add(PUT);
     }
 
     @Override
@@ -107,7 +107,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         /*if (function == FOREACH) {
             return foreach(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else*/
-            if (function == GET) {
+        if (function==PUT){
+            return getPut(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == GET) {
             return getGet(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == ADD) {
             return getAdd(function, operands, argumentList, (PathExtractor) evaluationContext);
@@ -148,6 +150,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
 
     }
+
+
 
     private Object getListPartition(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
@@ -228,6 +232,31 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         return null;
     }*/
 
+    private Object getPut(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object value1 = operands.next();
+        Token token1 = argumentList.pop();
+
+        if (null == value1) {
+            throw new ExpressionValidationException("Key as first parameter cannot be null or empty");
+        }
+
+        Map map = mapListResolver.resolveToMap(value1);
+        if (null!=map){
+            Object key = operands.next();
+            argumentList.pop();
+
+            if (null == key) {
+                throw new ExpressionValidationException("Key as second parameter cannot be null or empty");
+            }
+
+            Object value = operands.next();
+            argumentList.pop();
+
+            map.put(key, value);
+            return map;
+        }
+        return value1;
+    }
     private Object getAdd(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
         Object value1 = operands.next();
