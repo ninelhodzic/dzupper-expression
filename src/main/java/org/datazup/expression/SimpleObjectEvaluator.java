@@ -272,7 +272,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Instant dt = DateTimeUtils.resolve(op1);
             return DateTimeUtils.getYear(dt);
         } else if (function == NOW) {
-            return System.currentTimeMillis();
+            return Instant.now();
         } else if (function == SET_NULL) {
             Object op1 = operands.next();
             argumentList.pop();
