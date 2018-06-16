@@ -1277,17 +1277,16 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Object left = operands.next();
             Object right = operands.next();
             if (left instanceof String || right instanceof String) {
-                String l = null;
-                String r = null;
+                String l,r;
                 if (left instanceof String) {
                     l = (String) left;
                 } else {
-                    l = left.toString();
+                    l = (null==left?"":left.toString());
                 }
                 if (right instanceof String) {
                     r = (String) right;
                 } else {
-                    r = right.toString();
+                    r = (null==right?"":right.toString());
                 }
                 return l + r;
             } else {
