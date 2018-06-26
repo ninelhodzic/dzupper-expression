@@ -1,9 +1,10 @@
 package org.datazup.expression;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import org.apache.commons.lang3.*;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.commons.math3.util.MathUtils;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractResolverHelper;
@@ -17,14 +18,11 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.ValidationException;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -272,7 +270,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Instant dt = DateTimeUtils.resolve(op1);
             return DateTimeUtils.getYear(dt);
         } else if (function == NOW) {
-            return Instant.now();
+            return System.currentTimeMillis(); //Instant.now();
         } else if (function == SET_NULL) {
             Object op1 = operands.next();
             argumentList.pop();
