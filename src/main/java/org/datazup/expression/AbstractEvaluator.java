@@ -156,7 +156,7 @@ public abstract class AbstractEvaluator<T> {
             }
             if (value instanceof String) {
                 String strVal = (String) value;
-                if (StringUtils.isNotEmpty(strVal) && NumberUtils.isNumber(strVal)) {
+                if (StringUtils.isNotEmpty(strVal) && NumberUtils.isCreatable(strVal)) {
                     value = (T) NumberUtils.createNumber(strVal);
                 }
             }
@@ -451,7 +451,7 @@ public abstract class AbstractEvaluator<T> {
                 return (brackets.getOpen().equals(token) ? Token.buildOpenToken(brackets) : Token.buildCloseToken(brackets));
             else if (token.startsWith("'") && token.endsWith("'")) {
                 return Token.buildLiteralValue(token);
-            } else if (NumberUtils.isNumber(token)) {
+            } else if (NumberUtils.isCreatable(token)) {
                 Number number = NumberUtils.createDouble(token);// NumberUtils.createNumber(token);
                 return Token.buildNumber(number);
             } else {
