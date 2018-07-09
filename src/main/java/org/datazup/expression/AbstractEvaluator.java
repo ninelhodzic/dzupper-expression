@@ -357,7 +357,7 @@ public abstract class AbstractEvaluator<T> {
                 }
 
                 if (!openBracketFound) {
-                    throw new IllegalArgumentException("Parentheses mismatched");
+                    throw new IllegalArgumentException("Parentheses mismatched for expression: "+expression);
                 }
 
                 if (!stack.isEmpty() && ((Token) stack.peek()).isFunction()) {
