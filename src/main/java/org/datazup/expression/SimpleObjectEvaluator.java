@@ -1296,10 +1296,18 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         } else if (operator == MINUS) {
             Object left = operands.next();
+            if (null==left)
+                return null;
+
             Object right = operands.next();
+            if (null==right)
+                return null;
             Number l = (Number) left;
             Number r = (Number) right;
-            // if (null!=l && null!=r)
+
+            if (null==l || null==r)
+                return null;
+
             return l.doubleValue() - r.doubleValue();
         } else {
             return nextOperatorEvaluate(operator, operands, evaluationContext);
