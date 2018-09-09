@@ -28,7 +28,7 @@ import java.util.TimeZone;
 
 public class SimpleObjectEvaluatorTest extends TestBase {
 
-    @Test
+    /*@Test
     public void isEmptyExpressionEvaluatedAsTrueTest() throws EvaluatorException{
         String expression = "";
         Object evaluaged = evaluate(expression);
@@ -36,7 +36,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof Boolean);
         Boolean b = (Boolean)evaluaged;
         Assert.assertTrue(b);
-    }
+    }*/
 
     @Test
     public void evaluateSizeOfListExpressionTest() throws EvaluatorException{
