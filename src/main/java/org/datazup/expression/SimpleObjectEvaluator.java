@@ -21,7 +21,10 @@ import org.slf4j.LoggerFactory;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.WeekFields;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,6 +77,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function HOUR = new Function("HOUR", 1);
     public final static Function DAY = new Function("DAY", 1);
     public final static Function WEEK = new Function("WEEK", 1);
+    public final static Function WEEK_OF_YEAR = new Function("WEEK_OF_YEAR", 1);
+
     public final static Function MONTH = new Function("MONTH", 1);
     public final static Function YEAR = new Function("YEAR", 1);
 
@@ -145,6 +150,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(HOUR);
         PARAMETERS.add(DAY);
         PARAMETERS.add(WEEK);
+        PARAMETERS.add(WEEK_OF_YEAR);
+
         PARAMETERS.add(MONTH);
         PARAMETERS.add(YEAR);
 
@@ -257,9 +264,19 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Object op1 = operands.next();
             argumentList.pop();
             Instant dt = DateTimeUtils.resolve(op1);
-            int res = DateTimeUtils.getDayOfMonth(dt) % 7;
+            LocalDateTime localDate = LocalDateTime.ofInstant(dt, ZoneId.systemDefault());
+            int res = localDate.get(WeekFields.of(Locale.ENGLISH).weekOfMonth()); //DateTimeUtils.getDayOfMonth(dt) % 7;
             return res;
-        } else if (function == MONTH) {
+        }else if (function == WEEK_OF_YEAR) {
+            Object op1 = operands.next();
+            argumentList.pop();
+            Instant dt = DateTimeUtils.resolve(op1);
+            LocalDateTime localDate = LocalDateTime.ofInstant(dt, ZoneId.systemDefault());
+            int res = localDate.get(WeekFields.of(Locale.ENGLISH).weekOfYear()); //DateTimeUtils.getDayOfMonth(dt) % 7;
+
+            return res;
+        }
+        else if (function == MONTH) {
             Object op1 = operands.next();
             argumentList.pop();
             Instant dt = DateTimeUtils.resolve(op1);

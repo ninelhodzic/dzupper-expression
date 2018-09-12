@@ -103,6 +103,9 @@ public class DateTimeUtils {
     }
 
     public static Instant resolve(String datetime, String format) {
+        /*if (null==format || format.isEmpty()){
+            return resolve(datetime);
+        }*/
         DateTimeFormatter fmt = getFormatter(format);
         return resolve(fmt, datetime);
     }
@@ -135,6 +138,7 @@ public class DateTimeUtils {
     }
     public static Instant format(DateTime dt, String format) {
         String dtString = dt.toString(format);
+
         return resolve(dtString, format);
     }
 

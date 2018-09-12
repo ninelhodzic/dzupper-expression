@@ -483,6 +483,25 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void evaluateDateTimeWeekOfMonthTest() throws EvaluatorException{
+        String expression = "WEEK(TO_DATE('20171219121750.783Z'))";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Integer);
+        Assert.assertTrue(evaluaged.equals(4));
+    }
+
+    @Test
+    public void evaluateDateTimeWeekOfYEarTest() throws EvaluatorException{
+        String expression = "WEEK_OF_YEAR(TO_DATE('20171219121750.783Z'))";
+        Object evaluated = evaluate(expression);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof Integer);
+        Assert.assertTrue(evaluated.equals(51));
+        System.out.println("Week of the year: "+evaluated+" for date: 20171219121750.783Z");
+    }
+
+    @Test
     public void evaluateDateTimeToDateFormatExpressionLdapFormatTest() throws EvaluatorException{
         String expression = "TO_DATE('20171219121750.783Z')";
         Object evaluaged = evaluate(expression);
