@@ -136,10 +136,6 @@ public abstract class AbstractEvaluator<T> {
             String operator = token.getLiteral();
             Constant ct = (Constant) this.constants.get(operator);
             T value = ct == null ? null : this.evaluate(ct, evaluationContext);
-            /*if (value == null && evaluationContext != null && evaluationContext instanceof AbstractVariableSet) {
-                AbstractVariableSet abstractVariableSet = (AbstractVariableSet) evaluationContext;
-                value = (T) abstractVariableSet.get(operator);
-            }*/
 
             values.push(value != null ? value : this.toValue(operator, evaluationContext));
         } else if (token.isLookupLiteral()) {
@@ -164,23 +160,17 @@ public abstract class AbstractEvaluator<T> {
             values.push(value);// != null ? value : (T) new NullObject());
         } else if (token.isLiteralValue()) {
             String value = token.getLiteralValue();
-           // boolean shouldTrim = true;
-            /*if (value.contains("'")){
-                shouldTrim = false;
-            }
-            value = value.replaceAll("'", "");*/
+
             if (value.startsWith("'") && value.endsWith("'")){
                 value = value.substring(1, value.length() - 1);
             }
-
-
             values.push((T) value);
         } else if (token.isNumber()) {
             Number value = token.getNumber();
             values.push((T) value);
         } else {
             if (!token.isOperator()) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Token is not valid Operator: "+token.getContent());
             }
 
             Operator operator1 = token.getOperator();
@@ -201,12 +191,12 @@ public abstract class AbstractEvaluator<T> {
         throw new RuntimeException("evaluate(Function, Iterator) is not implemented for " + function.getName());
     }
 
-    private void doFunction(Deque<T> values, Function function, int argCount, Deque<Token> argumentList, Object evaluationContext) {
+    private void doFunction(Deque<T> values, Function function, int argCount, Deque<Token> argumentList, Object evaluationContext) throws EvaluatorException {
         if (function.getMinimumArgumentCount() <= argCount && function.getMaximumArgumentCount() >= argCount) {
             try {
                 values.push(this.evaluate(function, this.getArguments(values, argCount), getArgumentList(argumentList, argCount), evaluationContext));
             } catch (Exception e) {
-                throw e;
+                throw new EvaluatorException("Cannot process value and evaluate Function: "+function.getName());
             }
         } else {
             throw new IllegalArgumentException("Invalid argument count for " + function.getName()
@@ -217,7 +207,7 @@ public abstract class AbstractEvaluator<T> {
 
     private Iterator<T> getArguments(Deque<T> values, int nb) {
         if (values.size() < nb) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("There is values size: "+values.size()+" less then required: "+nb);
         } else {
             LinkedList result = new LinkedList();
 
@@ -264,177 +254,179 @@ public abstract class AbstractEvaluator<T> {
 
     public T evaluate(String expression, Object evaluationContext) throws EvaluatorException {
 
-       // expression = expression.trim();
-        if (StringUtils.isEmpty(expression)) {
-            return null; //(T) Boolean.TRUE;
-        }
-        if (expression.startsWith("'") && expression.endsWith("'")) {
-            int count = StringUtils.countMatches(expression, "'");
-            if (count==2) {
-                try {
-                    expression = expression.substring(1, expression.length() - 1);
-                    T res = (T) expression;
-                    return res;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
+            if (StringUtils.isEmpty(expression)) {
+                return null; //(T) Boolean.TRUE;
+            }
+            if (expression.startsWith("'") && expression.endsWith("'")) {
+                int count = StringUtils.countMatches(expression, "'");
+                if (count == 2) {
+                    try {
+                        expression = expression.substring(1, expression.length() - 1);
+                        T res = (T) expression;
+                        return res;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return null;
+                    }
                 }
             }
-        }
-        if (expression.startsWith("{") && expression.endsWith("}")){
-            try{
-                T value = (T) mapListResolver.resolveToMap(expression);
-                if (null!=value){
-                    return value;
-                }
-            }catch (Exception e){}
-        }
-
-        if (expression.startsWith("[") && expression.endsWith("]")){
-            try{
-                T value = (T) mapListResolver.resolveToList(expression);
-                if (null!=value){
-                    return value;
-                }
-            }catch (Exception e){}
-
-        }
-
-        if (Pattern.matches("[a-zA-Z0-9 _:\\.@]+", expression)) { //match string without special characters as string not expression
-            T res = (T) expression;
-            return res;
-        }
-
-        //expression = expression.replaceAll(System.lineSeparator(), " ");
-
-        Deque<T> values = new LinkedList();
-        ArrayDeque<Token> argumentTokens = new ArrayDeque();
-        ArrayDeque stack = new ArrayDeque();
-        ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
-        Iterator tokens = this.tokenize(expression);
-        //  List<Token> functionArgumentList = null;
-
-        Token token;
-        for (Token previous = null; tokens.hasNext(); previous = token) {
-            String sc = (String) tokens.next();
-            token = this.toToken(previous, sc);
-            if (token.isOpenBracket()) {
-                stack.push(token);
-                if (previous != null && previous.isFunction()) {
-                    if (!this.functionBrackets.containsKey(token.getBrackets().getOpen())) {
-                        throw new IllegalArgumentException("Invalid bracket after function: " + sc);
+            if (expression.startsWith("{") && expression.endsWith("}")) {
+                try {
+                    T value = (T) mapListResolver.resolveToMap(expression);
+                    if (null != value) {
+                        return value;
                     }
-                } else if (!this.expressionBrackets.containsKey(token.getBrackets().getOpen())) {
-                    throw new IllegalArgumentException("Invalid bracket in expression: " + sc);
+                } catch (Exception e) {
                 }
-            } else if (token.isCloseBracket()) {
-                if (previous == null) {
-                    throw new IllegalArgumentException("expression can\'t start with a close bracket");
+            }
+
+            if (expression.startsWith("[") && expression.endsWith("]")) {
+                try {
+                    T value = (T) mapListResolver.resolveToList(expression);
+                    if (null != value) {
+                        return value;
+                    }
+                } catch (Exception e) {
                 }
 
-                if (previous.isFunctionArgumentSeparator()) {
-                    throw new IllegalArgumentException("argument is missing");
-                }
+            }
 
-                BracketPair sc1 = token.getBrackets();
-                boolean openBracketFound = false;
+            if (Pattern.matches("[a-zA-Z0-9 _:\\.@]+", expression)) { //match string without special characters as string not expression
+                T res = (T) expression;
+                return res;
+            }
+
+            //expression = expression.replaceAll(System.lineSeparator(), " ");
+
+            Deque<T> values = new LinkedList();
+            ArrayDeque<Token> argumentTokens = new ArrayDeque();
+            ArrayDeque stack = new ArrayDeque();
+            ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
+            Iterator tokens = this.tokenize(expression);
+            //  List<Token> functionArgumentList = null;
+
+            Token token;
+            for (Token previous = null; tokens.hasNext(); previous = token) {
+                String sc = (String) tokens.next();
+                token = this.toToken(previous, sc);
+                if (token.isOpenBracket()) {
+                    stack.push(token);
+                    if (previous != null && previous.isFunction()) {
+                        if (!this.functionBrackets.containsKey(token.getBrackets().getOpen())) {
+                            throw new IllegalArgumentException("Invalid bracket after function: " + sc);
+                        }
+                    } else if (!this.expressionBrackets.containsKey(token.getBrackets().getOpen())) {
+                        throw new IllegalArgumentException("Invalid bracket in expression: " + sc);
+                    }
+                } else if (token.isCloseBracket()) {
+                    if (previous == null) {
+                        throw new IllegalArgumentException("expression can\'t start with a close bracket");
+                    }
+
+                    if (previous.isFunctionArgumentSeparator()) {
+                        throw new IllegalArgumentException("argument is missing");
+                    }
+
+                    BracketPair sc1 = token.getBrackets();
+                    boolean openBracketFound = false;
 
 
-                while (!stack.isEmpty()) {
-                    Token argCount = (Token) stack.pop();
+                    while (!stack.isEmpty()) {
+                        Token argCount = (Token) stack.pop();
 
-                    if (argCount.isOpenBracket()) {
-                        if (!argCount.getBrackets().equals(sc1)) {
-                            throw new IllegalArgumentException("Invalid parenthesis match " + argCount.getBrackets().getOpen() + sc1.getClose());
+                        if (argCount.isOpenBracket()) {
+                            if (!argCount.getBrackets().equals(sc1)) {
+                                throw new IllegalArgumentException("Invalid parenthesis match " + argCount.getBrackets().getOpen() + sc1.getClose());
+                            }
+
+                            openBracketFound = true;
+                            break;
                         }
 
-                        openBracketFound = true;
-                        break;
+                        this.output(values, argCount, evaluationContext);
+                        argumentTokens.push(argCount);
                     }
 
-                    this.output(values, argCount, evaluationContext);
-                    argumentTokens.push(argCount);
-                }
-
-                if (!openBracketFound) {
-                    throw new IllegalArgumentException("Parentheses mismatched for expression: "+expression);
-                }
-
-                if (!stack.isEmpty() && ((Token) stack.peek()).isFunction()) {
-                    try {
-                        int argCount1 = values.size() - (previousValuesSize.size() > 0 ? ((Integer) previousValuesSize.pop()).intValue(): 0);
-                        Token tkn = (Token) stack.pop();
-                        this.doFunction(values, (tkn).getFunction(), argCount1, argumentTokens, evaluationContext);
-                        argumentTokens.push(tkn);
-                    } catch (Exception e) {
-                        throw e;
+                    if (!openBracketFound) {
+                        throw new IllegalArgumentException("Parentheses mismatched for expression: " + expression);
                     }
 
-                }
-            } else if (token.isFunctionArgumentSeparator()) {
-                if (previous == null) {
-                    throw new IllegalArgumentException("expression can\'t start with a function argument separator");
-                }
+                    if (!stack.isEmpty() && ((Token) stack.peek()).isFunction()) {
+                        try {
+                            int argCount1 = values.size() - (previousValuesSize.size() > 0 ? ((Integer) previousValuesSize.pop()).intValue() : 0);
+                            Token tkn = (Token) stack.pop();
+                            this.doFunction(values, (tkn).getFunction(), argCount1, argumentTokens, evaluationContext);
+                            argumentTokens.push(tkn);
+                        } catch (Exception e) {
+                            throw e;
+                        }
 
-                if (previous.isOpenBracket() || previous.isFunctionArgumentSeparator()) {
-                    throw new IllegalArgumentException("argument is missing");
-                }
-
-                boolean sc3 = false;
-
-                while (!stack.isEmpty()) {
-                    if (((Token) stack.peek()).isOpenBracket()) {
-                        sc3 = true;
-                        break;
+                    }
+                } else if (token.isFunctionArgumentSeparator()) {
+                    if (previous == null) {
+                        throw new IllegalArgumentException("expression can\'t start with a function argument separator");
                     }
 
-                    Token aToken = (Token) stack.pop();
-                    argumentTokens.push(aToken);
+                    if (previous.isOpenBracket() || previous.isFunctionArgumentSeparator()) {
+                        throw new IllegalArgumentException("argument is missing");
+                    }
 
-                    this.output(values, aToken, evaluationContext);
-                }
+                    boolean sc3 = false;
 
-                if (!sc3) {
-                    throw new IllegalArgumentException("Separator or parentheses mismatched");
+                    while (!stack.isEmpty()) {
+                        if (((Token) stack.peek()).isOpenBracket()) {
+                            sc3 = true;
+                            break;
+                        }
+
+                        Token aToken = (Token) stack.pop();
+                        argumentTokens.push(aToken);
+
+                        this.output(values, aToken, evaluationContext);
+                    }
+
+                    if (!sc3) {
+                        throw new IllegalArgumentException("Separator or parentheses mismatched");
+                    }
+                } else if (token.isFunction()) {
+                    stack.push(token);
+                    previousValuesSize.push(Integer.valueOf(values.size()));
+                } else if (!token.isOperator()) {
+                    if (previous != null && previous.isLiteral()) {
+                        throw new IllegalArgumentException("A literal can\'t follow another literal");
+                    }
+                    argumentTokens.push(token);
+                    this.output(values, token, evaluationContext);
+                } else {
+                    while (!stack.isEmpty()) {
+                        Token sc4 = (Token) stack.peek();
+                        if (!sc4.isOperator() || (!token.getAssociativity().equals(Operator.Associativity.LEFT) || token.getPrecedence() > sc4.getPrecedence()) && token.getPrecedence() >= sc4.getPrecedence()) {
+                            break;
+                        }
+                        Token t = (Token) stack.pop();
+                        argumentTokens.push(t);
+                        this.output(values, t, evaluationContext);
+                    }
+
+                    stack.push(token);
                 }
-            } else if (token.isFunction()) {
-                stack.push(token);
-                previousValuesSize.push(Integer.valueOf(values.size()));
-            } else if (!token.isOperator()) {
-                if (previous != null && previous.isLiteral()) {
-                    throw new IllegalArgumentException("A literal can\'t follow another literal");
+            }
+
+            while (!stack.isEmpty()) {
+                Token sc2 = (Token) stack.pop();
+                if (sc2.isOpenBracket() || sc2.isCloseBracket()) {
+                    throw new IllegalArgumentException("Parentheses mismatched");
                 }
-                argumentTokens.push(token);
-                this.output(values, token, evaluationContext);
+                argumentTokens.push(sc2);
+                this.output(values, sc2, evaluationContext);
+            }
+
+            if (values.size() != 1) {
+                throw new IllegalArgumentException();
             } else {
-                while (!stack.isEmpty()) {
-                    Token sc4 = (Token) stack.peek();
-                    if (!sc4.isOperator() || (!token.getAssociativity().equals(Operator.Associativity.LEFT) || token.getPrecedence() > sc4.getPrecedence()) && token.getPrecedence() >= sc4.getPrecedence()) {
-                        break;
-                    }
-                    Token t = (Token) stack.pop();
-                    argumentTokens.push(t);
-                    this.output(values, t, evaluationContext);
-                }
-
-                stack.push(token);
+                return values.pop();
             }
-        }
 
-        while (!stack.isEmpty()) {
-            Token sc2 = (Token) stack.pop();
-            if (sc2.isOpenBracket() || sc2.isCloseBracket()) {
-                throw new IllegalArgumentException("Parentheses mismatched");
-            }
-            argumentTokens.push(sc2);
-            this.output(values, sc2, evaluationContext);
-        }
-
-        if (values.size() != 1) {
-            throw new IllegalArgumentException();
-        } else {
-            return values.pop();
-        }
     }
 
     private Token toToken(Token previous, String token) {
