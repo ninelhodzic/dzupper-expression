@@ -1,6 +1,7 @@
 package org.datazup.expression;
 
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.exceptions.EvaluatorException;
@@ -196,7 +197,7 @@ public abstract class AbstractEvaluator<T> {
             try {
                 values.push(this.evaluate(function, this.getArguments(values, argCount), getArgumentList(argumentList, argCount), evaluationContext));
             } catch (Exception e) {
-                throw new EvaluatorException("Cannot process value and evaluate Function: "+function.getName());
+                throw new EvaluatorException("Cannot process value and evaluate Function: "+function.getName(), e);
             }
         } else {
             throw new IllegalArgumentException("Invalid argument count for " + function.getName()
@@ -234,23 +235,6 @@ public abstract class AbstractEvaluator<T> {
     }
 
     protected abstract T toValue(String var1, Object var2);
-
-   /* public T evaluate(String expression) {
-        return this.evaluate((String) expression, (Object) null);
-    }
-*/
-
-
-    /*private boolean checkKeySplitters(String expression){
-        boolean contains = false;
-        if (expression.contains("$")){
-            contains = true;
-        }
-        if (expression.contains("<%")){
-            contains = true;
-        }
-        return contains;
-    }*/
 
     public T evaluate(String expression, Object evaluationContext) throws EvaluatorException {
 
@@ -305,6 +289,7 @@ public abstract class AbstractEvaluator<T> {
             Iterator tokens = this.tokenize(expression);
             //  List<Token> functionArgumentList = null;
 
+        try {
             Token token;
             for (Token previous = null; tokens.hasNext(); previous = token) {
                 String sc = (String) tokens.next();
@@ -422,11 +407,15 @@ public abstract class AbstractEvaluator<T> {
             }
 
             if (values.size() != 1) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Values size is not 1");
             } else {
                 return values.pop();
             }
 
+        }catch (Exception e){
+            throw new EvaluatorException("Cannot evaluate expression: "+expression+"" +
+                    ", with tokens: "+JsonUtils.getJsonFromObject(Lists.newArrayList(tokens))+", for context: "+JsonUtils.getJsonFromObject(evaluationContext), e);
+        }
     }
 
     private Token toToken(Token previous, String token) {
