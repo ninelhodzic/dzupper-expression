@@ -162,7 +162,9 @@ public abstract class AbstractEvaluator<T> {
         } else if (token.isLiteralValue()) {
             String value = token.getLiteralValue();
 
-            if (value.startsWith("'") && value.endsWith("'")){
+            if (value.startsWith("'#") && value.endsWith("#'")){
+                value = value.substring(2, value.length()-2);
+            }else  if (value.startsWith("'") && value.endsWith("'")) {
                 value = value.substring(1, value.length() - 1);
             }
             values.push((T) value);
