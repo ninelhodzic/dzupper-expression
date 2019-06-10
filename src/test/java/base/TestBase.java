@@ -113,6 +113,10 @@ public abstract class TestBase {
         parent.put("text", "this is some longer text for testing purposes and we'll make it more longer having different keywords in it");
 
         parent.put("log", "o.a.s.m.n.Client client-boss-1 [ERROR] connection attempt 959 to Netty-Client-/45.79.165.184:6701 failed: java.net.ConnectException: Connection refused: /45.79.165.184:6701");
+
+        parent.put("ts", 1464811823300L);
+        parent.put("tz", 240);
+
         return parent;
     }
 

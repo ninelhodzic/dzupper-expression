@@ -49,6 +49,47 @@ public class DateTimeUtils {
         return fmt;
     }
 
+    public static ZoneOffset resolveZoneOffset(Integer tzValue) {
+        ZoneOffset zoneOffset = ZoneOffset.UTC;
+        if (null==tzValue)
+            return zoneOffset;
+
+
+        if (tzValue>=-18 && tzValue<=18) {
+            zoneOffset = ZoneOffset.ofHours(tzValue);
+        }else{
+            tzValue = tzValue/60;// if it is in minutes
+            zoneOffset = ZoneOffset.ofHours(tzValue);
+        }
+        return zoneOffset;
+    }
+
+    public static ZoneOffset resolveZoneOffset(Object tzValue){
+        ZoneOffset zoneOffset = ZoneOffset.UTC;
+        if (null==tzValue)
+            return zoneOffset;
+
+        Integer i = TypeUtils.resolveInteger(tzValue);
+        if (null!=i){
+            zoneOffset = resolveZoneOffset(i);
+        }
+
+        return zoneOffset;
+    }
+
+    public static Instant resolve(Object dtValue, Object tzValue){
+        Instant dtInstant = resolve(dtValue);
+        if (null==dtInstant)
+            return null;
+        if (null==tzValue)
+            return dtInstant;
+
+        ZoneOffset zoneOffset = resolveZoneOffset(tzValue);
+
+        Instant dtInstantWithZone = dtInstant.atOffset(zoneOffset).toLocalDateTime().toInstant(ZoneOffset.UTC);
+        return dtInstantWithZone;
+    }
+
     public static Instant resolve(Object obj) {
         if (obj instanceof Instant){
             return (Instant)obj;

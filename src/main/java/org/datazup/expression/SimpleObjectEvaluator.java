@@ -84,7 +84,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     public final static Function DATE_DIFF = new Function("DATE_DIFF", 3);//firstDate, secondDate, TimeUnit
 
-    public final static Function TO_DATE = new Function("TO_DATE", 1, 2);
+    public final static Function TO_DATE = new Function("TO_DATE", 1, 3);
     public final static Function TO_INT = new Function("TO_INT", 1);
     public final static Function TO_LONG = new Function("TO_LONG", 1);
     public final static Function TO_DOUBLE = new Function("TO_DOUBLE", 1);
@@ -1026,14 +1026,21 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         Object valueObject = operands.next();
         Token valueObjectToken = argumentList.pop();
         String formatObject = null;
+
         if (operands.hasNext()) {
             formatObject = (String) operands.next();
             Token formatObjectToken = argumentList.pop();
 
         }
         String format = null;
-        if (null != formatObject) {
+        if (!StringUtils.isEmpty(formatObject)) {
             format = formatObject.replace("#", "");
+        }
+
+        Object timeZoneObject = null;
+        if (operands.hasNext()){
+            timeZoneObject = operands.next();
+            argumentList.pop();
         }
 
         Instant leftDateTime = null;
@@ -1086,6 +1093,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
              */
 
             Instant i = DateTimeUtils.format(leftDateTime, format);
+
+            if (null!=timeZoneObject){
+                i = DateTimeUtils.resolve(i, timeZoneObject);
+            }
 
             return i; // leftDateTime.atOffset(ZoneOffset.UTC);//dateTime;
         }

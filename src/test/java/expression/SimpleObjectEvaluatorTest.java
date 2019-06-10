@@ -91,7 +91,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         SimpleObjectEvaluator evaluator = SimpleObjectEvaluator.getInstance(mapListResolver); //new SimpleObjectEvaluator();
         return  evaluator.evaluate(expression,pathExtractor);
     }
-    
+
     @Test
     public void evaluateRegexFunctionExpressionTest()  throws EvaluatorException{
         String expression = "REGEX_MATCH($child.name$, '\\bchild\\b')";
@@ -111,7 +111,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Boolean b = (Boolean)evaluaged;
         Assert.assertTrue(b);
     }
-    
+
     @Test
     public void evaluateRegexExtractFunctionExpressionTest()  throws EvaluatorException{
         String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#',0)";
@@ -155,7 +155,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof Boolean);
         Assert.assertTrue(evaluaged.equals(Boolean.TRUE));
     }
-    
+
     @Test
     public void evaluateRegexExtractByGroupFunctionExpressionTest() throws EvaluatorException{
         String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#',1)";
@@ -480,6 +480,18 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
         Instant dt = (Instant)evaluaged;
         assertDayDates(dt);
+    }
+
+    @Test
+    public void evaluateDateTimeFromLongAndTimeZone() throws EvaluatorException {
+        String expression = "TO_DATE($ts$,  '', $tz$)";
+
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Instant);
+
+        Instant dt = (Instant)evaluaged;
+        System.out.println(dt.toEpochMilli()+" "+dt.toString()+", orig: "+1464811823300L+" (06/01/2016 @ 8:10pm (UTC)) - offset: "+240);
     }
 
     @Test
