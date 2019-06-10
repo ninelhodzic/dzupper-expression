@@ -1,7 +1,6 @@
 package org.datazup.expression;
 
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.apiinternal.ApiService;
 import org.datazup.expression.exceptions.ExpressionValidationException;
@@ -340,8 +339,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             argumentList.removeLast();
             if (null != value) {
                 Map newMap = mapListResolver.resolveToMap(value);
-                if (null == newMap)
-                    throw new ExpressionValidationException("Value in MAP expression should be of Map type");
+               /* if (null == newMap)
+                    throw new ExpressionValidationException("Value in MAP expression should be of Map type");*/
 
                 if (null != newMap) {
                     map.putAll(newMap);
