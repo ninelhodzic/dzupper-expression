@@ -95,6 +95,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     public final static Function REGEX_MATCH = new Function("REGEX_MATCH", 2);
     public final static Function REGEX_EXTRACT = new Function("REGEX_EXTRACT", 2, 3);
+    public final static Function REGEX_REPLACE = new Function("REGEX_REPLACE", 3);
     public final static Function EXTRACT = new Function("EXTRACT", 2);
 
     public final static Function STRING_FORMAT = new Function("STRING_FORMAT", 2, Integer.MAX_VALUE);
@@ -172,6 +173,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
+        PARAMETERS.add(REGEX_REPLACE);
         PARAMETERS.add(EXTRACT);
 
 
@@ -335,7 +337,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return regexMatch(function, operands, argumentList, evaluationContext);
         } else if (function == REGEX_EXTRACT) {
             return regexExtract(function, operands, argumentList, evaluationContext);
-        } else if (function == EXTRACT) {
+        } else if (function ==REGEX_REPLACE){
+            return regexReplace(function, operands, argumentList,  (PathExtractor)evaluationContext);
+        }else if (function == EXTRACT) {
             return extract(function, operands, argumentList, evaluationContext);
         } else if (function == REPLACE_ALL) {
             return replaceAll(function, operands, argumentList, evaluationContext);
@@ -357,6 +361,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
     }
+
+
 
     private Object abs(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
         Object firstObj = operands.next();
@@ -739,12 +745,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         Object valueToReplaceIn = operands.next();
         Token token2 = argumentList.pop();
 
-        Object place = null;
+        /*Object place = null;
         if (operands.hasNext()) {
             place = operands.next();
             Token token3 = argumentList.pop();
         }
-
+*/
         if (objectFieldValue instanceof String) {
             String strToReplace = whatToReplaceIn.toString();
             String objectValue = (String) objectFieldValue;
@@ -938,6 +944,26 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
 
         return list;
+    }
+
+    private Object regexReplace(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object op1 = operands.next();
+        if (null == op1)
+            return null;
+        String regexFieldValue = op1.toString();
+        argumentList.pop();
+
+        String regexPattern = operands.next().toString();
+        argumentList.pop();
+
+        String replaceWith = operands.next().toString();
+        argumentList.pop();
+
+        regexPattern = regexPattern.replace("#", "");
+        Pattern r = Pattern.compile(regexPattern, Pattern.DOTALL);
+        String replacedStr = r.matcher(regexFieldValue).replaceAll(replaceWith);
+
+        return replacedStr;
     }
 
     private Object regexExtract(Function function, Iterator<Object> operands, Deque<Token> argumentList,

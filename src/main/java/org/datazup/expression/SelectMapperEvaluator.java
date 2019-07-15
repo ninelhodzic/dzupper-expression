@@ -7,11 +7,14 @@ import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.utils.ListPartition;
+import org.datazup.utils.SortingUtils;
+import org.datazup.utils.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by admin@datazup on 3/21/16.
@@ -46,6 +49,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function GET = new Function("GET", 2, 3);
     public final static Function ADD = new Function("ADD", 2, Integer.MAX_VALUE);
     public final static Function PUT = new Function("PUT", 2, Integer.MAX_VALUE);
+
+    public final static Function SORT = new Function("SORT", 2, 3);
+    public final static Function LIMIT = new Function("LIMIT", 2, 2);
 
     private static SelectMapperEvaluator INSTANCE;
 
@@ -96,6 +102,10 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         SimpleObjectEvaluator.PARAMETERS.add(GET);
         SimpleObjectEvaluator.PARAMETERS.add(ADD);
         SimpleObjectEvaluator.PARAMETERS.add(PUT);
+
+        SimpleObjectEvaluator.PARAMETERS.add(SORT);
+        SimpleObjectEvaluator.PARAMETERS.add(LIMIT);
+
     }
 
     @Override
@@ -106,7 +116,11 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         /*if (function == FOREACH) {
             return foreach(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else*/
-        if (function==PUT){
+        if (function==LIMIT){
+            return getLimit(function, operands, argumentList, (PathExtractor)evaluationContext);
+        }else if (function==SORT){
+            return getSort(function, operands, argumentList, (PathExtractor)evaluationContext);
+        }else if (function==PUT){
             return getPut(function, operands, argumentList, (PathExtractor) evaluationContext);
         }else if (function == GET) {
             return getGet(function, operands, argumentList, (PathExtractor) evaluationContext);
@@ -150,7 +164,80 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     }
 
+    private Object getLimit(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object value1 = operands.next();
+        Token token1 = argumentList.pop();
 
+        if (null == value1)
+            return null;
+
+        Integer limitSize = null;
+        if (operands.hasNext()){
+            limitSize = TypeUtils.resolveInteger(operands.next());
+            argumentList.pop();
+        }
+
+
+        List list = mapListResolver.resolveToList(value1);
+        if (null==list){
+            Map<Object, Object> map = mapListResolver.resolveToMap(value1);
+            if (null==map){
+                Collection set = mapListResolver.resolveToCollection(value1);
+                if (null==set) {
+                    return value1;
+                }else{
+                    return set.stream().limit(limitSize).collect(Collectors.toSet());
+                }
+            }else{
+                Map limitedMap = map.entrySet().stream().limit(limitSize).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2)->e1, LinkedHashMap::new));
+                return limitedMap;
+
+            }
+        }else{
+            List limitedList =(List) list.stream().limit(limitSize).collect(Collectors.toList());
+            return limitedList;
+        }
+    }
+
+    private Object getSort(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object value1 = operands.next();
+        Token token1 = argumentList.pop();
+
+        if (null == value1)
+            return null;
+
+        // we can sort List or Map
+        // if List Object can be simple Number or simple String/char/boolean or complext Map
+        String direction = "DESC";
+        if (operands.hasNext()){
+            Object dirO = operands.next();
+            argumentList.pop();
+            direction = (String)dirO;
+        }
+        final String finalDirection = direction;
+
+        String sortingComponent = "BY_KEY";
+        if (operands.hasNext()){
+            sortingComponent = (String)operands.next();
+            argumentList.pop();
+        }
+        final String finalSortingComponent = sortingComponent;
+
+        List list = mapListResolver.resolveToList(value1);
+        if (null==list){
+            Map m = mapListResolver.resolveToMap(value1);
+            if (null==m){
+                return null;
+            }else{
+                Map sortedMap = SortingUtils.sortMap(m, finalDirection, finalSortingComponent);
+                return sortedMap;
+            }
+        }else{
+
+            List sortedList = SortingUtils.sortList(list, finalDirection, finalSortingComponent);
+            return sortedList;
+        }
+    }
 
     private Object getListPartition(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
