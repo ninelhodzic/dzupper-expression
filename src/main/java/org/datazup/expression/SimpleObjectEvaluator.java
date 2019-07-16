@@ -110,6 +110,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     public final static Function SPLITTER = new Function("SPLITTER", 1, 4);
     public final static Function SUBSTRING = new Function("SUBSTRING", 2, 3);
+    public final static Function INDEX_OF = new Function("INDEX_OF", 2);
     // public final static Function DATE = new Function("DATE", 2);
 
     protected static final Parameters PARAMETERS;
@@ -171,6 +172,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(SPLITTER);
         PARAMETERS.add(SUBSTRING);
 
+        PARAMETERS.add(INDEX_OF);
+
         PARAMETERS.add(REGEX_MATCH);
         PARAMETERS.add(REGEX_EXTRACT);
         PARAMETERS.add(REGEX_REPLACE);
@@ -224,7 +227,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList,
                               Object evaluationContext) {
 
-        if (function == IF) {
+        if (function==INDEX_OF){
+            return getIndexOf(function, operands, argumentList, evaluationContext);
+        }else if (function == IF) {
             return ifTrueFalse(function, operands, argumentList, evaluationContext);
         }else if (function == DATE_DIFF) {
             return timeDiff(function, operands, argumentList, evaluationContext);
@@ -362,6 +367,25 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
     }
 
+    private Object getIndexOf(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object valueObj = operands.next();
+        argumentList.pop();
+
+        Object indexObj = operands.next();
+        argumentList.pop();
+
+        List list = mapListResolver.resolveToList(valueObj);
+        if (null!=list){
+            return list.indexOf(indexObj);
+        }else{
+            if (valueObj instanceof String){
+                String strValue = (String)valueObj;
+                return strValue.indexOf(indexObj.toString());
+            }else{
+                return null;
+            }
+        }
+    }
 
 
     private Object abs(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
