@@ -419,7 +419,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     private Object getMap(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         // Token token = argumentList.pop();
         while (operands.hasNext()) {
             Object value = operands.next();
@@ -577,7 +577,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     }
 
     private Object getField(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Map<Object, Object> map = new HashMap<>();
+        Map<Object, Object> map = new LinkedHashMap<>();
         Object value1 = operands.next();
         Token token1 = argumentList.pop();
 
@@ -651,7 +651,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     }
 
     private Object getExtend(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         while (operands.hasNext()) {
             Object value = operands.next();
             Token token = argumentList.pop();
@@ -695,7 +695,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         Object newObject = value;
         Map newMap = mapListResolver.resolveToMap(value);
         if (null != newMap) {
-            newObject = new HashMap((Map) value);
+            newObject = new LinkedHashMap<>((Map) value);
         } else {
             List newList = mapListResolver.resolveToList(value);
             if (null != newList) {
@@ -716,7 +716,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
 
     private Object getSelect(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new LinkedHashMap<>();
         // Token token = argumentList.pop();
         while (operands.hasNext()) {
             Object value = operands.next();

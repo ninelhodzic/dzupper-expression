@@ -89,6 +89,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function TO_LONG = new Function("TO_LONG", 1);
     public final static Function TO_DOUBLE = new Function("TO_DOUBLE", 1);
     public final static Function TO_STRING = new Function("TO_STRING", 1);
+    public final static Function TO_BOOLEAN = new Function("TO_STRING", 1);
 
 
     public final static Function TO_LOWERCASE = new Function("TO_LOWERCASE", 1);
@@ -168,6 +169,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(TO_LONG);
         PARAMETERS.add(TO_DOUBLE);
         PARAMETERS.add(TO_STRING);
+        PARAMETERS.add(TO_BOOLEAN);
 
         PARAMETERS.add(TO_LOWERCASE);
         PARAMETERS.add(TO_UPPERCASE);
@@ -256,7 +258,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return toLong(function, operands, argumentList, evaluationContext);
         } else if (function == TO_STRING) {
             return toStringValue(function, operands, argumentList, evaluationContext);
-        } else if (function==TO_LOWERCASE){
+        } else if (function ==TO_BOOLEAN){
+            return toBooleanValue(function, operands, argumentList, evaluationContext);
+        }else if (function==TO_LOWERCASE){
             Object op1 = operands.next();
             argumentList.pop();
             String val = TypeUtils.resolveString(op1);
@@ -391,6 +395,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private Object toBooleanValue(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object valueObj = operands.next();
+        argumentList.pop();
+
+        return TypeUtils.resolveBoolean(valueObj);
     }
 
     private Object getIndexOf(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
