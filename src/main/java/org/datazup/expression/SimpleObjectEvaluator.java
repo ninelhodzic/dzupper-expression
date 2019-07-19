@@ -90,6 +90,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function TO_DOUBLE = new Function("TO_DOUBLE", 1);
     public final static Function TO_STRING = new Function("TO_STRING", 1);
 
+
+    public final static Function TO_LOWERCASE = new Function("TO_LOWERCASE", 1);
+    public final static Function TO_UPPERCASE = new Function("TO_UPPERCASE", 1);
+
     public final static Function ABS = new Function("ABS", 1);
 
 
@@ -164,6 +168,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(TO_LONG);
         PARAMETERS.add(TO_DOUBLE);
         PARAMETERS.add(TO_STRING);
+
+        PARAMETERS.add(TO_LOWERCASE);
+        PARAMETERS.add(TO_UPPERCASE);
 
         PARAMETERS.add(ABS);
 
@@ -249,6 +256,25 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return toLong(function, operands, argumentList, evaluationContext);
         } else if (function == TO_STRING) {
             return toStringValue(function, operands, argumentList, evaluationContext);
+        } else if (function==TO_LOWERCASE){
+            Object op1 = operands.next();
+            argumentList.pop();
+            String val = TypeUtils.resolveString(op1);
+            if (StringUtils.isEmpty(val))
+                return op1;
+            else
+                return val.toLowerCase();
+
+        } else if (function==TO_UPPERCASE){
+            Object op1 = operands.next();
+            argumentList.pop();
+
+            String val = TypeUtils.resolveString(op1);
+            if (StringUtils.isEmpty(val))
+                return op1;
+            else
+                return val.toUpperCase();
+
         } else if (function == STR_TO_DATE_TIMESTAMP) {
             return strToDateTimeStamp(function, operands, argumentList, evaluationContext);
         } else if (function == MINUTE) {
@@ -521,8 +547,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Object input = operands.next();
             Token token1 = argumentList.pop();
             if(input == null || !(input instanceof  String)) {
-                while (operands.hasNext())
+                while (operands.hasNext()) {
+                    operands.next();
                     argumentList.pop();
+                }
                 return input;
             }
             String inputText = input.toString();
@@ -763,7 +791,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         Object objectFieldValue = operands.next();
         Token token = argumentList.pop();
 
-        Object whatToReplaceIn = operands.next();
+        Object regexObj = operands.next();
         Token token1 = argumentList.pop();
 
         Object valueToReplaceIn = operands.next();
@@ -776,9 +804,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
 */
         if (objectFieldValue instanceof String) {
-            String strToReplace = whatToReplaceIn.toString();
+            String strRegex = regexObj.toString();
+            if (strRegex.startsWith("#") && strRegex.endsWith("#")){
+                strRegex = strRegex.substring(1, strRegex.length()-1);
+            }
             String objectValue = (String) objectFieldValue;
-            String replaced = objectValue.replaceAll(strToReplace, valueToReplaceIn.toString());
+            String replaced = objectValue.replaceAll(strRegex, valueToReplaceIn.toString());
             return replaced;
         }
 

@@ -537,7 +537,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         while (operands.hasNext()) {
             Object value = operands.next();
             argumentList.removeLast();
-            List listChild = mapListResolver.resolveToList(value);
+            Collection listChild = mapListResolver.resolveToCollection(value);
             if (null != listChild) {
                 list.addAll(listChild);
             } else {
@@ -672,12 +672,10 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             if (argumentList.size() > 0) {
                 Token token = argumentList.pop(); // just pop if exist - it will not exists if function was called before. Sample: union(keys($item$), values($item$))
             }
-            List lst = mapListResolver.resolveToList(value);
+            Collection lst = mapListResolver.resolveToCollection(value);
 
             if (null != lst) {
-                List l = (List) value;
-                if (null != l)
-                    list.addAll((List) value);
+                list.addAll(lst);
             } else {
                 if (null != value)
                     list.add(value);
