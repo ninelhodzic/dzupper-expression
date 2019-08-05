@@ -27,7 +27,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function FOREACH = new Function("FOREACH", 3, Integer.MAX_VALUE);
 */
     public final static Function SELECT = new Function("SELECT", 1, Integer.MAX_VALUE);
-    public final static Function LIST = new Function("LIST", 1, Integer.MAX_VALUE);
+    public final static Function LIST = new Function("LIST", 0, Integer.MAX_VALUE);
     public final static Function SORTED_SET = new Function("SORTED_SET", 1, Integer.MAX_VALUE);
     public final static Function LIST_PARTITION = new Function("LIST_PARTITION", 1, 2);
 
