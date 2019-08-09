@@ -66,6 +66,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function IS_NULL = new Function("IS_NULL", 1);
     public final static Function SET_NULL = new Function("SET_NULL", 1);
     public final static Function SIZE_OF = new Function("SIZE_OF", 1);
+    public final static Function TYPE_OF = new Function("TYPE_OF", 1);
+    public final static Function IS_OF_TYPE = new Function("IS_OF_TYPE", 2);
 
     public final static Function IF = new Function("IF", 3);
 
@@ -149,6 +151,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(IS_NULL);
         PARAMETERS.add(SET_NULL);
         PARAMETERS.add(SIZE_OF);
+        PARAMETERS.add(TYPE_OF);
+        PARAMETERS.add(IS_OF_TYPE);
+
         PARAMETERS.add(IF);
 
         PARAMETERS.add(STR_TO_DATE_TIMESTAMP);
@@ -338,7 +343,36 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 return ((String) op1).isEmpty();
             }
             return op1 == null;
-        } else if (function == SIZE_OF) {
+
+        }else if (function==IS_OF_TYPE){
+            return getIsOfType(function, operands, argumentList, evaluationContext);
+        }else if  (function==TYPE_OF){
+            Object op1 = operands.next();
+            argumentList.pop();
+
+            if (null != op1 && !(op1 instanceof NullObject)) {
+                String name = op1.getClass().getSimpleName();
+                switch (name){
+                    case "TreeList":
+                    case "JsonArray":
+                    case "ArrayList":
+                        return "List";
+                    case "TreeSet":
+                    case "LinkedHashSet":
+                    case "HashSet":
+                        return "Set";
+                    case "JsonObject":
+                    case "HashMap":
+                    case "TreeMap":
+                    case "LinkedHashMap":
+                        return "Map";
+                }
+                return name;
+            }else{
+                return null;
+            }
+
+        }else if (function == SIZE_OF) {
             Object op1 = operands.next();
             argumentList.pop();
             if (null != op1 && !(op1 instanceof NullObject)) {
@@ -395,6 +429,56 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private Boolean isOfTypeRecursively(Class objClass, String type){
+        if (null==objClass){
+            return null;
+        }
+        Boolean isOfType = false;
+
+        Class[] interfaces = objClass.getInterfaces();
+        for (int i=0;i<interfaces.length;i++){
+            Class anInterface = interfaces[i];
+            if (anInterface.getSimpleName().equalsIgnoreCase(type)) {
+                isOfType = true;
+                break;
+            }
+            else{
+                isOfType = isOfTypeRecursively(anInterface, type);
+            }
+        }
+        if (null!=isOfType && isOfType)
+            return true;
+
+        if (objClass.getSimpleName().equalsIgnoreCase(type)){
+            isOfType = true;
+        }else{
+            isOfType = isOfTypeRecursively(objClass.getSuperclass(), type);
+        }
+        return isOfType;
+    }
+
+
+
+    private Object getIsOfType(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        Object valueObj = operands.next();
+        argumentList.pop();
+
+        Object typeStrObj = operands.next();
+        argumentList.pop();
+
+        String typeStr = TypeUtils.resolveString(typeStrObj);
+        if (StringUtils.isEmpty(typeStr)){
+            return false;
+        }
+
+        Arrays.stream(valueObj.getClass().getInterfaces()).forEach(r->{
+        });
+
+        Boolean isOfType = isOfTypeRecursively(valueObj.getClass(), typeStr);
+
+        return isOfType;
     }
 
     private Object toBooleanValue(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {

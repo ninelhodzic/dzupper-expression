@@ -1,7 +1,6 @@
 package mapperevaluator;
 
 import base.TestBase;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SelectMapperEvaluator;
 import org.datazup.pathextractor.AbstractResolverHelper;
@@ -135,6 +134,61 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
         Boolean b = (Boolean) o;
         Assert.assertTrue(b);
+    }
+
+    @Test
+    public void isTypeOfCorrectTest() throws EvaluatorException {
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+
+        Object o = evaluator.evaluate("TYPE_OF($list$)", pathExtractor);
+        Assert.assertTrue(o instanceof String);
+        Assert.assertTrue(o.equals("List"));
+
+        o = evaluator.evaluate("TYPE_OF($text$)", pathExtractor);
+        Assert.assertTrue(o instanceof String);
+        Assert.assertTrue(o.equals("String"));
+
+        o = evaluator.evaluate("TYPE_OF($child$)", pathExtractor);
+        Assert.assertTrue(o instanceof String);
+        Assert.assertTrue(o.equals("Map"));
+
+        o = evaluator.evaluate("TYPE_OF($tz$)", pathExtractor);
+        Assert.assertTrue(o instanceof String);
+        Assert.assertTrue(o.equals("Integer"));
+    }
+
+    @Test
+    public void isOfTypeCorrectTest() throws EvaluatorException {
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        // SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
+
+        Object o = evaluator.evaluate("IS_OF_TYPE($list$, 'List')", pathExtractor);
+        Assert.assertTrue(o instanceof Boolean);
+        Assert.assertTrue((Boolean)o);
+
+        o = evaluator.evaluate("IS_OF_TYPE($text$, 'String')", pathExtractor);
+        Assert.assertTrue(o instanceof Boolean);
+        Assert.assertTrue((Boolean)o);
+
+        o = evaluator.evaluate("IS_OF_TYPE($child$, 'Map')", pathExtractor);
+        Assert.assertTrue(o instanceof Boolean);
+        Assert.assertTrue((Boolean)o);
+
+        o = evaluator.evaluate("IS_OF_TYPE($child$, 'HashMap')", pathExtractor);
+        Assert.assertTrue(o instanceof Boolean);
+        Assert.assertTrue((Boolean)o);
+
+        o = evaluator.evaluate("IS_OF_TYPE($tz$,'Integer')", pathExtractor);
+        Assert.assertTrue(o instanceof Boolean);
+        Assert.assertTrue((Boolean)o);
+
+        o = evaluator.evaluate("IS_OF_TYPE($tz$,'Number')", pathExtractor);
+        Assert.assertTrue(o instanceof Boolean);
+        Assert.assertTrue((Boolean)o);
+
     }
 
     @Test
