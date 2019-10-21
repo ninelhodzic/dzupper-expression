@@ -1164,7 +1164,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         if (list.size() > 1) {
             if (null != group) {
-                return list.get(((Double) group).intValue());
+                Integer groupInt = TypeUtils.resolveInteger(group);
+                return list.get(groupInt);
             } else {
                 return list;
             }
