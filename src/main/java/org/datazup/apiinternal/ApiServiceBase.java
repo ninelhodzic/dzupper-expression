@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created by admin@datazup on 11/22/17.
  */
-public abstract class ApiServiceBase implements ApiService {
+public abstract class  ApiServiceBase implements ApiService {
 
     protected Map<String,APIRunnable> apis = new HashMap<>();
 

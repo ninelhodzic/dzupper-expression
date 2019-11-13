@@ -116,6 +116,17 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void isFieldValueSumarized() throws EvaluatorException{
+        Map<String, Object> objectMap = new HashMap<String, Object>();
+        PathExtractor pathExtractor = new PathExtractor(objectMap, mapListResolver);
+
+        // NOTE: this is working as there is no - (minus) in these strings
+        Object datetimeRes = evaluator.evaluate("FIELD('key', 2+3)", pathExtractor);
+        Assert.assertNotNull(datetimeRes);
+
+    }
+
+    @Test
     public void isMovingAndRemovingAndPuttingTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);

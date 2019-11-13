@@ -53,6 +53,16 @@ public class BasicTest extends TestBase {
     }
 
     @Test
+    public void testPlus(){
+        String expression = "2+2";
+
+        Object res = evaluateOnMap(expression);
+        Assert.assertTrue (res instanceof Number);
+        Number bres = (Number)res;
+        Assert.assertTrue(bres.intValue()==4);
+    }
+
+    @Test
     public void testAnd(){
         String expression = "2==2 && 1==1";
         Object res = evaluateOnMap(expression);

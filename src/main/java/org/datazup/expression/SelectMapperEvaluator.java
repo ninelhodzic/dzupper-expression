@@ -48,7 +48,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     public final static Function GET = new Function("GET", 2, 3);
     public final static Function ADD = new Function("ADD", 2, Integer.MAX_VALUE);
-    public final static Function PUT = new Function("PUT", 2, Integer.MAX_VALUE);
+    public final static Function PUT = new Function("PUT", 3, 3);
 
     public final static Function SORT = new Function("SORT", 2, 3);
     public final static Function LIMIT = new Function("LIMIT", 2, 2);

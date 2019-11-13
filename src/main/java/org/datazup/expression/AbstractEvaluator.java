@@ -449,7 +449,7 @@ public abstract class AbstractEvaluator<T> {
         }
     }
 
-    private BracketPair getBracketPair(String token) {
+    private BracketPair  getBracketPair(String token) {
         BracketPair result = (BracketPair) this.expressionBrackets.get(token);
         return result == null ? (BracketPair) this.functionBrackets.get(token) : result;
     }
