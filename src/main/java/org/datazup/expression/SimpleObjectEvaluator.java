@@ -1047,6 +1047,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             } else {
                 num = NumberUtils.createNumber(valueObjectStr);
             }
+        } else if (valueObject instanceof Instant){
+            Instant obj = (Instant) valueObject;
+            num = new Long(obj.toEpochMilli());
         }
 
         return num;
