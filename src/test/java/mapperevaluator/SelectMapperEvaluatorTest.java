@@ -38,6 +38,38 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void isRemapperRuns() throws EvaluatorException {
+        String expression = "REMAP(THIS(), '#{ \"tz\": \"noviValue\"}#')";
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof Map);
+        Map m = (Map) evaluated;
+        Assert.assertFalse(m.containsKey("tz"));
+        Assert.assertTrue(m.containsKey("noviValue"));
+        Assert.assertTrue(m.get("noviValue").equals(240));
+        Assert.assertFalse(m.keySet().size()==1);
+    }
+
+    @Test
+    public void isRemapperRightRuns() throws EvaluatorException {
+        String expression = "REMAP(THIS(), '#{ \"tz\": \"noviValue\"}#', 'RIGHT')";
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof Map);
+        Map m = (Map) evaluated;
+        Assert.assertFalse(m.containsKey("tz"));
+        Assert.assertTrue(m.containsKey("noviValue"));
+        Assert.assertTrue(m.get("noviValue").equals(240));
+        Assert.assertTrue(m.keySet().size()==1);
+    }
+
+    @Test
     public void isThisExpressionRuns() throws EvaluatorException{
         String expression = "THIS()";
         Map<String, Object> objectMap = new HashMap<String, Object>();

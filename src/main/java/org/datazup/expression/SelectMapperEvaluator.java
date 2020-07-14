@@ -23,9 +23,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectMapperEvaluator.class);
 
-   /* @Deprecated
-    public final static Function FOREACH = new Function("FOREACH", 3, Integer.MAX_VALUE);
-*/
+    /* @Deprecated
+     public final static Function FOREACH = new Function("FOREACH", 3, Integer.MAX_VALUE);
+ */
     public final static Function SELECT = new Function("SELECT", 1, Integer.MAX_VALUE);
     public final static Function LIST = new Function("LIST", 0, Integer.MAX_VALUE);
     public final static Function SORTED_SET = new Function("SORTED_SET", 1, Integer.MAX_VALUE);
@@ -33,6 +33,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
 
     public final static Function MAP = new Function("MAP", 0, Integer.MAX_VALUE);
+    public final static Function REMAP = new Function("REMAP", 2, 3);
+
     public final static Function REMOVE = new Function("REMOVE", 1);
     public final static Function THIS = new Function("THIS", 0);
     public final static Function COPY = new Function("COPY", 1);
@@ -79,7 +81,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     static {
 
-       // SimpleObjectEvaluator.PARAMETERS.add(FOREACH);
+        // SimpleObjectEvaluator.PARAMETERS.add(FOREACH);
         SimpleObjectEvaluator.PARAMETERS.add(SELECT);
         SimpleObjectEvaluator.PARAMETERS.add(LIST);
         SimpleObjectEvaluator.PARAMETERS.add(SORTED_SET);
@@ -87,6 +89,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
 
         SimpleObjectEvaluator.PARAMETERS.add(MAP);
+        SimpleObjectEvaluator.PARAMETERS.add(REMAP);
+
         SimpleObjectEvaluator.PARAMETERS.add(FIELD);
         SimpleObjectEvaluator.PARAMETERS.add(REMOVE);
         SimpleObjectEvaluator.PARAMETERS.add(COPY);
@@ -116,13 +120,13 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         /*if (function == FOREACH) {
             return foreach(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else*/
-        if (function==LIMIT){
-            return getLimit(function, operands, argumentList, (PathExtractor)evaluationContext);
-        }else if (function==SORT){
-            return getSort(function, operands, argumentList, (PathExtractor)evaluationContext);
-        }else if (function==PUT){
+        if (function == LIMIT) {
+            return getLimit(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == SORT) {
+            return getSort(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == PUT) {
             return getPut(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }else if (function == GET) {
+        } else if (function == GET) {
             return getGet(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == ADD) {
             return getAdd(function, operands, argumentList, (PathExtractor) evaluationContext);
@@ -136,6 +140,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getListPartition(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == MAP) {
             return getMap(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == REMAP) {
+            return getReMap(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == SELECT) {
             return getSelect(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == REMOVE) {
@@ -172,29 +178,29 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return null;
 
         Integer limitSize = null;
-        if (operands.hasNext()){
+        if (operands.hasNext()) {
             limitSize = TypeUtils.resolveInteger(operands.next());
             argumentList.pop();
         }
 
 
         List list = mapListResolver.resolveToList(value1);
-        if (null==list){
+        if (null == list) {
             Map<Object, Object> map = mapListResolver.resolveToMap(value1);
-            if (null==map){
+            if (null == map) {
                 Collection set = mapListResolver.resolveToCollection(value1);
-                if (null==set) {
+                if (null == set) {
                     return value1;
-                }else{
+                } else {
                     return set.stream().limit(limitSize).collect(Collectors.toSet());
                 }
-            }else{
-                Map limitedMap = map.entrySet().stream().limit(limitSize).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2)->e1, LinkedHashMap::new));
+            } else {
+                Map limitedMap = map.entrySet().stream().limit(limitSize).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
                 return limitedMap;
 
             }
-        }else{
-            List limitedList =(List) list.stream().limit(limitSize).collect(Collectors.toList());
+        } else {
+            List limitedList = (List) list.stream().limit(limitSize).collect(Collectors.toList());
             return limitedList;
         }
     }
@@ -209,30 +215,30 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         // we can sort List or Map
         // if List Object can be simple Number or simple String/char/boolean or complext Map
         String direction = "DESC";
-        if (operands.hasNext()){
+        if (operands.hasNext()) {
             Object dirO = operands.next();
             argumentList.pop();
-            direction = (String)dirO;
+            direction = (String) dirO;
         }
         final String finalDirection = direction;
 
         String sortingComponent = "BY_KEY";
-        if (operands.hasNext()){
-            sortingComponent = (String)operands.next();
+        if (operands.hasNext()) {
+            sortingComponent = (String) operands.next();
             argumentList.pop();
         }
         final String finalSortingComponent = sortingComponent;
 
         List list = mapListResolver.resolveToList(value1);
-        if (null==list){
+        if (null == list) {
             Map m = mapListResolver.resolveToMap(value1);
-            if (null==m){
+            if (null == m) {
                 return null;
-            }else{
+            } else {
                 Map sortedMap = SortingUtils.sortMap(m, finalDirection, finalSortingComponent);
                 return sortedMap;
             }
-        }else{
+        } else {
 
             List sortedList = SortingUtils.sortList(list, finalDirection, finalSortingComponent);
             return sortedList;
@@ -254,17 +260,17 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         Object value2 = operands.next();
         Token token2 = argumentList.pop();
-        if (null==value2){
+        if (null == value2) {
             return value1;
         }
 
         Number n = 0;
-        if (value2 instanceof Number){
-            n = (Number)value2;
-        }else if (value2 instanceof String){
-            try{
-                n = NumberUtils.createNumber((String)value2);
-            }catch (Exception e){
+        if (value2 instanceof Number) {
+            n = (Number) value2;
+        } else if (value2 instanceof String) {
+            try {
+                n = NumberUtils.createNumber((String) value2);
+            } catch (Exception e) {
                 throw new ExpressionValidationException("Second argument is not a number");
             }
         }
@@ -327,7 +333,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
 
         Map map = mapListResolver.resolveToMap(value1);
-        if (null!=map){
+        if (null != map) {
             Object key = operands.next();
             argumentList.pop();
 
@@ -343,6 +349,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
         return value1;
     }
+
     private Object getAdd(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
         Object value1 = operands.next();
@@ -415,6 +422,83 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
 
         return evaluationContext.getDataObject();
+    }
+
+
+    private Object getReMap(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object source = operands.next();
+        argumentList.pop();
+
+        if (null == source) {
+            throw new ExpressionValidationException("First parameter cannot be null or empty");
+        }
+
+        Object value2 = operands.next();
+        argumentList.pop();
+        if (null == value2) {
+            return source;
+        }
+
+        Map mapper = mapListResolver.resolveDeepMap(value2);
+        if (null == mapper) {
+            throw new ExpressionValidationException("Second parameter has to be Map type");
+        }
+
+        String side = "LEFT";
+        if (operands.hasNext()) {
+            Object value3 = operands.next();
+            if (null != value3) {
+                side = value3.toString();
+            }
+        }
+
+        Map sourceMap = mapListResolver.resolveToMap(source);
+        if (null == sourceMap) {
+            List sourceList = mapListResolver.resolveToList(source);
+            if (null == sourceList) {
+                return source;
+            } else {
+                // handle list of Maps
+                List newList = new ArrayList();
+                for (Object o : sourceList) {
+                    Map sourceListMap = mapListResolver.resolveToMap(o);
+                    if (null == sourceListMap) {
+                        newList.add(o);
+                    } else {
+                        Map mappedObject = remapMap(sourceListMap, mapper, side);
+                        newList.add(mappedObject);
+                    }
+                }
+                return newList;
+            }
+        } else {
+            // handle single map
+            return remapMap(sourceMap, mapper, side);
+        }
+    }
+
+    private Map remapMap(Map<String, Object> source, Map<String, String> mapper, String side) {
+        Map<String, Object> newMap = new HashMap<>();
+        if (side.equalsIgnoreCase("LEFT")) {
+            for (String key : source.keySet()) {
+                if (mapper.containsKey(key)) {
+                    newMap.put(mapper.get(key), source.get(key));
+                } else {
+                    newMap.put(key, source.get(key));
+                }
+            }
+        } else {
+            for (String mapperKey : mapper.keySet()) {
+                if (source.containsKey(mapperKey)){
+                    newMap.put(mapper.get(mapperKey), source.get(mapperKey));
+                }else{
+                    newMap.put(mapperKey, mapper.get(mapperKey));
+                }
+
+            }
+        }
+
+        return newMap;
     }
 
     private Object getMap(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
