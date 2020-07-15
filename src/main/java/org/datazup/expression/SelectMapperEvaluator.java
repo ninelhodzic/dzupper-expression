@@ -3,6 +3,7 @@ package org.datazup.expression;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.apiinternal.ApiService;
+import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.PathExtractor;
@@ -33,7 +34,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
 
     public final static Function MAP = new Function("MAP", 0, Integer.MAX_VALUE);
-    public final static Function REMAP = new Function("REMAP", 2, 3);
+    public final static Function REMAP = new Function("REMAP", 2, 2);
+    public final static Function FOREACH = new Function("FOREACH", 2, 2);
 
     public final static Function REMOVE = new Function("REMOVE", 1);
     public final static Function THIS = new Function("THIS", 0);
@@ -90,6 +92,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         SimpleObjectEvaluator.PARAMETERS.add(MAP);
         SimpleObjectEvaluator.PARAMETERS.add(REMAP);
+        SimpleObjectEvaluator.PARAMETERS.add(FOREACH);
 
         SimpleObjectEvaluator.PARAMETERS.add(FIELD);
         SimpleObjectEvaluator.PARAMETERS.add(REMOVE);
@@ -142,6 +145,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getMap(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == REMAP) {
             return getReMap(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == FOREACH) {
+            return getForeach(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == SELECT) {
             return getSelect(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == REMOVE) {
@@ -424,6 +429,62 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         return evaluationContext.getDataObject();
     }
 
+    private Object getForeach(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object source = operands.next();
+        argumentList.pop();
+
+        if (null == source) {
+            return null;
+        }
+
+        Object value2 = operands.next();
+        argumentList.pop();
+        if (null == value2) {
+            return source;
+        }
+
+
+        String expressionToExecute = TypeUtils.resolveString(value2);
+        if (null == expressionToExecute || expressionToExecute.isEmpty()) {
+            return source;
+        }
+
+        Map sourceMap = mapListResolver.resolveToMap(source);
+        if (null == sourceMap) {
+            Collection l = mapListResolver.resolveToCollection(source);
+            if (null == l) {
+                return source;
+            } else {
+                List newList = new ArrayList();
+
+                Iterator iterator = l.iterator();
+                int index = 0;
+                while (iterator.hasNext()) {
+                    Object next = iterator.next();
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("_index", index);
+                    map.put("_current", next);
+
+                    try {
+                        Object res = evaluate(expressionToExecute, new PathExtractor(map, mapListResolver));
+                        newList.add(res);
+                    } catch (EvaluatorException e) {
+                        throw new ExpressionValidationException("Second parameter expression cannot be executed: " + expressionToExecute, e);
+                    }
+                    ++index;
+                }
+
+                return newList;
+            }
+        } else {
+            try {
+                Object res = evaluate(expressionToExecute, new PathExtractor(sourceMap, mapListResolver));
+                return res;
+            } catch (EvaluatorException e) {
+                throw new ExpressionValidationException("Second parameter expression cannot be executed: " + expressionToExecute, e);
+            }
+        }
+    }
 
     private Object getReMap(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         Object source = operands.next();
@@ -444,13 +505,6 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             throw new ExpressionValidationException("Second parameter has to be Map type");
         }
 
-        String side = "LEFT";
-        if (operands.hasNext()) {
-            Object value3 = operands.next();
-            if (null != value3) {
-                side = value3.toString();
-            }
-        }
 
         Map sourceMap = mapListResolver.resolveToMap(source);
         if (null == sourceMap) {
@@ -465,7 +519,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     if (null == sourceListMap) {
                         newList.add(o);
                     } else {
-                        Map mappedObject = remapMap(sourceListMap, mapper, side);
+                        Map mappedObject = remapMap(sourceListMap, mapper);
                         newList.add(mappedObject);
                     }
                 }
@@ -473,29 +527,15 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             }
         } else {
             // handle single map
-            return remapMap(sourceMap, mapper, side);
+            return remapMap(sourceMap, mapper);
         }
     }
 
-    private Map remapMap(Map<String, Object> source, Map<String, String> mapper, String side) {
+    private Map remapMap(Map<String, Object> source, Map<String, String> mapper) {
         Map<String, Object> newMap = new HashMap<>();
-        if (side.equalsIgnoreCase("LEFT")) {
-            for (String key : source.keySet()) {
-                if (mapper.containsKey(key)) {
-                    newMap.put(mapper.get(key), source.get(key));
-                } else {
-                    newMap.put(key, source.get(key));
-                }
-            }
-        } else {
-            for (String mapperKey : mapper.keySet()) {
-                if (source.containsKey(mapperKey)){
-                    newMap.put(mapper.get(mapperKey), source.get(mapperKey));
-                }else{
-                    newMap.put(mapperKey, mapper.get(mapperKey));
-                }
-
-            }
+        for (String mapperKey : mapper.keySet()) {
+            Object res = new PathExtractor(source, mapListResolver).extractObjectValue(mapperKey);
+            newMap.put(mapper.get(mapperKey), res);
         }
 
         return newMap;

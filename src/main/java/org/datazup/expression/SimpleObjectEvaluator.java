@@ -433,7 +433,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     private Boolean isOfTypeRecursively(Class objClass, String type){
         if (null==objClass){
-            return null;
+            return false;
         }
         Boolean isOfType = false;
 
@@ -924,7 +924,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         argumentList.pop();
 
         Boolean isTrue = true;
-        if (trueFalseObject instanceof Boolean) {
+        if (null==trueFalseObject){
+            isTrue = false;
+        }else if (trueFalseObject instanceof Boolean) {
             isTrue = (Boolean) trueFalseObject;
         } else if (trueFalseObject instanceof String) {
             try {

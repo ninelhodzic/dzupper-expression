@@ -38,8 +38,8 @@ public class SelectMapperEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void isRemapperRuns() throws EvaluatorException {
-        String expression = "REMAP(THIS(), '#{ \"tz\": \"noviValue\"}#')";
+    public void isRemapperRightComplexRuns() throws EvaluatorException {
+        String expression = "REMAP(THIS(), '#{ \"$child.value$\": \"noviValue\"}#')";
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
 
@@ -49,24 +49,24 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Map m = (Map) evaluated;
         Assert.assertFalse(m.containsKey("tz"));
         Assert.assertTrue(m.containsKey("noviValue"));
-        Assert.assertTrue(m.get("noviValue").equals(240));
-        Assert.assertFalse(m.keySet().size()==1);
+        Assert.assertTrue(m.get("noviValue").equals(1));
+        Assert.assertTrue(m.keySet().size()==1);
     }
 
     @Test
-    public void isRemapperRightRuns() throws EvaluatorException {
-        String expression = "REMAP(THIS(), '#{ \"tz\": \"noviValue\"}#', 'RIGHT')";
+    public void isForEachRuns() throws EvaluatorException {
+        String expression = "FOREACH($child.list$, '#IF(IS_OF_TYPE($_current$, 'HashMap'), $_current$, $_current$+\' \'+ $_index$)#')";
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
 
         Object evaluated = evaluator.evaluate(expression, pathExtractor);
         Assert.assertNotNull(evaluated);
-        Assert.assertTrue(evaluated instanceof Map);
-        Map m = (Map) evaluated;
-        Assert.assertFalse(m.containsKey("tz"));
-        Assert.assertTrue(m.containsKey("noviValue"));
-        Assert.assertTrue(m.get("noviValue").equals(240));
-        Assert.assertTrue(m.keySet().size()==1);
+        Assert.assertTrue(evaluated instanceof List);
+        List list = (List) evaluated;
+        Assert.assertTrue(list.size()==4);
+        Assert.assertTrue(list.get(0).equals("Hello 0"));
+        Assert.assertTrue(list.get(1).equals("Hi 1"));
+
     }
 
     @Test

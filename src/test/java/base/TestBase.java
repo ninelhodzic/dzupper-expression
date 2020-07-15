@@ -94,7 +94,9 @@ public abstract class TestBase {
         list.add(mp);
 
         List<Object> list1 = new ArrayList<>();
-        list1.add((new HashMap<>().put("n", "n")));
+        Map map = new HashMap();
+        map.put("n", "n");
+        list1.add(map);
 
         child.put("list", list);
         child.put("html", "<a href=\"http://twitter.com/download/iphone\" rel=\"nofollow\">Twitter for iPhone</a>");
