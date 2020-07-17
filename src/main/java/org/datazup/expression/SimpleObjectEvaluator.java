@@ -84,6 +84,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function MONTH = new Function("MONTH", 1);
     public final static Function YEAR = new Function("YEAR", 1);
 
+    public final static Function TRUE = new Function("TRUE", 0);
+    public final static Function FALSE = new Function("FALSE", 0);
+
     public final static Function DATE_DIFF = new Function("DATE_DIFF", 3);//firstDate, secondDate, TimeUnit
 
     public final static Function TO_DATE = new Function("TO_DATE", 1, 3);
@@ -176,6 +179,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(TO_STRING);
         PARAMETERS.add(TO_BOOLEAN);
 
+        PARAMETERS.add(TRUE);
+        PARAMETERS.add(FALSE);
+
         PARAMETERS.add(TO_LOWERCASE);
         PARAMETERS.add(TO_UPPERCASE);
 
@@ -265,6 +271,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return toStringValue(function, operands, argumentList, evaluationContext);
         } else if (function ==TO_BOOLEAN){
             return toBooleanValue(function, operands, argumentList, evaluationContext);
+        } else if (function==TRUE){
+            return true;
+        }else if (function == FALSE){
+            return false;
         }else if (function==TO_LOWERCASE){
             Object op1 = operands.next();
             argumentList.pop();

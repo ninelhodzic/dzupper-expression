@@ -35,7 +35,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     public final static Function MAP = new Function("MAP", 0, Integer.MAX_VALUE);
     public final static Function REMAP = new Function("REMAP", 2, 2);
-    public final static Function FOREACH = new Function("FOREACH", 2, 2);
+    public final static Function FOREACH = new Function("FOREACH", 2, 3);
 
     public final static Function REMOVE = new Function("REMOVE", 1);
     public final static Function THIS = new Function("THIS", 0);
@@ -443,6 +443,12 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return source;
         }
 
+        Object parentObj = null;
+        if (operands.hasNext()){
+            parentObj = operands.next();
+            argumentList.pop();
+        }
+
 
         String expressionToExecute = TypeUtils.resolveString(value2);
         if (null == expressionToExecute || expressionToExecute.isEmpty()) {
@@ -464,6 +470,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     Map<String, Object> map = new HashMap<>();
                     map.put("_index", index);
                     map.put("_current", next);
+                    if (null!=parentObj){
+                        map.put("_parent", parentObj);
+                    }
 
                     try {
                         Object res = evaluate(expressionToExecute, new PathExtractor(map, mapListResolver));
@@ -478,7 +487,13 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             }
         } else {
             try {
-                Object res = evaluate(expressionToExecute, new PathExtractor(sourceMap, mapListResolver));
+                Map map = new HashMap();
+                map.put("_current", sourceMap);
+                if (null!=parentObj){
+                    map.put("_parent", parentObj);
+                }
+
+                Object res = evaluate(expressionToExecute, new PathExtractor(map, mapListResolver));
                 return res;
             } catch (EvaluatorException e) {
                 throw new ExpressionValidationException("Second parameter expression cannot be executed: " + expressionToExecute, e);

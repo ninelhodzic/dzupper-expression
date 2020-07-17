@@ -101,7 +101,7 @@ public abstract class AbstractEvaluator<T> {
         this.functionArgumentSeparator = parameters.getFunctionArgumentSeparator();
         if (needFunctionSeparator1) {
             String funcArtSeparator = this.functionArgumentSeparator;
-            if (this.functionArgumentSeparator.equals(",")){
+            if (this.functionArgumentSeparator.equals(",")) {
                 //TODO: Handle situation when , is inside JSON string
             }
             tokenDelimitersBuilder.add(funcArtSeparator);
@@ -147,8 +147,8 @@ public abstract class AbstractEvaluator<T> {
                 AbstractVariableSet abstractVariableSet = (AbstractVariableSet) evaluationContext;
                 try {
                     value = (T) abstractVariableSet.get(operator);
-                }catch (Throwable e){
-                    throw new EvaluatorException("Cannot evaluate operator: "+operator, e);
+                } catch (Throwable e) {
+                    throw new EvaluatorException("Cannot evaluate operator: " + operator, e);
                 }
             }
             if (value instanceof String) {
@@ -162,9 +162,9 @@ public abstract class AbstractEvaluator<T> {
         } else if (token.isLiteralValue()) {
             String value = token.getLiteralValue();
 
-            if (value.startsWith("'#") && value.endsWith("#'")){
-                value = value.substring(2, value.length()-2);
-            }else  if (value.startsWith("'") && value.endsWith("'")) {
+            if (value.startsWith("'#") && value.endsWith("#'")) {
+                value = value.substring(2, value.length() - 2);
+            } else if (value.startsWith("'") && value.endsWith("'")) {
                 value = value.substring(1, value.length() - 1);
             }
             values.push((T) value);
@@ -173,7 +173,7 @@ public abstract class AbstractEvaluator<T> {
             values.push((T) value);
         } else {
             if (!token.isOperator()) {
-                throw new IllegalArgumentException("Token is not valid Operator: "+token.getContent());
+                throw new IllegalArgumentException("Token is not valid Operator: " + token.getContent());
             }
 
             Operator operator1 = token.getOperator();
@@ -199,18 +199,18 @@ public abstract class AbstractEvaluator<T> {
             try {
                 values.push(this.evaluate(function, this.getArguments(values, argCount), getArgumentList(argumentList, argCount), evaluationContext));
             } catch (Exception e) {
-                throw new EvaluatorException("Cannot process value and evaluate Function: "+function.getName(), e);
+                throw new EvaluatorException("Cannot process value and evaluate Function: " + function.getName(), e);
             }
         } else {
             throw new IllegalArgumentException("Invalid argument count for " + function.getName()
-                    +", min: "+function.getMinimumArgumentCount()+", max: "+function.getMaximumArgumentCount()
-                    +", count: "+argCount+" argumentList: "+ JsonUtils.getJsonFromObject(argumentList)+", values: "+JsonUtils.getJsonFromObject(values));
+                    + ", min: " + function.getMinimumArgumentCount() + ", max: " + function.getMaximumArgumentCount()
+                    + ", count: " + argCount + " argumentList: " + JsonUtils.getJsonFromObject(argumentList) + ", values: " + JsonUtils.getJsonFromObject(values));
         }
     }
 
     private Iterator<T> getArguments(Deque<T> values, int nb) {
         if (values.size() < nb) {
-            throw new IllegalArgumentException("There is values size: "+values.size()+" less then required: "+nb);
+            throw new IllegalArgumentException("There is values size: " + values.size() + " less then required: " + nb);
         } else {
             LinkedList result = new LinkedList();
 
@@ -240,56 +240,65 @@ public abstract class AbstractEvaluator<T> {
 
     public T evaluate(String expression, Object evaluationContext) throws EvaluatorException {
 
-            if (StringUtils.isEmpty(expression)) {
-                return null; //(T) Boolean.TRUE;
-            }
-            if (expression.startsWith("'") && expression.endsWith("'")) {
-                int count = StringUtils.countMatches(expression, "'");
-                if (count == 2) {
-                    try {
-                        expression = expression.substring(1, expression.length() - 1);
-                        T res = (T) expression;
-                        return res;
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
-                    }
-                }
-            }
-            if (expression.startsWith("{") && expression.endsWith("}")) {
+        if (expression.equalsIgnoreCase("true") || expression.equalsIgnoreCase("false")) {
+            Boolean b = Boolean.parseBoolean(expression);
+            return (T)b;
+        }
+
+        if (StringUtils.isEmpty(expression)) {
+            return null; //(T) Boolean.TRUE;
+        }
+        if (expression.startsWith("'") && expression.endsWith("'")) {
+            int count = StringUtils.countMatches(expression, "'");
+            if (count == 2) {
                 try {
-                    T value = (T) mapListResolver.resolveToMap(expression);
-                    if (null != value) {
-                        return value;
+                    expression = expression.substring(1, expression.length() - 1);
+                    if (expression.equalsIgnoreCase("true") || expression.equalsIgnoreCase("false")) {
+                        Boolean b = Boolean.parseBoolean(expression);
+                        return (T)b;
                     }
+                    T res = (T) expression;
+                    return res;
                 } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
                 }
             }
-
-            if (expression.startsWith("[") && expression.endsWith("]")) {
-                try {
-                    T value = (T) mapListResolver.resolveToList(expression);
-                    if (null != value) {
-                        return value;
-                    }
-                } catch (Exception e) {
+        }
+        if (expression.startsWith("{") && expression.endsWith("}")) {
+            try {
+                T value = (T) mapListResolver.resolveToMap(expression);
+                if (null != value) {
+                    return value;
                 }
+            } catch (Exception e) {
+            }
+        }
 
+        if (expression.startsWith("[") && expression.endsWith("]")) {
+            try {
+                T value = (T) mapListResolver.resolveToList(expression);
+                if (null != value) {
+                    return value;
+                }
+            } catch (Exception e) {
             }
 
-            if (Pattern.matches("[a-zA-Z0-9 _:\\.@]+", expression)) { //match string without special characters as string not expression
-                T res = (T) expression;
-                return res;
-            }
+        }
 
-            //expression = expression.replaceAll(System.lineSeparator(), " ");
+        if (Pattern.matches("[a-zA-Z0-9 _:\\.@]+", expression)) { //match string without special characters as string not expression
+            T res = (T) expression;
+            return res;
+        }
 
-            Deque<T> values = new LinkedList();
-            ArrayDeque<Token> argumentTokens = new ArrayDeque();
-            ArrayDeque stack = new ArrayDeque();
-            ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
-            Iterator tokens = this.tokenize(expression);
-            //  List<Token> functionArgumentList = null;
+        //expression = expression.replaceAll(System.lineSeparator(), " ");
+
+        Deque<T> values = new LinkedList();
+        ArrayDeque<Token> argumentTokens = new ArrayDeque();
+        ArrayDeque stack = new ArrayDeque();
+        ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
+        Iterator tokens = this.tokenize(expression);
+        //  List<Token> functionArgumentList = null;
 
         try {
             Token token;
@@ -414,9 +423,9 @@ public abstract class AbstractEvaluator<T> {
                 return values.pop();
             }
 
-        }catch (Exception e){
-            throw new EvaluatorException("Cannot evaluate expression: "+expression+"" +
-                    ", with tokens: "+JsonUtils.getJsonFromObject(Lists.newArrayList(tokens))+", for context: "+JsonUtils.getJsonFromObject(evaluationContext), e);
+        } catch (Exception e) {
+            throw new EvaluatorException("Cannot evaluate expression: " + expression + "" +
+                    ", with tokens: " + JsonUtils.getJsonFromObject(Lists.newArrayList(tokens)) + ", for context: " + JsonUtils.getJsonFromObject(evaluationContext), e);
         }
     }
 
@@ -449,7 +458,7 @@ public abstract class AbstractEvaluator<T> {
         }
     }
 
-    private BracketPair  getBracketPair(String token) {
+    private BracketPair getBracketPair(String token) {
         BracketPair result = (BracketPair) this.expressionBrackets.get(token);
         return result == null ? (BracketPair) this.functionBrackets.get(token) : result;
     }

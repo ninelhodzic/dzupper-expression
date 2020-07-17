@@ -90,6 +90,15 @@ public class BasicTest extends TestBase {
     }
 
     @Test
+    public void testTrue(){
+        String expression = "true";
+        Object res = evaluateOnMap(expression);
+        Assert.assertTrue (res instanceof Boolean);
+        Boolean bres = (Boolean)res;
+        Assert.assertTrue(bres);
+    }
+
+    @Test
     public void testGreaterOrEqualTRUE(){
         String expression = "1>=1";
         Object res = evaluateOnMap(expression);
