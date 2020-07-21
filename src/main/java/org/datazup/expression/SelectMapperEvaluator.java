@@ -620,20 +620,33 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             if (null == l) {
                 return source;
             } else {
-                List newList = new ArrayList();
+                List newList = new ArrayList(l);
 
-                Iterator iterator = l.iterator();
+                ListIterator iterator = newList.listIterator();// l.iterator();
                 int index = 0;
                 while (iterator.hasNext()) {
                     Object next = iterator.next();
                     Map<String, Object> map = new HashMap<>();
                     map.put("_index", index);
                     map.put("_current", next);
+                    map.put("_prev", index > 0 ? newList.get(index - 1) : null);
+                    map.put("_next", index == newList.size() - 1 ? null : newList.get(index + 1));
                     map.put("_parent", parentObj);
 
                     try {
                         Object res = evaluate(expressionToExecute, new PathExtractor(map, mapListResolver));
-                        newList.add(res);
+                        Map resMap = mapListResolver.resolveToMap(res);
+                        if (null != resMap) {
+                            resMap.remove("_index");
+                            resMap.remove("_current");
+                            resMap.remove("_prev");
+                            resMap.remove("_next");
+                            resMap.remove("_parent");
+                            iterator.set(resMap);
+                        } else {
+                            iterator.set(res);
+                        }
+                        //newList.add(res);
                     } catch (EvaluatorException e) {
                         throw new ExpressionValidationException("Second parameter expression cannot be executed: " + expressionToExecute, e);
                     }

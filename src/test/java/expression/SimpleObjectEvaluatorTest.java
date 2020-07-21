@@ -414,8 +414,31 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
         Number val = (Number) evaluaged;
         Assert.assertTrue(val.doubleValue() == 10d);
-
     }
+
+    @Test
+    public void testRoundDoubleValue() throws EvaluatorException {
+        String expression = "ROUND(0-10.23123523, 2)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+
+        Number val = (Number) evaluaged;
+        Assert.assertTrue(val.floatValue() == -10.24f);
+    }
+
+    @Test
+    public void testCeilDoubleValue() throws EvaluatorException {
+        String expression = "CEIL(0-10.23123523, 2)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+
+        Number val = (Number) evaluaged;
+        Assert.assertTrue(val.floatValue() == -10.23f);
+    }
+
+    @Test
     public void evaluateSubstringTest1() throws EvaluatorException{
         String expression = "SUBSTRING('Hello world!', 2, 5)";
         Object evaluaged = evaluate(expression);

@@ -68,7 +68,7 @@ public class Tokenizer {
         StringBuilder result = new StringBuilder();
         result.append('(');
         //result.append("'#.*?#'"); //special case
-        result.append("('#(?:[^'##']+|(?1))*+#')"); // added library: florianingerl - suppor for "recursion" in Java regex (?1)
+        result.append("('#(?:[^'#]+|(?1))*+#')"); // added library: florianingerl - suppor for "recursion" in Java regex (?1)
 
         result.append('|');
         result.append("('(?!#).*?(?!#)')");
