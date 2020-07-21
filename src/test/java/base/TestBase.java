@@ -119,6 +119,11 @@ public abstract class TestBase {
         parent.put("ts", 1464811823300L);
         parent.put("tz", 240);
 
+        List numbers = new ArrayList();
+        numbers.add(2);
+        numbers.add(5);
+        numbers.add(4);
+        parent.put("numbers", numbers);
         return parent;
     }
 

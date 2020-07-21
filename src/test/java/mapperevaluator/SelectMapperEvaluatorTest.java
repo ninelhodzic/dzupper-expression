@@ -23,6 +23,43 @@ public class SelectMapperEvaluatorTest extends TestBase {
     private static AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
     private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(mapListResolver);
 
+
+    @Test
+    public void isStepRuns() throws EvaluatorException {
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluator.evaluate("STEP($numbers$, '#ADD($_current$, 3)#', '#ADD($_current$, 3)#')", pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof List);
+        List m = (List) evaluated;
+        Assert.assertTrue(m.size()==5);
+    }
+
+    @Test
+    public void isStepSubStepRuns() throws EvaluatorException {
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluator.evaluate("STEP($numbers$, '#STEP($_current$, '#ADD($_current$, 3)#','#ADD($_current$, 3)#' )#')", pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof List);
+        List m = (List) evaluated;
+        Assert.assertTrue(m.size()==5);
+    }
+
+    @Test
+    public void isSumRuns() throws EvaluatorException {
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluator.evaluate("SUM($numbers$)", pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof Number);
+        Number m = (Number) evaluated;
+        Assert.assertTrue(m.doubleValue()== 11d);
+    }
+
     @Test
     public void isFilterFieldsRuns() throws EvaluatorException {
 
@@ -593,6 +630,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         //    SelectMapperEvaluator evaluator = new SelectMapperEvaluator();
 
+        //String expression = "KEYS(MAP(FIELD('this',EXTRACT($text$, '#this#'), 'false'), FIELD('longer',EXTRACT($text$, '#longer, test#'), 'false'), FIELD('has', EXTRACT($text$, '#longer,  test, has purposes#'),'false')))";
         String expression = "KEYS(MAP(FIELD('this',EXTRACT($text$, '#this#'), 'false'), FIELD('longer',EXTRACT($text$, '#longer, test#'), 'false'), FIELD('has', EXTRACT($text$, '#longer,  test, has purposes#'),'false')))";
 
         Object o = evaluator.evaluate(expression, pathExtractor);
@@ -729,6 +767,4 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(((Map) o).get("prop2").equals(23));
 
     }
-
-
 }

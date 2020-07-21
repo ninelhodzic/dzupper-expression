@@ -62,6 +62,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Operator DIVIDE = new Operator("/", 2, Operator.Associativity.LEFT, 11);
 
     public final static Operator MODULO = new Operator("%", 2, Operator.Associativity.LEFT, 12);
+    public final static Operator POW = new Operator("^", 2, Operator.Associativity.LEFT, 13);
 
     public final static Function IS_NULL = new Function("IS_NULL", 1);
     public final static Function SET_NULL = new Function("SET_NULL", 1);
@@ -146,6 +147,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         PARAMETERS.add(DIVIDE);
 
         PARAMETERS.add(MODULO);
+        PARAMETERS.add(POW);
 
 
         PARAMETERS.addExpressionBracket(BracketPair.PARENTHESES);
@@ -1076,7 +1078,6 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         String fieldValue = fieldValueObject.toString().toLowerCase();
 
-        // String[] fieldValueSplited = fieldValue.toLowerCase().split("\\b");
         Token token = argumentList.pop();
 
         String topicValues = operands.next().toString();
@@ -1336,7 +1337,16 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     @Override
     protected Object evaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
-        if (operator == MODULO) {
+
+        if (operator==POW){
+            Tuple<Number, Number> numberTuple = getNumberTuple(operands);
+
+            if (null != numberTuple.getKey() && null != numberTuple.getValue()) {
+                return Math.pow(numberTuple.getKey().doubleValue(),  numberTuple.getValue().doubleValue());
+            }
+            throw new ExpressionValidationException("Values cannot be null type");
+
+        }else if (operator == MODULO) {
             Tuple<Number, Number> numberTuple = getNumberTuple(operands);
 
             // TODO - write test ases for Modulo
