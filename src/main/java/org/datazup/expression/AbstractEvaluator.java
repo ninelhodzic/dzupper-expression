@@ -240,14 +240,16 @@ public abstract class AbstractEvaluator<T> {
 
     public T evaluate(String expression, Object evaluationContext) throws EvaluatorException {
 
+        if (StringUtils.isEmpty(expression)) {
+            return null; //(T) Boolean.TRUE;
+        }
+
         if (expression.equalsIgnoreCase("true") || expression.equalsIgnoreCase("false")) {
             Boolean b = Boolean.parseBoolean(expression);
             return (T)b;
         }
 
-        if (StringUtils.isEmpty(expression)) {
-            return null; //(T) Boolean.TRUE;
-        }
+
         if (expression.startsWith("'") && expression.endsWith("'")) {
             int count = StringUtils.countMatches(expression, "'");
             if (count == 2) {

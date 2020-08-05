@@ -28,6 +28,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function LIST = new Function("LIST", 0, Integer.MAX_VALUE);
     public final static Function SORTED_SET = new Function("SORTED_SET", 1, Integer.MAX_VALUE);
     public final static Function LIST_PARTITION = new Function("LIST_PARTITION", 1, 2);
+    public final static Function LIST_UNPARTITION = new Function("LIST_UNPARTITION", 1);
 
 
     public final static Function MAP = new Function("MAP", 0, Integer.MAX_VALUE);
@@ -92,6 +93,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         SimpleObjectEvaluator.PARAMETERS.add(LIST);
         SimpleObjectEvaluator.PARAMETERS.add(SORTED_SET);
         SimpleObjectEvaluator.PARAMETERS.add(LIST_PARTITION);
+        SimpleObjectEvaluator.PARAMETERS.add(LIST_UNPARTITION);
+
 
 
         SimpleObjectEvaluator.PARAMETERS.add(MAP);
@@ -153,6 +156,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getSortedSet(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == LIST_PARTITION) {
             return getListPartition(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == LIST_UNPARTITION) {
+            return getListUnPartition(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == MAP) {
             return getMap(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == REMAP) {
@@ -367,6 +372,33 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
     }
 
+    private Object getListUnPartition(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object value1 = operands.next();
+        Token token1 = argumentList.pop();
+
+        if (null == value1)
+            return null;
+
+        List l = mapListResolver.resolveToList(value1);
+        if (null==l){
+            return value1;
+        }
+
+        List newList = new ArrayList();
+        for (Object oList: l){
+            Collection lTmp = (Collection)oList;
+            if (null!=lTmp){
+                Iterator iTmp = lTmp.iterator();
+                while(iTmp.hasNext()){
+                    Object t = iTmp.next();
+                    newList.add(t);
+                }
+            }else{
+                // TODO do we need to do something here??? - what if list contains some other type of objcts?
+            }
+        }
+        return newList;
+    }
     private Object getListPartition(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
         Object value1 = operands.next();

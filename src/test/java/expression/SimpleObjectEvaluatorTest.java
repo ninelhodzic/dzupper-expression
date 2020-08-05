@@ -39,42 +39,42 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }*/
 
     @Test
-    public void evaluateSizeOfListExpressionTest() throws EvaluatorException{
+    public void evaluateSizeOfListExpressionTest() throws EvaluatorException {
         String expression = "SIZE_OF($list$)==1";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Boolean b = (Boolean)evaluaged;
+        Boolean b = (Boolean) evaluaged;
         Assert.assertTrue(b);
     }
 
     @Test
-    public void evaluateNullFunctionMissingExpressionTest() throws EvaluatorException{
+    public void evaluateNullFunctionMissingExpressionTest() throws EvaluatorException {
         String expression = "IS_NULL(child.name.nemaovo)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Boolean b = (Boolean)evaluaged;
+        Boolean b = (Boolean) evaluaged;
         Assert.assertTrue(b);
     }
 
     @Test
-    public void evaluateNullFunctionExpressionTest() throws EvaluatorException{
+    public void evaluateNullFunctionExpressionTest() throws EvaluatorException {
         String expression = "IS_NULL(child.name1)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Boolean b = (Boolean)evaluaged;
+        Boolean b = (Boolean) evaluaged;
         Assert.assertTrue(b);
     }
 
     @Test
-    public void evaluateNotNullFunctionExpressionTest() throws EvaluatorException{
+    public void evaluateNotNullFunctionExpressionTest() throws EvaluatorException {
         String expression = "!IS_NULL(child.name)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Boolean b = (Boolean)evaluaged;
+        Boolean b = (Boolean) evaluaged;
         Assert.assertTrue(b);
     }
 
@@ -87,33 +87,33 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
     public Object evaluate(String expression) throws EvaluatorException {
         SimpleResolverHelper mapListResolver = new SimpleResolverHelper();
-        PathExtractor pathExtractor = new PathExtractor(getData(),mapListResolver);
+        PathExtractor pathExtractor = new PathExtractor(getData(), mapListResolver);
         SimpleObjectEvaluator evaluator = SimpleObjectEvaluator.getInstance(mapListResolver); //new SimpleObjectEvaluator();
-        return  evaluator.evaluate(expression,pathExtractor);
+        return evaluator.evaluate(expression, pathExtractor);
     }
 
     @Test
-    public void evaluateRegexFunctionExpressionTest()  throws EvaluatorException{
+    public void evaluateRegexFunctionExpressionTest() throws EvaluatorException {
         String expression = "REGEX_MATCH($child.name$, '\\bchild\\b')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Boolean b = (Boolean)evaluaged;
+        Boolean b = (Boolean) evaluaged;
         Assert.assertTrue(b);
     }
 
     @Test
-    public void evaluateRegexFunctionExpressionStringTest()  throws EvaluatorException{
+    public void evaluateRegexFunctionExpressionStringTest() throws EvaluatorException {
         String expression = "REGEX_MATCH('this is [ERROR] of something', '#\\[ERROR\\]#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Boolean b = (Boolean)evaluaged;
+        Boolean b = (Boolean) evaluaged;
         Assert.assertTrue(b);
     }
 
     @Test
-    public void evaluateRegexExtractFunctionExpressionTest()  throws EvaluatorException{
+    public void evaluateRegexExtractFunctionExpressionTest() throws EvaluatorException {
         String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#',0)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -124,18 +124,18 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
 
     @Test
-    public void evaluateRegexExtractMulitFunctionExpressionTest()  throws EvaluatorException{
+    public void evaluateRegexExtractMulitFunctionExpressionTest() throws EvaluatorException {
         String expression = "REGEX_EXTRACT($log$, '#(?<class>[^\\s]+)+\\s(?<thread>[^\\s]+)+\\s(?<level>[^\\s]+)+\\s(?<message>.*)#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof List);
-        Assert.assertTrue(((List)evaluaged).size()==5);
+        Assert.assertTrue(((List) evaluaged).size() == 5);
     }
 
     @Test
-    public void evaluateRegexExtractHtmlTest() throws EvaluatorException{
+    public void evaluateRegexExtractHtmlTest() throws EvaluatorException {
 
-         // #<a[^>]*?>(.*?)<\/a>#
+        // #<a[^>]*?>(.*?)<\/a>#
         // #<a.*>(.*?)<#
         String expression = "REGEX_EXTRACT($child.html$, '#<a[^>]*?>(.*?)</a>#', 1)";
         Object evaluaged = evaluate(expression);
@@ -145,7 +145,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexMatchHtmlTest() throws EvaluatorException{
+    public void evaluateRegexMatchHtmlTest() throws EvaluatorException {
 
         // #<a[^>]*?>(.*?)<\/a>#
         // #<a.*>(.*?)<#
@@ -157,7 +157,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexExtractByGroupFunctionExpressionTest() throws EvaluatorException{
+    public void evaluateRegexExtractByGroupFunctionExpressionTest() throws EvaluatorException {
         String expression = "REGEX_EXTRACT($child.name$, '#(?<=c)(.*)(?=d)#',1)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -165,7 +165,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexExtractNumber() throws EvaluatorException{
+    public void evaluateRegexExtractNumber() throws EvaluatorException {
         String expression = "TO_INT(REGEX_EXTRACT($fieldPrice$, '#\\d+#',1))";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -174,7 +174,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexExtractNumberWithSeparator() throws EvaluatorException{
+    public void evaluateRegexExtractNumberWithSeparator() throws EvaluatorException {
         String expression = "TO_DOUBLE(REGEX_EXTRACT($fieldPrice1$, '#\\d+,.\\d+#'))";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -183,7 +183,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRegexExtractNumberWithSeparator2() throws EvaluatorException{
+    public void evaluateRegexExtractNumberWithSeparator2() throws EvaluatorException {
         String expression = "TO_DOUBLE(REGEX_EXTRACT($fieldPrice2$, '#\\d+(,|.)\\d+#',0))";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -211,13 +211,13 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     */
 
     @Test
-    public void evaluateExtractorFnTest() throws EvaluatorException{
+    public void evaluateExtractorFnTest() throws EvaluatorException {
         String expression = "EXTRACT($text$, '#this,longer,   test, has purposes#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof List);
-        List l = (List)evaluaged;
-        Assert.assertTrue(l.size()==4);
+        List l = (List) evaluaged;
+        Assert.assertTrue(l.size() == 4);
         Assert.assertTrue("this".equals(l.get(0)));
         Assert.assertTrue("longer".equals(l.get(1)));
         Assert.assertTrue("test".equals(l.get(2)));
@@ -225,99 +225,99 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateContainsStringSimpleTest() throws EvaluatorException{
+    public void evaluateContainsStringSimpleTest() throws EvaluatorException {
 
         String expression = "CONTAINS($text$, 'longer text')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateContainsStringSimpleCaseInsensitiveTest() throws EvaluatorException{
+    public void evaluateContainsStringSimpleCaseInsensitiveTest() throws EvaluatorException {
 
         String expression = "CONTAINS($text$,'ALL_INSENSITIVE', 'longer TEXT')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateContainsStringSimpleCaseInsensitiveMoreTest() throws EvaluatorException{
+    public void evaluateContainsStringSimpleCaseInsensitiveMoreTest() throws EvaluatorException {
 
         String expression = "CONTAINS($text$,'ALL_INSENSITIVE', 'longer TEXT', 'Test', 'tesTing purposes')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateContainsStringSimpleCaseInsensitiveFalseTest() throws EvaluatorException{
+    public void evaluateContainsStringSimpleCaseInsensitiveFalseTest() throws EvaluatorException {
 
         String expression = "CONTAINS($text$,'ALL', 'longer TEXT')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertFalse((Boolean)evaluaged);
+        Assert.assertFalse((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateContainsStringSimpleNotMatchTest() throws EvaluatorException{
+    public void evaluateContainsStringSimpleNotMatchTest() throws EvaluatorException {
 
         String expression = "CONTAINS($text$, 'longer text 1')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertFalse((Boolean)evaluaged);
+        Assert.assertFalse((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateContainsListSimpleTest() throws EvaluatorException{
+    public void evaluateContainsListSimpleTest() throws EvaluatorException {
 
         String expression = "CONTAINS($child.list$, 'Hello')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateContainsListSimpleFalseTest() throws EvaluatorException{
+    public void evaluateContainsListSimpleFalseTest() throws EvaluatorException {
 
         String expression = "CONTAINS($child.list$, 'Hello 1')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertFalse((Boolean)evaluaged);
+        Assert.assertFalse((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateContainsListAnyTest() throws EvaluatorException{
+    public void evaluateContainsListAnyTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "CONTAINS($child.list$,'ANY', 'Hello', 'ahoj')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateContainMapKeyAllTest() throws EvaluatorException{
+    public void evaluateContainMapKeyAllTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "CONTAINS($child$,'ALL', 'list', 'html')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateRandomTest() throws EvaluatorException{
+    public void evaluateRandomTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "RANDOM_NUM()";
@@ -328,7 +328,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRandomMaxTest() throws EvaluatorException{
+    public void evaluateRandomMaxTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "RANDOM_NUM(50)";
@@ -339,7 +339,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRandomMinMaxTest() throws EvaluatorException{
+    public void evaluateRandomMinMaxTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "RANDOM_NUM(1, 10)";
@@ -350,7 +350,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRandomChartTest() throws EvaluatorException{
+    public void evaluateRandomChartTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "RANDOM_CHAR(' ')";
@@ -361,7 +361,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRandomWordTest() throws EvaluatorException{
+    public void evaluateRandomWordTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "RANDOM_WORD('This is the word')";
@@ -372,7 +372,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateRandomSentenceTest() throws EvaluatorException{
+    public void evaluateRandomSentenceTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "RANDOM_SENTENCE('This is the word. Another Sentence. Third to check... more to solve.. this is interesting')";
@@ -383,7 +383,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSplitterDocTest() throws EvaluatorException{
+    public void evaluateSplitterDocTest() throws EvaluatorException {
 
         // Note: Insensitive doesn't workf ro lists or maps
         String expression = "SPLITTER('This is the word. Another Sentence. Third to check... more to solve.. this is interesting','\\.', 'en', 'true')";
@@ -400,8 +400,8 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Integer);
 
-        Integer val = (Integer)evaluaged;
-        Assert.assertTrue(val==5);
+        Integer val = (Integer) evaluaged;
+        Assert.assertTrue(val == 5);
 
     }
 
@@ -439,7 +439,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSubstringTest1() throws EvaluatorException{
+    public void evaluateSubstringTest1() throws EvaluatorException {
         String expression = "SUBSTRING('Hello world!', 2, 5)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -449,7 +449,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSubstringTest2() throws EvaluatorException{
+    public void evaluateSubstringTest2() throws EvaluatorException {
         String expression = "SUBSTRING('Hello world!', 2)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -458,8 +458,9 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         System.out.println(evaluaged);
     }
 
+
     @Test
-    public void evaluateSimpleDateConversionBasedOnFormatTest(){
+    public void evaluateSimpleDateConversionBasedOnFormatTest() {
         DateTime dt = DateTime.now(DateTimeZone.UTC);
         String format = "YYYY";
 
@@ -476,33 +477,38 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
     }
 
-    private void assertDayDates(Instant dt){
-
-        //LocalDateTime.ofInstant(dt, ZoneOffset.UTC).getHour();
-
-
-
-        Assert.assertTrue(DateTimeUtils.getHour(dt)==0);//dt.get(ChronoField.HOUR_OF_DAY)==0);
-        Assert.assertTrue(DateTimeUtils.getMinute(dt)==0);//dt.get(ChronoField.MINUTE_OF_DAY)==0);//dt.getMinuteOfDay()==0);
-        Assert.assertTrue(DateTimeUtils.getSecond(dt)==0);//dt.get(ChronoField.SECOND_OF_DAY)==0);//dt.getSecondOfDay()==0);
+    private void assertDayDates(Instant dt) {
+        Assert.assertTrue(DateTimeUtils.getHour(dt) == 0);//dt.get(ChronoField.HOUR_OF_DAY)==0);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt) == 0);//dt.get(ChronoField.MINUTE_OF_DAY)==0);//dt.getMinuteOfDay()==0);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt) == 0);//dt.get(ChronoField.SECOND_OF_DAY)==0);//dt.getSecondOfDay()==0);
         assertDateZeroMinutes(dt);
     }
 
-    private void assertDateZeroMinutes(Instant dt){
+    private void assertDateZeroMinutes(Instant dt) {
 
-        Assert.assertTrue(DateTimeUtils.getMinute(dt)==0);//dt.get(ChronoField.MINUTE_OF_HOUR)==0);//dt.getMinuteOfHour()==0);
-        Assert.assertTrue(DateTimeUtils.getSecond(dt)==0);//dt.get(ChronoField.SECOND_OF_MINUTE)==0);//dt.getSecondOfMinute()==0);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt) == 0);//dt.get(ChronoField.MINUTE_OF_HOUR)==0);//dt.getMinuteOfHour()==0);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt) == 0);//dt.get(ChronoField.SECOND_OF_MINUTE)==0);//dt.getSecondOfMinute()==0);
     }
 
     @Test
-    public void evaluateDateTimeToDateFormatExpressionTest() throws EvaluatorException{
+    public void evaluateDateTimeToDateFormatExpressionTest() throws EvaluatorException {
         String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
         assertDayDates(dt);
+    }
+
+    @Test
+    public void evaluateAdditionToDate() throws EvaluatorException {
+        String expression = "DATE_DIFF(DATE_MINUS(NOW(), 10, 'DAYS'), DATE_PLUS(NOW(), 10, 'DAYS'), 'DAYS')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertNotNull(evaluaged instanceof Number);
+        Number number = (Number)evaluaged;
+        Assert.assertTrue(number.intValue()==20);
     }
 
     @Test
@@ -513,12 +519,12 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
-        System.out.println(dt.toEpochMilli()+" "+dt.toString()+", orig: "+1464811823300L+" (06/01/2016 @ 8:10pm (UTC)) - offset: "+240);
+        Instant dt = (Instant) evaluaged;
+        System.out.println(dt.toEpochMilli() + " " + dt.toString() + ", orig: " + 1464811823300L + " (06/01/2016 @ 8:10pm (UTC)) - offset: " + 240);
     }
 
     @Test
-    public void evaluateDateTimeWeekOfMonthTest() throws EvaluatorException{
+    public void evaluateDateTimeWeekOfMonthTest() throws EvaluatorException {
         String expression = "WEEK(TO_DATE('20171219121750.783Z'))";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -527,48 +533,48 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateTimeWeekOfYEarTest() throws EvaluatorException{
+    public void evaluateDateTimeWeekOfYEarTest() throws EvaluatorException {
         String expression = "WEEK_OF_YEAR(TO_DATE('20171219121750.783Z'))";
         Object evaluated = evaluate(expression);
         Assert.assertNotNull(evaluated);
         Assert.assertTrue(evaluated instanceof Integer);
         Assert.assertTrue(evaluated.equals(51));
-        System.out.println("Week of the year: "+evaluated+" for date: 20171219121750.783Z");
+        System.out.println("Week of the year: " + evaluated + " for date: 20171219121750.783Z");
     }
 
     @Test
-    public void evaluateDateTimeToDateFormatExpressionLdapFormatTest() throws EvaluatorException{
+    public void evaluateDateTimeToDateFormatExpressionLdapFormatTest() throws EvaluatorException {
         String expression = "TO_DATE('20171219121750.783Z')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
 
-        Assert.assertTrue(DateTimeUtils.getYear(dt)==2017);
-        Assert.assertTrue(DateTimeUtils.getMonth(dt)==12);
-        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==19);
-        Assert.assertTrue(DateTimeUtils.getHour(dt)==12);
-        Assert.assertTrue(DateTimeUtils.getMinute(dt)==17);
-        Assert.assertTrue(DateTimeUtils.getSecond(dt)==50);
+        Assert.assertTrue(DateTimeUtils.getYear(dt) == 2017);
+        Assert.assertTrue(DateTimeUtils.getMonth(dt) == 12);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt) == 19);
+        Assert.assertTrue(DateTimeUtils.getHour(dt) == 12);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt) == 17);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt) == 50);
 
     }
 
     @Test
-    public void evaluateToDate() throws EvaluatorException{
+    public void evaluateToDate() throws EvaluatorException {
         String expression = "TO_DATE('2018-02-26 14:42:04')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
 
-        Assert.assertTrue(DateTimeUtils.getYear(dt)==2018);
-        Assert.assertTrue(DateTimeUtils.getMonth(dt)==02);
-        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==26);
-        Assert.assertTrue(DateTimeUtils.getHour(dt)==14);
-        Assert.assertTrue(DateTimeUtils.getMinute(dt)==42);
-        Assert.assertTrue(DateTimeUtils.getSecond(dt)==04);
+        Assert.assertTrue(DateTimeUtils.getYear(dt) == 2018);
+        Assert.assertTrue(DateTimeUtils.getMonth(dt) == 02);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt) == 26);
+        Assert.assertTrue(DateTimeUtils.getHour(dt) == 14);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt) == 42);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt) == 04);
 
     }
 
@@ -579,33 +585,33 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Long);
 
-        Long val = (Long)evaluaged;
-        Assert.assertTrue(val==10);
+        Long val = (Long) evaluaged;
+        Assert.assertTrue(val == 10);
 
     }
 
     @Test
-    public void evaluateToDateFormated() throws EvaluatorException{
+    public void evaluateToDateFormated() throws EvaluatorException {
         String expression = "TO_DATE('2018-02-26 14:42:04', '#YYYY-MM-dd hh a#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
 
-        Assert.assertTrue(DateTimeUtils.getYear(dt)==2018);
-        Assert.assertTrue(DateTimeUtils.getMonth(dt)==02);
-        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==26);
-        Assert.assertTrue(DateTimeUtils.getHour(dt)==14);
+        Assert.assertTrue(DateTimeUtils.getYear(dt) == 2018);
+        Assert.assertTrue(DateTimeUtils.getMonth(dt) == 02);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt) == 26);
+        Assert.assertTrue(DateTimeUtils.getHour(dt) == 14);
 
-        Assert.assertTrue(DateTimeUtils.getMinute(dt)==0);
-        Assert.assertTrue(DateTimeUtils.getSecond(dt)==0);
+        Assert.assertTrue(DateTimeUtils.getMinute(dt) == 0);
+        Assert.assertTrue(DateTimeUtils.getSecond(dt) == 0);
     }
 
     //
 
     @Test
-    public void evaluateDateTimeToHourExpressionTest() throws EvaluatorException{
+    public void evaluateDateTimeToHourExpressionTest() throws EvaluatorException {
         String expression = "HOUR($dateTime$)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -622,12 +628,12 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateTimeToDateHourAMPMFormatExpressionTest() throws EvaluatorException{
+    public void evaluateDateTimeToDateHourAMPMFormatExpressionTest() throws EvaluatorException {
         String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd hh ZZZ a#')";
         Object evaluated1 = evaluate(expression);
 
         Assert.assertTrue(evaluated1 instanceof Instant);
-        Instant instant = (Instant)evaluated1;
+        Instant instant = (Instant) evaluated1;
 
         LocalDateTime l = LocalDateTime.ofInstant(instant, ZoneId.of("UTC")); //new LocalDateTime(instant);
         java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("hh a").withZone(ZoneId.of("UTC"));
@@ -638,21 +644,21 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         java.sql.Date date = new java.sql.Date(instant.toEpochMilli());
 
 
-        System.out.println("Instant: "+evaluated1);
-        System.out.println("Formatted Instant: "+formatter.format(instant));
-        System.out.println("Formatted sql.Date: "+df.format(date));
+        System.out.println("Instant: " + evaluated1);
+        System.out.println("Formatted Instant: " + formatter.format(instant));
+        System.out.println("Formatted sql.Date: " + df.format(date));
 
 
         expression = "HOUR($dateTime$)";
         evaluated1 = evaluate(expression);
-        System.out.println("Hour: "+evaluated1);
+        System.out.println("Hour: " + evaluated1);
 
 
         expression = "TO_DATE($dateTime1$, '#YYYY-MM-dd hh a#')";
         evaluated1 = evaluate(expression);
 
         Assert.assertTrue(evaluated1 instanceof Instant);
-        instant = (Instant)evaluated1;
+        instant = (Instant) evaluated1;
 
         date = new java.sql.Date(instant.toEpochMilli());
 
@@ -663,7 +669,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
         expression = "HOUR($dateTime1$)";
         evaluated1 = evaluate(expression);
-        System.out.println("Hour1: "+evaluated1);
+        System.out.println("Hour1: " + evaluated1);
 
         /*Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
@@ -673,78 +679,78 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateDateToDateFormatExpressionTest() throws EvaluatorException{
+    public void evaluateDateToDateFormatExpressionTest() throws EvaluatorException {
         String expression = "TO_DATE($date$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
         assertDayDates(dt);
     }
 
     @Test
-    public void evaluateDateTimeStringToDateFormatExpressionTest() throws EvaluatorException{
+    public void evaluateDateTimeStringToDateFormatExpressionTest() throws EvaluatorException {
         String expression = "TO_DATE($dateTimeString$, '#YYYY-MM-dd#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
         assertDayDates(dt);
     }
 
     @Test
-    public void evaluateDateTimeToDateHourFormatExpressionTest() throws EvaluatorException{
+    public void evaluateDateTimeToDateHourFormatExpressionTest() throws EvaluatorException {
         String expression = "TO_DATE($dateTime$, '#YYYY-MM-dd hh#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
         assertDateZeroMinutes(dt);
     }
 
 
     @Test
-    public void evaluateDateTimeToDateYearFormatExpressionTest() throws EvaluatorException{
+    public void evaluateDateTimeToDateYearFormatExpressionTest() throws EvaluatorException {
         String expression = "TO_DATE($dateTime$, '#YYYY#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
         assertDayDates(dt);
-        Assert.assertTrue(DateTimeUtils.getMonth(dt)==1);//dt.get(ChronoField.MONTH_OF_YEAR)==1);//dt.getMonthOfYear()==1);
-        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==1);//dt.get(ChronoField.DAY_OF_YEAR)==1);//dt.getDayOfYear()==1);
+        Assert.assertTrue(DateTimeUtils.getMonth(dt) == 1);//dt.get(ChronoField.MONTH_OF_YEAR)==1);//dt.getMonthOfYear()==1);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt) == 1);//dt.get(ChronoField.DAY_OF_YEAR)==1);//dt.getDayOfYear()==1);
     }
 
     @Test
-    public void evaluateDateTimeStringToDateMonthFormatExpressionTest() throws EvaluatorException{
+    public void evaluateDateTimeStringToDateMonthFormatExpressionTest() throws EvaluatorException {
         String expression = "TO_DATE($dateTimeString$, '#YYYY-MM#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
         assertDayDates(dt);
-        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==1);//dt.get(ChronoField.DAY_OF_MONTH)==1);//dt.getDayOfMonth()==1);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt) == 1);//dt.get(ChronoField.DAY_OF_MONTH)==1);//dt.getDayOfMonth()==1);
     }
 
     @Test
-    public void evaluateTweetStringToDateMonthFormatExpressionTest() throws EvaluatorException{
+    public void evaluateTweetStringToDateMonthFormatExpressionTest() throws EvaluatorException {
         String expression = "TO_DATE($tweetCreatedAt$, '#YYYY-MM#')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Instant);
 
-        Instant dt = (Instant)evaluaged;
+        Instant dt = (Instant) evaluaged;
         assertDayDates(dt);
-        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt)==1);//dt.get(ChronoField.DAY_OF_MONTH)==1);//dt.getDayOfMonth()==1);
+        Assert.assertTrue(DateTimeUtils.getDayOfMonth(dt) == 1);//dt.get(ChronoField.DAY_OF_MONTH)==1);//dt.getDayOfMonth()==1);
     }
 
     @Test
-    public void evaluateIfTrueFalsValueTest() throws EvaluatorException{
+    public void evaluateIfTrueFalsValueTest() throws EvaluatorException {
         String expression = "IF(!IS_NULL($child.name$), TO_INT('10'), '20')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -753,7 +759,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateIfTrueFalsValueAsIntegerTest() throws EvaluatorException{
+    public void evaluateIfTrueFalsValueAsIntegerTest() throws EvaluatorException {
         String expression = "IF(TO_INT('0')-TO_INT('1'), TO_INT('10'), '20')";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -762,33 +768,34 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateBooleanSimple() throws EvaluatorException{
+    public void evaluateBooleanSimple() throws EvaluatorException {
         String expression = "'true'=='true'";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
+
     @Test
-    public void evaluateBooleanObjectSimple() throws EvaluatorException{
+    public void evaluateBooleanObjectSimple() throws EvaluatorException {
         String expression = "$child.valueTrue$=='true'";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateBooleanObjectComplex() throws EvaluatorException{
+    public void evaluateBooleanObjectComplex() throws EvaluatorException {
         String expression = "!IS_NULL($child.valueTrue$) && $child.valueTrue$=='true'";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Boolean);
-        Assert.assertTrue((Boolean)evaluaged);
+        Assert.assertTrue((Boolean) evaluaged);
     }
 
     @Test
-    public void evaluateSimplePathExtractor() throws EvaluatorException{
+    public void evaluateSimplePathExtractor() throws EvaluatorException {
         String expression = "$child.name$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -796,14 +803,15 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSimplePathExtractorList() throws EvaluatorException{
+    public void evaluateSimplePathExtractorList() throws EvaluatorException {
         String expression = "$child.list$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof List);
     }
+
     @Test
-    public void evaluateSimplePathExtractorLisParams() throws EvaluatorException{
+    public void evaluateSimplePathExtractorLisParams() throws EvaluatorException {
         String expression = "$child.list[0]$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -812,7 +820,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSimplePathExtractorLisParamsLast() throws EvaluatorException{
+    public void evaluateSimplePathExtractorLisParamsLast() throws EvaluatorException {
         String expression = "$child.list[last]$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
@@ -821,7 +829,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void evaluateSimplePathExtractorLisParamsLastChil() throws EvaluatorException{
+    public void evaluateSimplePathExtractorLisParamsLastChil() throws EvaluatorException {
         String expression = "$child.list[last].third.thirdlist[0]$";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);

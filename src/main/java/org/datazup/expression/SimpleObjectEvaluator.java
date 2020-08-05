@@ -92,6 +92,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     public final static Function DATE_DIFF = new Function("DATE_DIFF", 3);//firstDate, secondDate, TimeUnit
 
+    public final static Function DATE_MINUS = new Function("DATE_MINUS", 3);//firstDate, secondDate, TimeUnit
+    public final static Function DATE_PLUS = new Function("DATE_PLUS", 3);//firstDate, secondDate, TimeUnit
+
     public final static Function TO_DATE = new Function("TO_DATE", 1, 3);
     public final static Function TO_INT = new Function("TO_INT", 1);
     public final static Function TO_LONG = new Function("TO_LONG", 1);
@@ -179,6 +182,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         PARAMETERS.add(DATE_DIFF);
 
+        PARAMETERS.add(DATE_MINUS);
+        PARAMETERS.add(DATE_PLUS);
+
         PARAMETERS.add(TO_DATE);
         PARAMETERS.add(TO_INT);
         PARAMETERS.add(TO_LONG);
@@ -263,6 +269,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return ifTrueFalse(function, operands, argumentList, evaluationContext);
         } else if (function == DATE_DIFF) {
             return timeDiff(function, operands, argumentList, evaluationContext);
+        } else if (function == DATE_MINUS) {
+            return getDateMinus(function, operands, argumentList, evaluationContext);
+        } else if (function == DATE_PLUS) {
+            return getDatePlus(function, operands, argumentList, evaluationContext);
         } else if (function == ABS) {
             return abs(function, operands, argumentList, evaluationContext);
         } else if (function == ROUND) {
@@ -550,7 +560,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             df.setRoundingMode(RoundingMode.FLOOR);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
             return newNum.floatValue();
-        }else{
+        } else {
             return Math.round(number.doubleValue());
         }
 
@@ -579,7 +589,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             df.setRoundingMode(RoundingMode.CEILING);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
             return newNum.floatValue();
-        }else{
+        } else {
             return Math.ceil(number.doubleValue());
         }
     }
@@ -616,6 +626,50 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return d;
         }
         return null;
+    }
+
+    private Object manageDateAddSubtract(String operation, Iterator<Object> operands, Deque<Token> argumentList) {
+        Object firstDTObj = operands.next();
+        argumentList.pop();
+        Object durationObj = operands.next();
+        argumentList.pop();
+        Object timeUnitObj = operands.next();
+        argumentList.pop();
+
+        Instant firstDt = DateTimeUtils.resolve(firstDTObj);
+        if (null == firstDt) {
+            return firstDTObj;
+        }
+        Long duration = TypeUtils.resolveLong(durationObj);
+        if (null == duration) {
+            duration = 0l;
+        }
+
+        String timeUnitString = TypeUtils.resolveString(timeUnitObj);
+        if (null == timeUnitString) {
+            timeUnitString = "Minutes";
+        }
+        ChronoUnit timeUnit = ChronoUnit.valueOf(timeUnitString.toUpperCase());
+
+        Instant result = firstDt;
+        switch (operation) {
+            case "PLUS":
+                result = firstDt.plus(duration, timeUnit);
+                break;
+            case "MINUS":
+                result = firstDt.minus(duration, timeUnit);
+                break;
+        }
+
+        return result;
+    }
+
+    private Object getDatePlus(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        return manageDateAddSubtract("PLUS", operands, argumentList);
+    }
+
+    private Object getDateMinus(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+        return manageDateAddSubtract("MINUS", operands, argumentList);
     }
 
     private Object timeDiff(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
