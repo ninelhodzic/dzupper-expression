@@ -3,6 +3,8 @@ package expression;
 import base.TestBase;
 import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SimpleObjectEvaluator;
+import org.datazup.expression.context.ConcurrentExecutionContext;
+import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
 import org.datazup.utils.DateTimeUtils;
@@ -27,6 +29,8 @@ import java.util.TimeZone;
  */
 
 public class SimpleObjectEvaluatorTest extends TestBase {
+
+    private static ExecutionContext executionContext = new ConcurrentExecutionContext();
 
     /*@Test
     public void isEmptyExpressionEvaluatedAsTrueTest() throws EvaluatorException{
@@ -88,7 +92,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     public Object evaluate(String expression) throws EvaluatorException {
         SimpleResolverHelper mapListResolver = new SimpleResolverHelper();
         PathExtractor pathExtractor = new PathExtractor(getData(), mapListResolver);
-        SimpleObjectEvaluator evaluator = SimpleObjectEvaluator.getInstance(mapListResolver); //new SimpleObjectEvaluator();
+        SimpleObjectEvaluator evaluator = SimpleObjectEvaluator.getInstance(executionContext, mapListResolver); //new SimpleObjectEvaluator();
         return evaluator.evaluate(expression, pathExtractor);
     }
 

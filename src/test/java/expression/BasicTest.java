@@ -3,6 +3,8 @@ package expression;
 import base.TestBase;
 import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SimpleObjectEvaluator;
+import org.datazup.expression.context.ConcurrentExecutionContext;
+import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
 import org.junit.Assert;
@@ -19,10 +21,11 @@ public class BasicTest extends TestBase {
 
     private static SimpleObjectEvaluator evaluator;
     private static SimpleResolverHelper mapListResolver =new SimpleResolverHelper();
+    private static ExecutionContext executionContext = new ConcurrentExecutionContext();
 
     @BeforeClass
     public static void init(){
-        evaluator = SimpleObjectEvaluator.getInstance(mapListResolver);
+        evaluator = SimpleObjectEvaluator.getInstance(executionContext, mapListResolver);
     }
 
     private Object evaluateOnMap(String expression){

@@ -32,6 +32,7 @@ public class DateTimeUtils {
                     getFormatter("yyyy-MM-dd HH:mm:ss"),
 
                     getFormatter("EEE MMM dd HH:mm:ss Z yyyy"),
+                    getFormatter("EEE MMM dd HH:mm:ss zz yyyy"),
                     getFormatter("YYYYMMddHHmmss.SSSZ"));
 
     private static DateTimeFormatter getFormatter(String format) {

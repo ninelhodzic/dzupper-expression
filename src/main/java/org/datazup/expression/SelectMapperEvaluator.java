@@ -4,6 +4,7 @@ package org.datazup.expression;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.apiinternal.ApiService;
 import org.datazup.exceptions.EvaluatorException;
+import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.PathExtractor;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * Created by admin@datazup on 3/21/16.
  */
 public class SelectMapperEvaluator extends SimpleObjectEvaluator {
+
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectMapperEvaluator.class);
 
@@ -67,20 +69,20 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     private static SelectMapperEvaluator INSTANCE;
 
-    public static SelectMapperEvaluator getInstance(AbstractResolverHelper mapListResolver) {
+    public static SelectMapperEvaluator getInstance(ExecutionContext executionContext, AbstractResolverHelper mapListResolver) {
         synchronized (SelectMapperEvaluator.class) {
             if (null == INSTANCE) {
                 synchronized (SelectMapperEvaluator.class) {
                     if (null == INSTANCE)
-                        INSTANCE = new SelectMapperEvaluator(mapListResolver);
+                        INSTANCE = new SelectMapperEvaluator(executionContext,mapListResolver);
                 }
             }
         }
         return INSTANCE;
     }
 
-    public SelectMapperEvaluator(AbstractResolverHelper mapListResolver) {
-        super(mapListResolver);
+    public SelectMapperEvaluator(ExecutionContext executionContext, AbstractResolverHelper mapListResolver) {
+        super(executionContext,mapListResolver);
     }
 
     private ApiService apiService;

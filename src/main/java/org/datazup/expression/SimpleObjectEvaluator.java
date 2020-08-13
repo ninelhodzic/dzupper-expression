@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractResolverHelper;
@@ -227,24 +228,24 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
     private static SimpleObjectEvaluator INSTANCE;
 
-    public static SimpleObjectEvaluator getInstance(AbstractResolverHelper mapListResolver) {
+    public static SimpleObjectEvaluator getInstance(ExecutionContext executionContext, AbstractResolverHelper mapListResolver) {
         synchronized (SimpleObjectEvaluator.class) {
             if (null == INSTANCE) {
                 synchronized (SimpleObjectEvaluator.class) {
                     if (null == INSTANCE)
-                        INSTANCE = new SimpleObjectEvaluator(mapListResolver);
+                        INSTANCE = new SimpleObjectEvaluator(executionContext, mapListResolver);
                 }
             }
         }
         return INSTANCE;
     }
 
-    private SimpleObjectEvaluator() {
-        super(PARAMETERS, new SimpleResolverHelper());
+    private SimpleObjectEvaluator(ExecutionContext executionContext) {
+        super(executionContext,PARAMETERS, new SimpleResolverHelper());
     }
 
-    protected SimpleObjectEvaluator(AbstractResolverHelper mapListResolver) {
-        super(PARAMETERS, mapListResolver);
+    protected SimpleObjectEvaluator(ExecutionContext executionContext, AbstractResolverHelper mapListResolver) {
+        super(executionContext, PARAMETERS, mapListResolver);
     }
 
     @Override

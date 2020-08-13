@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.exceptions.EvaluatorException;
+import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.utils.JsonUtils;
@@ -25,8 +26,11 @@ public abstract class AbstractEvaluator<T> {
     private final Map<String, BracketPair> expressionBrackets;
 
     protected AbstractResolverHelper mapListResolver;
+    protected ExecutionContext executionContext;
 
-    protected AbstractEvaluator(Parameters parameters, AbstractResolverHelper mapListResolver) {
+
+    protected AbstractEvaluator(ExecutionContext executionContext, Parameters parameters, AbstractResolverHelper mapListResolver) {
+        this.executionContext = executionContext;
         this.mapListResolver = mapListResolver;
 
         ArrayList tokenDelimitersBuilder = new ArrayList();
@@ -197,7 +201,10 @@ public abstract class AbstractEvaluator<T> {
     private void doFunction(Deque<T> values, Function function, int argCount, Deque<Token> argumentList, Object evaluationContext) throws EvaluatorException {
         if (function.getMinimumArgumentCount() <= argCount && function.getMaximumArgumentCount() >= argCount) {
             try {
-                values.push(this.evaluate(function, this.getArguments(values, argCount), getArgumentList(argumentList, argCount), evaluationContext));
+                Iterator<T> arguments = this.getArguments(values, argCount);
+                Deque<Token> tokenList = getArgumentList(argumentList, argCount);
+                T res = this.evaluate(function, arguments, tokenList, evaluationContext);
+                values.push(res);
             } catch (Exception e) {
                 throw new EvaluatorException("Cannot process value and evaluate Function: " + function.getName(), e);
             }
@@ -213,11 +220,9 @@ public abstract class AbstractEvaluator<T> {
             throw new IllegalArgumentException("There is values size: " + values.size() + " less then required: " + nb);
         } else {
             LinkedList result = new LinkedList();
-
             for (int i = 0; i < nb; ++i) {
                 result.addFirst(values.pop());
             }
-
             return result.iterator();
         }
     }
@@ -227,11 +232,9 @@ public abstract class AbstractEvaluator<T> {
             throw new IllegalArgumentException();
         } else {
             Deque<Token> result = new ArrayDeque<>();
-
             for (int i = 0; i < nb; ++i) {
                 result.addFirst(values.pop());
             }
-
             return result;
         }
     }

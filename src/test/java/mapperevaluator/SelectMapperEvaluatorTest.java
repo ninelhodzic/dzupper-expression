@@ -3,6 +3,8 @@ package mapperevaluator;
 import base.TestBase;
 import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SelectMapperEvaluator;
+import org.datazup.expression.context.ConcurrentExecutionContext;
+import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
@@ -21,7 +23,8 @@ import java.util.regex.Pattern;
 public class SelectMapperEvaluatorTest extends TestBase {
 
     private static AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
-    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(mapListResolver);
+    private static ExecutionContext executionContext = new ConcurrentExecutionContext();
+    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(executionContext,mapListResolver);
 
         /*
     @Test
