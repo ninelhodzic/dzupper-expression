@@ -11,6 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <underscore.version>1.57</underscore.version>
     </properties>
 
     <dependencies>
@@ -28,6 +29,11 @@
             <version>1.1.9</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.javadev</groupId>
+            <artifactId>underscore</artifactId>
+            <version>${underscore.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>

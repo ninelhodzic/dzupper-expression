@@ -25,6 +25,8 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
 import java.util.*;
@@ -99,7 +101,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     public final static Function TO_INT = new Function("TO_INT", 1);
     public final static Function TO_LONG = new Function("TO_LONG", 1);
     public final static Function TO_DOUBLE = new Function("TO_DOUBLE", 1);
-    public final static Function TO_STRING = new Function("TO_STRING", 1);
+    public final static Function TO_STRING = new Function("TO_STRING", 1, 2);
     public final static Function TO_BOOLEAN = new Function("TO_BOOLEAN", 1);
 
     public final static Function ROUND = new Function("ROUND", 1, 2);
@@ -513,6 +515,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     private Object toBooleanValue(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
         Object valueObj = operands.next();
         argumentList.pop();
+        if(null==valueObj){
+            return false;
+        }
 
         return TypeUtils.resolveBoolean(valueObj);
     }
@@ -1107,6 +1112,20 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         if (null == valueObject)
             return valueObject;
+
+        if (operands.hasNext()) {
+            String format = (String) operands.next();
+            argumentList.pop();
+
+            if (!StringUtils.isEmpty(format)) {
+                format = format.replace("#", "");
+            }
+            Instant instant = DateTimeUtils.resolve(valueObject);
+            if (null != instant) {
+                String formattedString = DateTimeFormatter.ofPattern(format).format(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
+                return formattedString;
+            }
+        }
 
         return valueObject.toString();
     }

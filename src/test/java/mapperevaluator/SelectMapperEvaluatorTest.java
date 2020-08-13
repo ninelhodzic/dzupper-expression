@@ -23,6 +23,66 @@ public class SelectMapperEvaluatorTest extends TestBase {
     private static AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
     private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(mapListResolver);
 
+        /*
+    @Test
+    public void evaluateSimpleGroupByPropertyAsMapDefinedTest()throws EvaluatorException{
+        String expression = "GROUP_BY($listOfMaps$, MAP(FIELD('property','type')))";
+        // should be: {type1:[{}...], type2:[{}...]}
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Map);
+    }
+
+    @Test
+    public void evaluateSimpleGroupByPropertyAsMapDefinedChildrenKeyTest()throws EvaluatorException{
+        String expression = "GROUP_BY($listOfMaps$, MAP(FIELD('property','type'),FIELD('childrenKey', 'children')))";
+        // should be: [{type:'type1, children:[]}, {type:'type2, children:[]}]
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof List);
+    }*/
+
+    @Test
+    public void evaluateSimpleGroupByPropertyTest()throws EvaluatorException{
+        String expression = "GROUP_BY($listOfMaps$, 'type')";
+        // should be: {type1:[{}...], type2:[{}...]}
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof Map);
+        Map result = (Map)evaluated;
+        Assert.assertTrue(result.size()==2);
+
+    }
+
+    @Test
+    public void evaluateSimpleGroupByPropertyAsMapDefinedChildrenKeyCustomPropertyNameTest()throws EvaluatorException{
+        String expression = "GROUP_BY($listOfMaps$, \n" +
+                "FIELD('properties',\n" +
+                "   LIST(\n" +
+                "       MAP(\n" +
+                "           FIELD('property', 'type'),\n" +
+                "              FIELD('propertyNewName', 'name')\n" +
+                "          ),\n" +
+                "       MAP(\n" +
+                "           FIELD('property', 'sourceType'),\n" +
+                "           FIELD('propertyNewName', 'category')\n" +
+                "       )\n" +
+                "      )\n" +
+                "   )\n" +
+                "   FIELD('childrenKey', 'children')\n" +
+                ")";
+
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluator.evaluate(expression, pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof List);
+    }
+
 
     @Test
     public void isStepRuns() throws EvaluatorException {

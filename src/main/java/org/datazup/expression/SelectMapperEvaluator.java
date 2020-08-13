@@ -7,6 +7,7 @@ import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.PathExtractor;
+import org.datazup.utils.GroupByUtils;
 import org.datazup.utils.ListPartition;
 import org.datazup.utils.SortingUtils;
 import org.datazup.utils.TypeUtils;
@@ -47,6 +48,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function TEMPLATE = new Function("T", 1, 2);
     public final static Function EXCLUDE_FIELDS = new Function("EXCLUDE_FIELDS", 1, Integer.MAX_VALUE);
     public final static Function API = new Function("API", 2, 2);
+
+    public final static Function GROUP_BY = new Function("GROUP_BY", 2, 3);
 
 
     public final static Function GET = new Function("GET", 2, 3);
@@ -96,11 +99,11 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         SimpleObjectEvaluator.PARAMETERS.add(LIST_UNPARTITION);
 
 
-
         SimpleObjectEvaluator.PARAMETERS.add(MAP);
         SimpleObjectEvaluator.PARAMETERS.add(REMAP);
         SimpleObjectEvaluator.PARAMETERS.add(FOREACH);
         SimpleObjectEvaluator.PARAMETERS.add(STEP);
+        SimpleObjectEvaluator.PARAMETERS.add(GROUP_BY);
 
         SimpleObjectEvaluator.PARAMETERS.add(FIELD);
         SimpleObjectEvaluator.PARAMETERS.add(REMOVE);
@@ -166,6 +169,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getForeach(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == STEP) {
             return getStep(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == GROUP_BY) {
+            return getGroupBy(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == SELECT) {
             return getSelect(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == REMOVE) {
@@ -380,25 +385,26 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return null;
 
         List l = mapListResolver.resolveToList(value1);
-        if (null==l){
+        if (null == l) {
             return value1;
         }
 
         List newList = new ArrayList();
-        for (Object oList: l){
-            Collection lTmp = (Collection)oList;
-            if (null!=lTmp){
+        for (Object oList : l) {
+            Collection lTmp = (Collection) oList;
+            if (null != lTmp) {
                 Iterator iTmp = lTmp.iterator();
-                while(iTmp.hasNext()){
+                while (iTmp.hasNext()) {
                     Object t = iTmp.next();
                     newList.add(t);
                 }
-            }else{
+            } else {
                 // TODO do we need to do something here??? - what if list contains some other type of objcts?
             }
         }
         return newList;
     }
+
     private Object getListPartition(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
         Object value1 = operands.next();
@@ -456,7 +462,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return null;
 
         if (apiService.contains(apiKeyName)) {
-            return apiService.execute(apiKeyName, value2, evaluationContext);
+            Object result = apiService.execute(apiKeyName, value2, evaluationContext);
+            return result;
         }
         return null;
     }
@@ -577,6 +584,69 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
 
         return evaluationContext.getDataObject();
+    }
+
+    private Object getGroupBy(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        Object source = operands.next();
+        argumentList.pop();
+
+        if (null == source) {
+            return null;
+        }
+
+        List list = mapListResolver.resolveToList(source);
+        if (null == list) {
+            throw new ExpressionValidationException("Source should be of List type");
+        }
+
+        if (!operands.hasNext())
+            return source;
+
+        Object propertySource = operands.next();
+        argumentList.pop();
+
+        Object childrenKey = null;
+        if (operands.hasNext()) {
+            childrenKey = operands.next();
+            argumentList.pop();
+        }
+
+        Map properties = mapListResolver.resolveToMap(propertySource);
+        List<Map<String,Object>> propertyList = new ArrayList();
+        //List<Map<String, Object>> properties = mapListResolver.resolveToList(propertySource);
+        if (null == properties) {
+            String propertyName = (String) propertySource;
+            if (null == propertyName)
+                throw new ExpressionValidationException("Property to group by is not String nor properly defined Map");
+            Map newMap = new HashMap();
+            newMap.put("propertyName", propertyName);
+            propertyList.add(newMap);
+        }else{
+            Object propertiesObject = properties.get("properties");
+            propertyList = mapListResolver.resolveToList(propertiesObject);
+        }
+
+        GroupByUtils groupByUtils = new GroupByUtils(this, mapListResolver);
+        if (null == childrenKey) {
+            // return Map { prop1Val:[] ... } - we'll use only first Property from properties list
+            Map<Object, List<Object>> result = groupByUtils.groupByProperty(list, propertyList.get(0));
+            return result;
+        } else {
+            // return List of Maps [{ propName:propValue, propName1: propVale1, children: [] }] - we'll use only first Property from properties list
+            String childrenKeyStr = "children";
+            Map childrenKeyMap = mapListResolver.resolveToMap(childrenKey);
+            if (null!=childrenKeyMap){
+                Object chTmp = childrenKeyMap.get("childrenKey");
+                if(null!=chTmp){
+                    childrenKeyStr = (String)chTmp;
+                }
+            }else if (childrenKey instanceof String){
+                childrenKeyStr = (String)childrenKey;
+            }
+
+            List<Map<Object, List<Object>>> result = groupByUtils.groupByProperties(list, propertyList, childrenKeyStr);
+            return result;
+        }
     }
 
     private Object getStep(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
