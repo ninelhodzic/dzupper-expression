@@ -252,7 +252,6 @@ public abstract class AbstractEvaluator<T> {
             return (T)b;
         }
 
-
         if (expression.startsWith("'") && expression.endsWith("'")) {
             int count = StringUtils.countMatches(expression, "'");
             if (count == 2) {

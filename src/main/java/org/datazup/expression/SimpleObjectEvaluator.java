@@ -1544,18 +1544,6 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 return !((Boolean) next);
             }
         } else if (operator == NOT_EQUAL) {
-            /*Object left = operands.next();
-            Object right = operands.next();
-            if (null == left && null == right)
-                return false;
-            if (null == left || null == right)
-                return true;
-
-            if (left instanceof Number && right instanceof Number) {
-                return ((Number) left).doubleValue() != ((Number) right).doubleValue();
-            } else {
-                return !left.equals(right);
-            }*/
             return !getEqual(operator, operands, evaluationContext);
         } else if (operator == EQUAL) {
             return getEqual(operator, operands, evaluationContext);
