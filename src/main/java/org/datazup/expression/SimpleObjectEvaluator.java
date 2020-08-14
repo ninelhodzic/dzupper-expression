@@ -460,8 +460,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             return evaluateRandomCharFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == SUBSTRING) {
             return substring(function, operands, argumentList, evaluationContext);
-        } else {
+        }
+        /*else {
             return nextFunctionEvaluate(function, operands, argumentList, evaluationContext);
+        }*/
+        else {
+            return super.evaluate(function, operands, argumentList, evaluationContext);
         }
     }
 
@@ -1465,10 +1469,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         return super.evaluate(function, operands, argumentList, evaluationContext);
     }
 
-    protected Object superFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList,
+   /* protected Object superFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList,
                                            Object evaluationContext) {
         return super.evaluate(function, operands, argumentList, evaluationContext);
-    }
+    }*/
 
     @Override
     protected Object evaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {

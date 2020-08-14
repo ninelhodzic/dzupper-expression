@@ -2,8 +2,8 @@ package org.datazup.expression;
 
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.datazup.apiinternal.ApiService;
 import org.datazup.exceptions.EvaluatorException;
+import org.datazup.expression.context.ConcurrentExecutionContext;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.AbstractResolverHelper;
@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
  * Created by admin@datazup on 3/21/16.
  */
 public class SelectMapperEvaluator extends SimpleObjectEvaluator {
-
 
     private static final Logger LOG = LoggerFactory.getLogger(SelectMapperEvaluator.class);
 
@@ -49,7 +48,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function FIELD = new Function("FIELD", 2, 3);
     public final static Function TEMPLATE = new Function("T", 1, 2);
     public final static Function EXCLUDE_FIELDS = new Function("EXCLUDE_FIELDS", 1, Integer.MAX_VALUE);
-    public final static Function API = new Function("API", 2, 2);
+    //public final static Function API = new Function("API", 2, 2);
 
     public final static Function GROUP_BY = new Function("GROUP_BY", 2, 3);
 
@@ -68,6 +67,11 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
 
     private static SelectMapperEvaluator INSTANCE;
+    static ConcurrentExecutionContext executionContext = new ConcurrentExecutionContext();
+
+    public static SelectMapperEvaluator getInstance(AbstractResolverHelper mapListResolver) {
+        return getInstance(executionContext, mapListResolver);
+    }
 
     public static SelectMapperEvaluator getInstance(ExecutionContext executionContext, AbstractResolverHelper mapListResolver) {
         synchronized (SelectMapperEvaluator.class) {
@@ -85,15 +89,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         super(executionContext,mapListResolver);
     }
 
-    private ApiService apiService;
-
-    public void setApiService(ApiService apiService) {
-        this.apiService = apiService;
-    }
-
     static {
 
-        // SimpleObjectEvaluator.PARAMETERS.add(FOREACH);
         SimpleObjectEvaluator.PARAMETERS.add(SELECT);
         SimpleObjectEvaluator.PARAMETERS.add(LIST);
         SimpleObjectEvaluator.PARAMETERS.add(SORTED_SET);
@@ -117,7 +114,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         SimpleObjectEvaluator.PARAMETERS.add(VALUES);
         SimpleObjectEvaluator.PARAMETERS.add(TEMPLATE);
         SimpleObjectEvaluator.PARAMETERS.add(EXCLUDE_FIELDS);
-        SimpleObjectEvaluator.PARAMETERS.add(API);
+//        SimpleObjectEvaluator.PARAMETERS.add(API);
 
         SimpleObjectEvaluator.PARAMETERS.add(GET);
         SimpleObjectEvaluator.PARAMETERS.add(ADD);
@@ -134,7 +131,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     }
 
     @Override
-    protected Object nextFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+    protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
         if (function == MAX) {
             return getMax(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == MIN) {
@@ -193,10 +190,14 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getValues(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == EXCLUDE_FIELDS) {
             return getExcludeFields(function, operands, argumentList, (PathExtractor) evaluationContext);
-        } else if (function == API) {
+        }/* else if (function == API) {
             return evaluateApiFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
-        } else {
+        } */
+        /*else {
             return superFunctionEvaluate(function, operands, argumentList, evaluationContext);
+        }*/
+        else {
+            return super.evaluate(function, operands, argumentList, evaluationContext);
         }
     }
 
@@ -443,7 +444,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     }
 
 
-    private Object evaluateApiFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    /*private Object evaluateApiFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
         Object value1 = operands.next();
         Token token1 = argumentList.pop();
@@ -469,7 +470,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
         return null;
     }
-
+*/
 
    /* @Deprecated
     private Object foreach(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
