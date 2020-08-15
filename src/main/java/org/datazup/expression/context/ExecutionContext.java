@@ -1,5 +1,5 @@
 package org.datazup.expression.context;
 
-public interface ExecutionContext<T> {
-    ContextWrapper create(T object);
+public interface ExecutionContext {
+    ContextWrapper create(Object object);
 }

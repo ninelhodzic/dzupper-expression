@@ -1,5 +1,6 @@
 package org.datazup.apiinternal;
 
+import org.datazup.expression.context.ContextWrapper;
 import org.datazup.pathextractor.PathExtractor;
 
 import java.util.HashMap;
@@ -8,23 +9,22 @@ import java.util.Map;
 /**
  * Created by admin@datazup on 11/22/17.
  */
-public abstract class  ApiServiceBase implements ApiService {
+public abstract class ApiServiceBase implements ApiService {
 
-    protected Map<String,APIRunnable> apis = new HashMap<>();
+    protected Map<String, APICallable> apis = new HashMap<>();
 
-    public void add(APIRunnable apiRunnable){
-        apis.put(apiRunnable.getName(), apiRunnable);
+    public void add(APICallable apiCallable) {
+        apis.put(apiCallable.getName(), apiCallable);
     }
 
-    public Boolean contains(String apiName){
+    public Boolean contains(String apiName) {
         return apis.containsKey(apiName);
     }
 
-    public Object execute(String apiName, Object params, PathExtractor context){
-
-        if (apis.containsKey(apiName)){
-            APIRunnable api = apis.get(apiName);
-            Object apiResponse = api.run(params, context);
+    public ContextWrapper execute(String apiName, ContextWrapper params, PathExtractor context) {
+        if (apis.containsKey(apiName)) {
+            APICallable api = apis.get(apiName);
+            ContextWrapper apiResponse = api.run(params, context);
             return apiResponse;
         }
         return null;

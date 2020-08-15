@@ -4,6 +4,7 @@ import base.TestBase;
 import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.expression.context.ConcurrentExecutionContext;
+import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
@@ -93,7 +94,8 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         SimpleResolverHelper mapListResolver = new SimpleResolverHelper();
         PathExtractor pathExtractor = new PathExtractor(getData(), mapListResolver);
         SimpleObjectEvaluator evaluator = SimpleObjectEvaluator.getInstance(executionContext, mapListResolver); //new SimpleObjectEvaluator();
-        return evaluator.evaluate(expression, pathExtractor);
+        ContextWrapper wrapper = evaluator.evaluate(expression, pathExtractor);
+        return wrapper.get();
     }
 
     @Test

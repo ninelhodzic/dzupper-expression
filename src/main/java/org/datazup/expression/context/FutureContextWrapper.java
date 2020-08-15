@@ -23,7 +23,8 @@ public class FutureContextWrapper implements ContextWrapper {
                 throw new ExpressionContextException(e);
             }
 
+        }else {
+            return null;
         }
-        return null;
     }
 }

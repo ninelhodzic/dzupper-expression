@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.exceptions.EvaluatorException;
+import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
@@ -16,7 +17,7 @@ import java.util.regex.Pattern;
 /**
  * Created by admin@datazup on 3/14/16.
  */
-public abstract class AbstractEvaluator<T> {
+public abstract class AbstractEvaluator {
     private final Tokenizer tokenizer;
     private final Map<String, Function> functions;
     private final Map<String, List<Operator>> operators;
@@ -136,29 +137,38 @@ public abstract class AbstractEvaluator<T> {
         return operator;
     }
 
-    private void output(Deque<T> values, Token token, Object evaluationContext) throws EvaluatorException {
-        if (token.isLiteral()) {
-            String operator = token.getLiteral();
-            Constant ct = (Constant) this.constants.get(operator);
-            T value = ct == null ? null : this.evaluate(ct, evaluationContext);
+    private void resolveLiteral(Deque<ContextWrapper> values, Token token, Object evaluationContext){
+        String operator = token.getLiteral();
+        Constant ct =  this.constants.get(operator);
+        ContextWrapper res = this.evaluate(ct, evaluationContext);
+        Object resolved = res.get();
+        values.push(resolved != null ? res : this.toValue(operator, evaluationContext));
+    }
 
-            values.push(value != null ? value : this.toValue(operator, evaluationContext));
+    private void output(Deque<ContextWrapper> values, Token token, Object evaluationContext) throws EvaluatorException {
+        if (token.isLiteral()) {
+           resolveLiteral(values, token, evaluationContext);
         } else if (token.isLookupLiteral()) {
             String operator = token.getLookupLiteralValue();
-            Constant ct = (Constant) this.constants.get(operator);
-            T value = ct == null ? null : this.evaluate(ct, evaluationContext);
+            Constant ct = this.constants.get(operator);
+            ContextWrapper value = ct == null ? null : this.evaluate(ct, evaluationContext);
             if (value == null && evaluationContext != null && evaluationContext instanceof AbstractVariableSet) {
                 AbstractVariableSet abstractVariableSet = (AbstractVariableSet) evaluationContext;
                 try {
-                    value = (T) abstractVariableSet.get(operator);
+                    Object evaluated =  abstractVariableSet.get(operator);
+                    value = executionContext.create(evaluated);
                 } catch (Throwable e) {
                     throw new EvaluatorException("Cannot evaluate operator: " + operator, e);
                 }
             }
-            if (value instanceof String) {
-                String strVal = (String) value;
-                if (StringUtils.isNotEmpty(strVal) && NumberUtils.isNumber(strVal)) {
-                    value = (T) NumberUtils.createNumber(strVal);
+
+            if (null!=value) {
+                Object resolved = value.get();
+                if(null!=resolved && resolved instanceof String) {
+                    String strVal = (String) resolved;
+                    if (StringUtils.isNotEmpty(strVal) && NumberUtils.isNumber(strVal)) {
+                        value = executionContext.create(NumberUtils.createNumber(strVal));
+                    }
                 }
             }
 
@@ -171,10 +181,11 @@ public abstract class AbstractEvaluator<T> {
             } else if (value.startsWith("'") && value.endsWith("'")) {
                 value = value.substring(1, value.length() - 1);
             }
-            values.push((T) value);
+
+            values.push(executionContext.create(value));
         } else if (token.isNumber()) {
             Number value = token.getNumber();
-            values.push((T) value);
+            values.push(executionContext.create(value));
         } else {
             if (!token.isOperator()) {
                 throw new IllegalArgumentException("Token is not valid Operator: " + token.getContent());
@@ -185,25 +196,29 @@ public abstract class AbstractEvaluator<T> {
         }
 
     }
+    protected ContextWrapper wrap(Object object){
+        return executionContext.create(object);
+    }
 
-    protected T evaluate(Constant constant, Object evaluationContext) {
+
+    protected ContextWrapper evaluate(Constant constant, Object evaluationContext) {
         throw new RuntimeException("evaluate(Constant) is not implemented for " + constant.getName());
     }
 
-    protected T evaluate(Operator operator, Iterator<T> operands, Object evaluationContext) {
+    protected ContextWrapper evaluate(Operator operator, Iterator<ContextWrapper> operands, Object evaluationContext) {
         throw new RuntimeException("evaluate(Operator, Iterator) is not implemented for " + operator.getSymbol());
     }
 
-    protected T evaluate(Function function, Iterator<T> arguments, Deque<Token> argumentList, Object evaluationContext) {
+    protected ContextWrapper evaluate(Function function, Iterator<ContextWrapper> arguments, Deque<Token> argumentList, Object evaluationContext) {
         throw new RuntimeException("evaluate(Function, Iterator) is not implemented for " + function.getName());
     }
 
-    private void doFunction(Deque<T> values, Function function, int argCount, Deque<Token> argumentList, Object evaluationContext) throws EvaluatorException {
+    private void doFunction(Deque<ContextWrapper> values, Function function, int argCount, Deque<Token> argumentList, Object evaluationContext) throws EvaluatorException {
         if (function.getMinimumArgumentCount() <= argCount && function.getMaximumArgumentCount() >= argCount) {
             try {
-                Iterator<T> arguments = this.getArguments(values, argCount);
+                Iterator<ContextWrapper> arguments = this.getArguments(values, argCount);
                 Deque<Token> tokenList = getArgumentList(argumentList, argCount);
-                T res = this.evaluate(function, arguments, tokenList, evaluationContext);
+                ContextWrapper res = this.evaluate(function, arguments, tokenList, evaluationContext);
                 values.push(res);
             } catch (Exception e) {
                 throw new EvaluatorException("Cannot process value and evaluate Function: " + function.getName(), e);
@@ -215,7 +230,7 @@ public abstract class AbstractEvaluator<T> {
         }
     }
 
-    private Iterator<T> getArguments(Deque<T> values, int nb) {
+    private Iterator<ContextWrapper> getArguments(Deque<ContextWrapper> values, int nb) {
         if (values.size() < nb) {
             throw new IllegalArgumentException("There is values size: " + values.size() + " less then required: " + nb);
         } else {
@@ -239,17 +254,18 @@ public abstract class AbstractEvaluator<T> {
         }
     }
 
-    protected abstract T toValue(String var1, Object var2);
+    protected abstract ContextWrapper toValue(String var1, Object var2);
 
-    public T evaluate(String expression, Object evaluationContext) throws EvaluatorException {
+    public ContextWrapper evaluate(String expression, Object evaluationContext) throws EvaluatorException {
 
         if (StringUtils.isEmpty(expression)) {
-            return null; //(T) Boolean.TRUE;
+            //return null;
+            return executionContext.create(null);
         }
 
         if (expression.equalsIgnoreCase("true") || expression.equalsIgnoreCase("false")) {
             Boolean b = Boolean.parseBoolean(expression);
-            return (T)b;
+            return executionContext.create(b); //(T)b;
         }
 
         if (expression.startsWith("'") && expression.endsWith("'")) {
@@ -259,21 +275,23 @@ public abstract class AbstractEvaluator<T> {
                     expression = expression.substring(1, expression.length() - 1);
                     if (expression.equalsIgnoreCase("true") || expression.equalsIgnoreCase("false")) {
                         Boolean b = Boolean.parseBoolean(expression);
-                        return (T)b;
+                        return executionContext.create(b);//return (T)b;
                     }
-                    T res = (T) expression;
-                    return res;
+                    //T res = (T) expression;
+                    return executionContext.create(expression);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    return null;
+                    //return null;
+                    return executionContext.create(null);
                 }
             }
         }
         if (expression.startsWith("{") && expression.endsWith("}")) {
             try {
-                T value = (T) mapListResolver.resolveToMap(expression);
+                Object value = mapListResolver.resolveToMap(expression);
                 if (null != value) {
-                    return value;
+                    //return value;
+                    return executionContext.create(value);
                 }
             } catch (Exception e) {
             }
@@ -281,9 +299,10 @@ public abstract class AbstractEvaluator<T> {
 
         if (expression.startsWith("[") && expression.endsWith("]")) {
             try {
-                T value = (T) mapListResolver.resolveToList(expression);
+                Object value = mapListResolver.resolveToList(expression);
                 if (null != value) {
-                    return value;
+                    //return value;
+                    return executionContext.create(value);
                 }
             } catch (Exception e) {
             }
@@ -291,13 +310,14 @@ public abstract class AbstractEvaluator<T> {
         }
 
         if (Pattern.matches("[a-zA-Z0-9 _:\\.@]+", expression)) { //match string without special characters as string not expression
-            T res = (T) expression;
-            return res;
+            /*T res = (T) expression;
+            return res;*/
+            return executionContext.create(expression);
         }
 
         //expression = expression.replaceAll(System.lineSeparator(), " ");
 
-        Deque<T> values = new LinkedList();
+        Deque<ContextWrapper> values = new LinkedList();
         ArrayDeque<Token> argumentTokens = new ArrayDeque();
         ArrayDeque stack = new ArrayDeque();
         ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
@@ -424,7 +444,8 @@ public abstract class AbstractEvaluator<T> {
             if (values.size() != 1) {
                 throw new IllegalArgumentException("Values size is not 1");
             } else {
-                return values.pop();
+                ContextWrapper res = values.pop();
+                return res;
             }
 
         } catch (Exception e) {
@@ -453,12 +474,6 @@ public abstract class AbstractEvaluator<T> {
             } else {
                 return Token.buildLookupLiteral(token); // we want clean tokens such as: person.name or person.items[] or person.items[0].title
             }
-            /*else if (token.startsWith("$") && token.endsWith("$")){
-                return Token.buildLookupLiteral(token);
-            }
-            else {
-                return Token.buildLiteral(token);
-            }*/
         }
     }
 
@@ -491,6 +506,4 @@ public abstract class AbstractEvaluator<T> {
     protected Iterator<String> tokenize(String expression) {
         return this.tokenizer.tokenize(expression);
     }
-
-
 }

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
@@ -37,7 +38,7 @@ import java.util.regex.Pattern;
 /**
  * Created by admin@datazup on 3/14/16.
  */
-public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
+public class SimpleObjectEvaluator extends AbstractEvaluator {
     protected static final Logger LOG = LoggerFactory.getLogger(SimpleObjectEvaluator.class);
     /**
      * The negate unary operator.
@@ -241,7 +242,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     }
 
     private SimpleObjectEvaluator(ExecutionContext executionContext) {
-        super(executionContext,PARAMETERS, new SimpleResolverHelper());
+        super(executionContext, PARAMETERS, new SimpleResolverHelper());
     }
 
     protected SimpleObjectEvaluator(ExecutionContext executionContext, AbstractResolverHelper mapListResolver) {
@@ -249,22 +250,22 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     }
 
     @Override
-    protected Object toValue(String literal, Object evaluationContext) {
+    protected ContextWrapper toValue(String literal, Object evaluationContext) {
         if (evaluationContext instanceof AbstractVariableSet) {
             AbstractVariableSet abs = (AbstractVariableSet) evaluationContext;
             Object o = abs.get(literal);
             if (null == o) {
-                return new NullObject();
+                return executionContext.create(new NullObject());
             } else {
-                return o;
+                return executionContext.create(o);
             }
         }
-        return literal;
+        return executionContext.create(literal);
     }
 
     @Override
-    protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                              Object evaluationContext) {
+    protected ContextWrapper evaluate(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                      Object evaluationContext) {
 
         if (function == INDEX_OF) {
             return getIndexOf(function, operands, argumentList, evaluationContext);
@@ -297,145 +298,150 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         } else if (function == TO_BOOLEAN) {
             return toBooleanValue(function, operands, argumentList, evaluationContext);
         } else if (function == TRUE) {
-            return true;
+            return executionContext.create(true);
         } else if (function == FALSE) {
-            return false;
+            return executionContext.create(false);
         } else if (function == TO_LOWERCASE) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            String val = TypeUtils.resolveString(op1);
+            String val = TypeUtils.resolveString(op1.get());
             if (StringUtils.isEmpty(val))
                 return op1;
             else
-                return val.toLowerCase();
+                return executionContext.create(val.toLowerCase());
 
         } else if (function == TO_UPPERCASE) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
 
             String val = TypeUtils.resolveString(op1);
             if (StringUtils.isEmpty(val))
                 return op1;
             else
-                return val.toUpperCase();
+                return executionContext.create(val.toUpperCase());
 
         } else if (function == STR_TO_DATE_TIMESTAMP) {
             return strToDateTimeStamp(function, operands, argumentList, evaluationContext);
         } else if (function == MINUTE) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            Instant dt = DateTimeUtils.resolve(op1);
-            return DateTimeUtils.getMinute(dt); // LocalDateTime.ofInstant(dt,
-            // ZoneOffset.UTC).getMinute();
+            Instant dt = DateTimeUtils.resolve(op1.get());
+            return executionContext.create(DateTimeUtils.getMinute(dt));
         } else if (function == HOUR) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            Instant dt = DateTimeUtils.resolve(op1);
-            return DateTimeUtils.getHour(dt);
+            Instant dt = DateTimeUtils.resolve(op1.get());
+            return executionContext.create(DateTimeUtils.getHour(dt));
         } else if (function == DAY) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            Instant dt = DateTimeUtils.resolve(op1);
-            return DateTimeUtils.getDayOfMonth(dt);
+            Instant dt = DateTimeUtils.resolve(op1.get());
+            return executionContext.create(DateTimeUtils.getDayOfMonth(dt));
         } else if (function == WEEK) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            Instant dt = DateTimeUtils.resolve(op1);
+            Instant dt = DateTimeUtils.resolve(op1.get());
             LocalDateTime localDate = LocalDateTime.ofInstant(dt, ZoneId.systemDefault());
-            int res = localDate.get(WeekFields.of(Locale.ENGLISH).weekOfMonth()); //DateTimeUtils.getDayOfMonth(dt) % 7;
-            return res;
+            Integer res = localDate.get(WeekFields.of(Locale.ENGLISH).weekOfMonth()); //DateTimeUtils.getDayOfMonth(dt) % 7;
+            return executionContext.create(res);
         } else if (function == WEEK_OF_YEAR) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            Instant dt = DateTimeUtils.resolve(op1);
+            Instant dt = DateTimeUtils.resolve(op1.get());
             LocalDateTime localDate = LocalDateTime.ofInstant(dt, ZoneId.systemDefault());
-            int res = localDate.get(WeekFields.of(Locale.ENGLISH).weekOfYear()); //DateTimeUtils.getDayOfMonth(dt) % 7;
+            Integer res = localDate.get(WeekFields.of(Locale.ENGLISH).weekOfYear()); //DateTimeUtils.getDayOfMonth(dt) % 7;
 
-            return res;
+            return executionContext.create(res);
         } else if (function == MONTH) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            Instant dt = DateTimeUtils.resolve(op1);
-            return DateTimeUtils.getMonth(dt);
+            Instant dt = DateTimeUtils.resolve(op1.get());
+            return executionContext.create(DateTimeUtils.getMonth(dt));
         } else if (function == YEAR) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            Instant dt = DateTimeUtils.resolve(op1);
-            return DateTimeUtils.getYear(dt);
+            Instant dt = DateTimeUtils.resolve(op1.get());
+            return executionContext.create(DateTimeUtils.getYear(dt));
         } else if (function == NOW) {
-            return System.currentTimeMillis(); //Instant.now();
+            return executionContext.create(System.currentTimeMillis()); //Instant.now();
         } else if (function == SET_NULL) {
             Object op1 = operands.next();
             argumentList.pop();
-            return null; // getNullObject();
+            return executionContext.create(null); // getNullObject();
         } else if (function == IS_NULL) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             Token token = argumentList.pop();
-            if (null == op1 || op1 instanceof NullObject || op1.toString() == token.getContent().toString()) {
-                return true;
-            } else if (op1 instanceof String) {
-                return ((String) op1).isEmpty();
+            Object resolved = op1.get();
+            if (null == resolved || resolved instanceof NullObject || resolved.toString() == token.getContent().toString()) {
+                return executionContext.create(true);
+            } else if (resolved instanceof String) {
+                return executionContext.create(((String) resolved).isEmpty());
             }
-            return op1 == null;
+            return executionContext.create(resolved == null);
 
         } else if (function == IS_OF_TYPE) {
             return getIsOfType(function, operands, argumentList, evaluationContext);
         } else if (function == TYPE_OF) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
 
-            if (null != op1 && !(op1 instanceof NullObject)) {
-                String name = op1.getClass().getSimpleName();
+            Object resolved = op1.get();
+
+            if (null != resolved && !(resolved instanceof NullObject)) {
+                String name = resolved.getClass().getSimpleName();
                 switch (name) {
                     case "TreeList":
                     case "JsonArray":
                     case "ArrayList":
-                        return "List";
+                        name = "List";
+                        break;
                     case "TreeSet":
                     case "LinkedHashSet":
                     case "HashSet":
-                        return "Set";
+                        name = "Set";
+                        break;
                     case "JsonObject":
                     case "HashMap":
                     case "TreeMap":
                     case "LinkedHashMap":
-                        return "Map";
+                        name = "Map";
+                        break;
                 }
-                return name;
+                return executionContext.create(name);
             } else {
-                return null;
+                return executionContext.create(null);
             }
-
         } else if (function == SIZE_OF) {
-            Object op1 = operands.next();
+            ContextWrapper op1 = operands.next();
             argumentList.pop();
-            if (null != op1 && !(op1 instanceof NullObject)) {
+            Object resolved = op1.get();
+            if (null != resolved && !(resolved instanceof NullObject)) {
 
-                if (op1 instanceof String) {
-                    return ((String) op1).length();
+                if (resolved instanceof String) {
+                    return executionContext.create(((String) resolved).length());
                 } else {
-                    Map m = mapListResolver.resolveToMap(op1);
+                    Map m = mapListResolver.resolveToMap(resolved);
                     if (null == m) {
-                        Collection c = mapListResolver.resolveToCollection(op1);
+                        Collection c = mapListResolver.resolveToCollection(resolved);
                         if (null == c) {
-                            List l = mapListResolver.resolveToList(op1);
+                            List l = mapListResolver.resolveToList(resolved);
                             if (null != l) {
-                                return l.size();
+                                return executionContext.create(l.size());
                             }
                         } else {
-                            return c.size();
+                            return executionContext.create(c.size());
                         }
                     } else {
-                        return m.size();
+                        return executionContext.create(m.size());
                     }
                 }
 
                 throw new NotSupportedExpressionException(
-                        "SizeOf function not supported for instance of \"" + op1.getClass() + "\"");
+                        "SizeOf function not supported for instance of \"" + resolved.getClass() + "\"");
 
 
             }
-            return 0;
+            return executionContext.create(0);
         } else if (function == REGEX_MATCH) {
             return regexMatch(function, operands, argumentList, evaluationContext);
         } else if (function == REGEX_EXTRACT) {
@@ -497,67 +503,80 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
     }
 
 
-    private Object getIsOfType(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        Object valueObj = operands.next();
+    private ContextWrapper getIsOfType(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper valueObj = operands.next();
+        argumentList.pop();
+        Object valueObjResolved = valueObj.get();
+
+
+        ContextWrapper typeStrObj = operands.next();
         argumentList.pop();
 
-        Object typeStrObj = operands.next();
-        argumentList.pop();
+        if (null == valueObjResolved) {
+            return executionContext.create(false);
+        }
 
-        String typeStr = TypeUtils.resolveString(typeStrObj);
+        Object typeStrObjResolved = typeStrObj.get();
+
+        String typeStr = TypeUtils.resolveString(typeStrObjResolved);
         if (StringUtils.isEmpty(typeStr)) {
-            return false;
+            return executionContext.create(false);
         }
 
-        Arrays.stream(valueObj.getClass().getInterfaces()).forEach(r -> {
-        });
+        Boolean isOfType = isOfTypeRecursively(valueObjResolved.getClass(), typeStr);
 
-        Boolean isOfType = isOfTypeRecursively(valueObj.getClass(), typeStr);
-
-        return isOfType;
+        return executionContext.create(isOfType);
     }
 
-    private Object toBooleanValue(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        Object valueObj = operands.next();
+    private ContextWrapper toBooleanValue(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper valueObj = operands.next();
         argumentList.pop();
-        if(null==valueObj){
-            return false;
+        if (null == valueObj) {
+            return executionContext.create(false);
         }
 
-        return TypeUtils.resolveBoolean(valueObj);
+        Object resolved = valueObj.get();
+        return executionContext.create(TypeUtils.resolveBoolean(resolved));
     }
 
-    private Object getIndexOf(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        Object valueObj = operands.next();
+    private ContextWrapper getIndexOf(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper valueObj = operands.next();
         argumentList.pop();
 
-        Object indexObj = operands.next();
+        ContextWrapper indexObj = operands.next();
         argumentList.pop();
 
-        List list = mapListResolver.resolveToList(valueObj);
+        Object valueObjResolved = valueObj.get();
+        Object indexObjResolved = indexObj.get();
+
+        List list = mapListResolver.resolveToList(valueObjResolved);
         if (null != list) {
-            return list.indexOf(indexObj);
+            return executionContext.create(list.indexOf(indexObjResolved));
         } else {
-            if (valueObj instanceof String) {
-                String strValue = (String) valueObj;
-                return strValue.indexOf(indexObj.toString());
+            if (valueObjResolved instanceof String) {
+                String strValue = (String) valueObjResolved;
+                return executionContext.create(strValue.indexOf(indexObjResolved.toString()));
             } else {
-                return null;
+                return executionContext.create(null);
             }
         }
     }
 
-    private Object getRound(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        Object firstObj = operands.next();
+    private ContextWrapper getRound(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper firstObj = operands.next();
         argumentList.pop();
 
-        Number number = TypeUtils.resolveNumber(firstObj);
+        Object firstObjResolved = firstObj.get();
+
+        Number number = TypeUtils.resolveNumber(firstObjResolved);
         if (null == number)
-            return firstObj;
+            return executionContext.create(firstObjResolved);
 
         Number decimalPlaces = null;
         if (operands.hasNext()) {
-            decimalPlaces = TypeUtils.resolveNumber(operands.next());
+            ContextWrapper nextObj = operands.next();
+            Object nextObjResolbed = nextObj.get();
+            decimalPlaces = TypeUtils.resolveNumber(nextObjResolbed);
             argumentList.pop();
         }
 
@@ -569,24 +588,27 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             DecimalFormat df = new DecimalFormat(format.trim());
             df.setRoundingMode(RoundingMode.FLOOR);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
-            return newNum.floatValue();
+            return executionContext.create(newNum.floatValue());
         } else {
-            return Math.round(number.doubleValue());
+            return executionContext.create(Math.round(number.doubleValue()));
         }
-
     }
 
-    private Object getCeil(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        Object firstObj = operands.next();
+    private ContextWrapper getCeil(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper firstObj = operands.next();
         argumentList.pop();
 
-        Number number = TypeUtils.resolveNumber(firstObj);
+        Object firstObjResolved = firstObj.get();
+
+        Number number = TypeUtils.resolveNumber(firstObjResolved);
         if (null == number)
-            return firstObj;
+            return executionContext.create(firstObjResolved);
 
         Number decimalPlaces = null;
         if (operands.hasNext()) {
-            decimalPlaces = TypeUtils.resolveNumber(operands.next());
+            ContextWrapper c = operands.next();
+            Object resolved = c.get();
+            decimalPlaces = TypeUtils.resolveNumber(resolved);
             argumentList.pop();
         }
 
@@ -598,19 +620,21 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             DecimalFormat df = new DecimalFormat(format.trim());
             df.setRoundingMode(RoundingMode.CEILING);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
-            return newNum.floatValue();
+            return executionContext.create(newNum.floatValue());
         } else {
-            return Math.ceil(number.doubleValue());
+            return executionContext.create(Math.ceil(number.doubleValue()));
         }
     }
 
-    private Object abs(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        Object firstObj = operands.next();
+    private ContextWrapper abs(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper firstObjContext = operands.next();
         argumentList.pop();
 
         if (operands.hasNext()) {
             throw new ExpressionValidationException("We expect three arguments for ABS expression");
         }
+
+        Object firstObj = firstObjContext.get();
 
 
         if (firstObj instanceof String) {
@@ -620,36 +644,45 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
 
         if (firstObj instanceof Integer) {
-            return Math.abs((Integer) firstObj);
+            firstObj = Math.abs((Integer) firstObj);
         } else if (firstObj instanceof Long) {
-            return Math.abs((Long) firstObj);
+            firstObj = Math.abs((Long) firstObj);
         } else if (firstObj instanceof Float) {
-            return Math.abs((Float) firstObj);
+            firstObj = Math.abs((Float) firstObj);
         } else if (firstObj instanceof Double) {
-            return Math.abs((Double) firstObj);
+            firstObj = Math.abs((Double) firstObj);
         } else if (firstObj instanceof Number) {
             Number n = (Number) firstObj;
             Double d = n.doubleValue();
             if (d < 0) {
                 d = -d;
             }
-            return d;
+            firstObj = d;
+        } else {
+            firstObj = null;
         }
-        return null;
+        return executionContext.create(firstObj);
     }
 
-    private Object manageDateAddSubtract(String operation, Iterator<Object> operands, Deque<Token> argumentList) {
-        Object firstDTObj = operands.next();
+    private ContextWrapper manageDateAddSubtract(String operation, Iterator<ContextWrapper> operands, Deque<Token> argumentList) {
+        ContextWrapper firstDTObjContext = operands.next();
         argumentList.pop();
-        Object durationObj = operands.next();
+        ContextWrapper durationObjContext = operands.next();
         argumentList.pop();
-        Object timeUnitObj = operands.next();
+        ContextWrapper timeUnitObjContext = operands.next();
         argumentList.pop();
+
+        Object firstDTObj = firstDTObjContext.get();
+
 
         Instant firstDt = DateTimeUtils.resolve(firstDTObj);
         if (null == firstDt) {
-            return firstDTObj;
+            return executionContext.create(firstDTObj);
         }
+
+        Object durationObj = durationObjContext.get();
+        Object timeUnitObj = timeUnitObjContext.get();
+
         Long duration = TypeUtils.resolveLong(durationObj);
         if (null == duration) {
             duration = 0l;
@@ -671,28 +704,32 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 break;
         }
 
-        return result;
+        return executionContext.create(result);
     }
 
-    private Object getDatePlus(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+    private ContextWrapper getDatePlus(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
         return manageDateAddSubtract("PLUS", operands, argumentList);
     }
 
-    private Object getDateMinus(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+    private ContextWrapper getDateMinus(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
         return manageDateAddSubtract("MINUS", operands, argumentList);
     }
 
-    private Object timeDiff(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
-        Object firstDTObj = operands.next();
+    private ContextWrapper timeDiff(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper firstDTObjC = operands.next();
         argumentList.pop();
-        Object secondDTObj = operands.next();
+        ContextWrapper secondDTObjC = operands.next();
         argumentList.pop();
-        Object timeUnitObj = operands.next();
+        ContextWrapper timeUnitObjC = operands.next();
         argumentList.pop();
 
         if (operands.hasNext()) {
             throw new ExpressionValidationException("We expect three arguments for TimeDiff expression");
         }
+
+        Object firstDTObj = firstDTObjC.get();
+        Object secondDTObj = secondDTObjC.get();
+        Object timeUnitObj = timeUnitObjC.get();
 
         Instant firstDt = DateTimeUtils.resolve(firstDTObj);
         Instant secondDt = DateTimeUtils.resolve(secondDTObj);
@@ -710,13 +747,15 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         long timeDiff = timeUnit.between(firstDt, secondDt);
 
 
-        return timeDiff;
+        return executionContext.create(timeDiff);
     }
 
-    private Object splitter(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+    private ContextWrapper splitter(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
         if (operands.hasNext()) {
-            Object stringToSplitObj = operands.next();
+            ContextWrapper stringToSplitObjC = operands.next();
             argumentList.pop();
+
+            Object stringToSplitObj = stringToSplitObjC.get();
 
             if (null == stringToSplitObj || !(stringToSplitObj instanceof String)) {
                 while (operands.hasNext()) {
@@ -725,26 +764,29 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                         argumentList.pop(); // just to clean in case there is more arguments
                 }
 
-                return stringToSplitObj;
+                return wrap(stringToSplitObj);
             }
 
             String stringToSplit = (String) stringToSplitObj;
             if (operands.hasNext()) {
-                Object splitterObj = operands.next();
+                ContextWrapper splitterObjC = operands.next();
                 argumentList.pop();
+                Object splitterObj = splitterObjC.get();
                 String splitter = (String) splitterObj;
 
                 String language = "en";
                 if (operands.hasNext()) {
-                    Object splitterLang = operands.next();
+                    ContextWrapper splitterLangC = operands.next();
                     argumentList.pop();
+                    Object splitterLang = splitterLangC.get();
                     language = (String) splitterLang;
                 }
 
                 Boolean removeEmpty = false;
                 if (operands.hasNext()) {
-                    Object removeEmptyObj = operands.next();
+                    ContextWrapper removeEmptyObjC = operands.next();
                     argumentList.pop();
+                    Object removeEmptyObj = removeEmptyObjC.get();
                     removeEmpty = TypeUtils.resolveBoolean(removeEmptyObj);
                 }
 
@@ -762,57 +804,60 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                             }
                         }
 
-                        return l;
+                        return wrap(l);
                     default:
                         throw new ExpressionValidationException("There is no splitter for language: " + language + " implemented");
                 }
 
             } else {
-                return stringToSplit;
+                return wrap(stringToSplit);
             }
 
         }
-        return null;
+        return wrap(null);
     }
 
-    private Object substring(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+    private ContextWrapper substring(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
         if (operands.hasNext()) {
             String result = "";
-            Object input = operands.next();
+            ContextWrapper inputC = operands.next();
+            Object input = inputC.get();
+
             Token token1 = argumentList.pop();
             if (input == null || !(input instanceof String)) {
                 while (operands.hasNext()) {
                     operands.next();
                     argumentList.pop();
                 }
-                return input;
+                return wrap(input);
             }
             String inputText = input.toString();
             if (operands.hasNext()) {
-                int startIndex = (int) Double.parseDouble(operands.next().toString());
+                int startIndex = (int) Double.parseDouble(operands.next().get().toString());
                 token1 = argumentList.pop();
                 if (operands.hasNext()) {
-                    int endIndex = (int) Double.parseDouble(operands.next().toString());
+                    int endIndex = (int) Double.parseDouble(operands.next().get().toString());
                     token1 = argumentList.pop();
                     result = inputText.substring(startIndex, endIndex);
                 } else {
                     result = inputText.substring(startIndex);
                 }
             }
-            return result;
+            return wrap(result);
         } else {
-            return null;
+            return wrap(null);
         }
     }
 
-    private Object evaluateRandomCharFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper evaluateRandomCharFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
         if (operands.hasNext()) {
-            Object containerOrString = operands.next();
+            ContextWrapper containerOrStringC = operands.next();
             Token token1 = argumentList.pop();
+            Object containerOrString = containerOrStringC.get();
 
             if (null == containerOrString || !(containerOrString instanceof String)) {
-                return RandomStringUtils.random(1);
+                return wrap(RandomStringUtils.random(1));
             } else {
                 String s = (String) containerOrString;
                 if (s.contains(" ")) {
@@ -820,23 +865,24 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 }
                 int random = RandomUtils.nextInt(0, s.length());
                 if (s.length() > random) {
-                    return String.valueOf(s.charAt(random));
+                    return wrap(String.valueOf(s.charAt(random)));
                 } else {
-                    return containerOrString;
+                    return wrap(containerOrString);
                 }
             }
         } else {
-            return RandomStringUtils.random(1);
+            return wrap(RandomStringUtils.random(1));
         }
     }
 
-    private Object evaluateRandomWordFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper evaluateRandomWordFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         if (operands.hasNext()) {
-            Object containerOrString = operands.next();
+            ContextWrapper containerOrStringC = operands.next();
             Token token1 = argumentList.pop();
+            Object containerOrString = containerOrStringC.get();
 
             if (null == containerOrString || !(containerOrString instanceof String)) {
-                return RandomStringUtils.random(10);
+                return wrap(RandomStringUtils.random(10));
             } else {
                 String words = (String) containerOrString;
                 if (words.contains(" ")) {
@@ -848,23 +894,24 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                         }
                     }
                     int random = RandomUtils.nextInt(0, clean.size());
-                    return clean.get(random);
+                    return wrap(clean.get(random));
                 } else {
-                    return words;
+                    return wrap(words);
                 }
             }
         } else {
-            return RandomStringUtils.random(5);
+            return wrap(RandomStringUtils.random(5));
         }
     }
 
-    private Object evaluateRandomSentenceFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper evaluateRandomSentenceFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         if (operands.hasNext()) {
-            Object containerOrString = operands.next();
+            ContextWrapper containerOrStringC = operands.next();
             Token token1 = argumentList.pop();
+            Object containerOrString = containerOrStringC.get();
 
             if (null == containerOrString || !(containerOrString instanceof String)) {
-                return RandomStringUtils.random(10);
+                return wrap(RandomStringUtils.random(10));
             } else {
                 String sentences = (String) containerOrString;
                 if (sentences.contains(".")) {
@@ -876,26 +923,28 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                         }
                     }
                     int random = RandomUtils.nextInt(0, clean.size());
-                    return clean.get(random);
+                    return wrap(clean.get(random));
                 } else {
-                    return sentences;
+                    return wrap(sentences);
                 }
             }
         }
-        return RandomStringUtils.random(10);
+        return wrap(RandomStringUtils.random(10));
     }
 
-    private Object evaluateRandomNumFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper evaluateRandomNumFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         if (operands.hasNext()) {
-            Object containerOrString = operands.next();
+            ContextWrapper containerOrStringC = operands.next();
             Token token1 = argumentList.pop();
 
+            Object containerOrString = containerOrStringC.get();
+
             if (null == containerOrString) {
-                return RandomUtils.nextInt();
+                return wrap(RandomUtils.nextInt());
             } else {
                 Number n = TypeUtils.resolveNumber(containerOrString);
                 if (null == n) {
-                    return RandomUtils.nextInt();
+                    return wrap(RandomUtils.nextInt());
                 }
 
                 if (operands.hasNext()) {
@@ -904,37 +953,41 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
                     Number maxN = TypeUtils.resolveNumber(max);
                     if (null == maxN) {
-                        return RandomUtils.nextInt(n.intValue(), Integer.MAX_VALUE);
+                        return wrap(RandomUtils.nextInt(n.intValue(), Integer.MAX_VALUE));
                     }
 
                     // we'll support nextLong only if both values are specified
-                    return RandomUtils.nextLong(n.intValue(), maxN.intValue());
+                    return wrap(RandomUtils.nextLong(n.intValue(), maxN.intValue()));
 
                 } else {
-                    return RandomUtils.nextInt(0, n.intValue());
+                    return wrap(RandomUtils.nextInt(0, n.intValue()));
                 }
             }
         } else {
-            return RandomUtils.nextInt();
+            return wrap(RandomUtils.nextInt());
         }
     }
 
-    private Object evaluateContainsFunction(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                                            Object evaluationContext) {
+    private ContextWrapper evaluateContainsFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                                    Object evaluationContext) {
 
-        Object containerOrString = operands.next();
+        ContextWrapper containerOrStringC = operands.next();
         Token token1 = argumentList.pop();
+        Object containerOrString = containerOrStringC.get();
+
         if (null == containerOrString || containerOrString instanceof NullObject) {
             while (operands.hasNext()) {
                 operands.next();
                 argumentList.pop();
             }
 
-            return false;
+            return wrap(false);
         }
 
-        Object containsType = operands.next();
+        ContextWrapper containsTypeC = operands.next();
         Token token2 = argumentList.pop();
+
+        Object containsType = containsTypeC.get();
 
         Object value = null;
         String allOrAnyType = "ALL"; // can be ALL, ANY, ALL_INSENSITIVE, ANY_INSENSITIVE
@@ -948,13 +1001,14 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         if (containerOrString instanceof String) {
             if (!hasMore) {
-                return ((String) containerOrString).contains(value.toString());
+                return wrap(((String) containerOrString).contains(value.toString()));
             } else {
 
                 List<Boolean> bList = new ArrayList<>();
                 while (operands.hasNext()) {
-                    Object o = operands.next();
+                    ContextWrapper oC = operands.next();
                     argumentList.pop();
+                    Object o = oC.get();
 
                     if (allOrAnyType.contains("INSENSITIVE")) {
                         bList.add(((String) containerOrString).toLowerCase().contains(o.toString().toLowerCase()));
@@ -964,77 +1018,77 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
                 }
                 if (allOrAnyType.startsWith("ALL")) {
-                    return BooleanUtils.and(bList.toArray(new Boolean[bList.size()]));
+                    return wrap(BooleanUtils.and(bList.toArray(new Boolean[bList.size()])));
                 } else {
-                    return BooleanUtils.or(bList.toArray(new Boolean[bList.size()]));
+                    return wrap(BooleanUtils.or(bList.toArray(new Boolean[bList.size()])));
                 }
             }
         } else {
             List l = mapListResolver.resolveToList(containerOrString);
             if (null != l) {
                 if (!hasMore) {
-                    return l.contains(value);
+                    return wrap(l.contains(value));
                 } else {
 
                     List<Boolean> bList = new ArrayList<>();
                     while (operands.hasNext()) {
-                        Object o = operands.next();
+                        ContextWrapper oC = operands.next();
                         argumentList.pop();
+                        Object o = oC.get();
+
                         bList.add(l.contains(o));
                     }
                     if (allOrAnyType.startsWith("ALL")) {
-                        return BooleanUtils.and(bList.toArray(new Boolean[bList.size()]));
+                        return wrap(BooleanUtils.and(bList.toArray(new Boolean[bList.size()])));
                     } else {
-                        return BooleanUtils.or(bList.toArray(new Boolean[bList.size()]));
+                        return wrap(BooleanUtils.or(bList.toArray(new Boolean[bList.size()])));
                     }
                 }
             } else {
                 Map m = mapListResolver.resolveToMap(containerOrString);
                 if (null != l) {
                     if (!hasMore) {
-                        return m.containsKey(value);
+                        return wrap(m.containsKey(value));
                     }
                 } else {
 
                     List<Boolean> bList = new ArrayList<>();
                     while (operands.hasNext()) {
-                        Object o = operands.next();
+                        ContextWrapper oC = operands.next();
                         argumentList.pop();
-
+                        Object o = oC.get();
                         bList.add(m.containsKey(o));
                     }
                     if (allOrAnyType.startsWith("ALL")) {
-                        return BooleanUtils.and(bList.toArray(new Boolean[bList.size()]));
+                        return wrap(BooleanUtils.and(bList.toArray(new Boolean[bList.size()])));
                     } else {
-                        return BooleanUtils.or(bList.toArray(new Boolean[bList.size()]));
+                        return wrap(BooleanUtils.or(bList.toArray(new Boolean[bList.size()])));
                     }
                 }
             }
         }
 
 
-        return false;
+        return wrap(false);
     }
 
 
-    private Object replaceAll(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                              Object evaluationContext) {
+    private ContextWrapper replaceAll(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                      Object evaluationContext) {
 
-        Object objectFieldValue = operands.next();
+        ContextWrapper objectFieldValueC = operands.next();
         Token token = argumentList.pop();
 
-        Object regexObj = operands.next();
+        ContextWrapper regexObjC = operands.next();
         Token token1 = argumentList.pop();
 
-        Object valueToReplaceIn = operands.next();
+        ContextWrapper valueToReplaceInC = operands.next();
         Token token2 = argumentList.pop();
 
-        /*Object place = null;
-        if (operands.hasNext()) {
-            place = operands.next();
-            Token token3 = argumentList.pop();
-        }
-*/
+        Object objectFieldValue = objectFieldValueC.get();
+        Object regexObj = regexObjC.get();
+        Object valueToReplaceIn = valueToReplaceInC.get();
+
         if (objectFieldValue instanceof String) {
             String strRegex = regexObj.toString();
             if (strRegex.startsWith("#") && strRegex.endsWith("#")) {
@@ -1042,23 +1096,27 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             }
             String objectValue = (String) objectFieldValue;
             String replaced = objectValue.replaceAll(strRegex, valueToReplaceIn.toString());
-            return replaced;
+            return wrap(replaced);
         }
 
-        return null;
+        return wrap(null);
     }
 
-    private Object ifTrueFalse(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                               Object evaluationContext) {
+    private ContextWrapper ifTrueFalse(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                       Object evaluationContext) {
 
-        Object trueFalseObject = operands.next();
+        ContextWrapper trueFalseObjectC = operands.next();
         argumentList.pop();
 
-        Object leftValue = operands.next();
+        ContextWrapper leftValueC = operands.next();
         argumentList.pop();
 
-        Object rightValue = operands.next();
+        ContextWrapper rightValueC = operands.next();
         argumentList.pop();
+
+        Object trueFalseObject = trueFalseObjectC.get();
+        Object leftValue = leftValueC.get();
+        Object rightValue = rightValueC.get();
 
         Boolean isTrue = true;
         if (null == trueFalseObject) {
@@ -1078,21 +1136,24 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             }
         }
         if (isTrue) {
-            return leftValue;
+            return wrap(leftValue);
         } else {
-            return rightValue;
+            return wrap(rightValue);
         }
     }
 
-    private Object stringFormat(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                                Object evaluationContext) {
-        Object valueObject = operands.next();
+    private ContextWrapper stringFormat(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                        Object evaluationContext) {
+        ContextWrapper valueObjectC = operands.next();
         argumentList.pop();
+
+        Object valueObject = valueObjectC.get();
 
         List<Object> payload = new ArrayList<>();
         while (operands.hasNext()) {
-            Object val = operands.next();
+            ContextWrapper valC = operands.next();
             argumentList.pop();
+            Object val = valC.get();
             payload.add(val);
         }
 
@@ -1103,23 +1164,27 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 if (!StringUtils.isEmpty(valueResult) && valueResult.startsWith("#") && valueResult.endsWith("#")) {
                     valueResult = valueResult.substring(1, valueResult.length() - 1);
                 }
-                return valueResult;
+                return wrap(valueResult);
             }
         }
 
-        return null;
+        return wrap(null);
     }
 
-    private Object toStringValue(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                                 Object evaluationContext) {
-        Object valueObject = operands.next();
+    private ContextWrapper toStringValue(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                         Object evaluationContext) {
+        ContextWrapper valueObjectC = operands.next();
         argumentList.pop();
 
+        Object valueObject = valueObjectC.get();
+
         if (null == valueObject)
-            return valueObject;
+            return wrap(valueObject);
 
         if (operands.hasNext()) {
-            String format = (String) operands.next();
+            ContextWrapper next = operands.next();
+            Object formatO = next.get();
+            String format = (String) formatO;
             argumentList.pop();
 
             if (!StringUtils.isEmpty(format)) {
@@ -1128,59 +1193,65 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Instant instant = DateTimeUtils.resolve(valueObject);
             if (null != instant) {
                 String formattedString = DateTimeFormatter.ofPattern(format).format(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
-                return formattedString;
+                return wrap(formattedString);
             }
         }
 
-        return valueObject.toString();
+        return wrap(valueObject.toString());
     }
 
-    private Object toLong(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                          Object evaluationContext) {
-        Object valueObject = operands.next();
+    private ContextWrapper toLong(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                  Object evaluationContext) {
+        ContextWrapper valueObjectC = operands.next();
         argumentList.pop();
 
+        Object valueObject = valueObjectC.get();
+
         if (null == valueObject)
-            return valueObject;
+            return wrap(valueObject);
 
         Number number = resolveNumber(valueObject);
         if (null == number) {
-            return number;
+            return wrap(number);
         }
-        return number.longValue(); // resolveNumber(valueObject).longValue();
+        return wrap(number.longValue()); // resolveNumber(valueObject).longValue();
     }
 
-    private Object toDouble(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                            Object evaluationContext) {
-        Object valueObject = operands.next();
+    private ContextWrapper toDouble(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                    Object evaluationContext) {
+        ContextWrapper valueObjectC = operands.next();
         argumentList.pop();
 
+        Object valueObject = valueObjectC.get();
+
         if (null == valueObject)
-            return valueObject;
+            return wrap(valueObject);
 
         Number number = resolveNumber(valueObject);
         if (null == number) {
-            return number;
+            return wrap(number);
         }
         Double d = new Double(number.toString()); // resolveNumber(valueObject).doubleValue();
-        return d;
+        return wrap(d);
     }
 
-    private Object toInteger(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                             Object evaluationContext) {
+    private ContextWrapper toInteger(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                     Object evaluationContext) {
 
-        Object valueObject = operands.next();
+        ContextWrapper valueObjectC = operands.next();
         argumentList.pop();
 
+        Object valueObject = valueObjectC.get();
+
         if (null == valueObject)
-            return valueObject;
+            return wrap(valueObject);
 
         Number number = resolveNumber(valueObject);
         if (null == number) {
-            return number;
+            return wrap(number);
         }
         // return resolveNumber(valueObject).intValue();
-        return number.intValue();
+        return wrap(number.intValue());
     }
 
     private Number resolveNumber(Object valueObject) {
@@ -1208,88 +1279,109 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         return num;
     }
 
-    private Object extract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                           Object evaluationContext) {
+    private ContextWrapper extract(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                   Object evaluationContext) {
 
-        Object fieldValueObject = operands.next();
+        ContextWrapper fieldValueObjectC = operands.next();
+        argumentList.pop();
+        Object fieldValueObject = fieldValueObjectC.get();
+
         if (null == fieldValueObject)
-            return null;
+            return wrap(null);
 
         String fieldValue = fieldValueObject.toString().toLowerCase();
 
-        Token token = argumentList.pop();
-
-        String topicValues = operands.next().toString();
-        topicValues = topicValues.replaceAll("#", "");
-        Token token1 = argumentList.pop();
-
-        String[] searchedTopics = topicValues.toLowerCase().split(",");
+        ContextWrapper next = operands.next();
+        argumentList.pop();
+        Object topicValuesO = next.get();
 
         ArrayList list = new ArrayList();
-        for (int i = 0; i < searchedTopics.length; i++) {
-            String k = searchedTopics[i].trim().toLowerCase();
-            boolean exists = false;
-            if (k.contains(" ")) {
-                String[] sk = k.split(" ");
-                for (int j = 0; j < sk.length; j++) {
-                    String sk1 = sk[j];
-                    if (fieldValue.contains(sk1)) {
+        if (null != topicValuesO) {
+            String topicValues = TypeUtils.resolveString(topicValuesO);
+            topicValues = topicValues.replaceAll("#", "");
+
+            String[] searchedTopics = topicValues.toLowerCase().split(",");
+
+            for (int i = 0; i < searchedTopics.length; i++) {
+                String k = searchedTopics[i].trim().toLowerCase();
+                boolean exists = false;
+                if (k.contains(" ")) {
+                    String[] sk = k.split(" ");
+                    for (int j = 0; j < sk.length; j++) {
+                        String sk1 = sk[j];
+                        if (fieldValue.contains(sk1)) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                } else {
+                    if (fieldValue.contains(k)) {
                         exists = true;
-                        break;
                     }
                 }
-            } else {
-                if (fieldValue.contains(k)) {
-                    exists = true;
+                if (exists) {
+                    list.add(k);
                 }
-            }
-            if (exists) {
-                list.add(k);
             }
         }
 
-        return list;
+        return wrap(list);
     }
 
-    private Object regexReplace(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object op1 = operands.next();
+    private ContextWrapper regexReplace(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper op1C = operands.next();
+        argumentList.pop();
+
+        Object op1 = op1C.get();
+
         if (null == op1)
-            return null;
+            return wrap(null);
+
         String regexFieldValue = op1.toString();
+
+        ContextWrapper regexPatternC = operands.next();
         argumentList.pop();
 
-        String regexPattern = operands.next().toString();
-        argumentList.pop();
+        Object regexPatternO = regexPatternC.get();
+        String regexPattern = regexPatternO.toString();
 
-        String replaceWith = operands.next().toString();
+        ContextWrapper replaceWithC = operands.next();
         argumentList.pop();
+        Object replaceWithO = replaceWithC.get();
+
+        String replaceWith = replaceWithO.toString();
+
 
         regexPattern = regexPattern.replace("#", "");
         Pattern r = Pattern.compile(regexPattern, Pattern.DOTALL);
         String replacedStr = r.matcher(regexFieldValue).replaceAll(replaceWith);
 
-        return replacedStr;
+        return wrap(replacedStr);
     }
 
-    private Object regexExtract(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                                Object evaluationContext) {
-
-
-        Object op1 = operands.next();
-        if (null == op1)
-            return null;
-        String regexFieldValue = op1.toString();
-
-        //String regexFieldValue = operands.next().toString();
+    private ContextWrapper regexExtract(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                        Object evaluationContext) {
+        ContextWrapper op1C = operands.next();
         Token token = argumentList.pop();
 
-        String regexPattern = operands.next().toString();
+        Object op1 = op1C.get();
+
+        if (null == op1)
+            return wrap(null);
+
+        String regexFieldValue = op1.toString();
+
+        ContextWrapper regexPatternC = operands.next();
         Token token1 = argumentList.pop();
+        Object regexPatternO = regexPatternC.get();
+
+        String regexPattern = regexPatternO.toString();
 
         Object group = null;
         if (operands.hasNext()) {
-            group = operands.next();
+            ContextWrapper groupC = operands.next();
             Token token2 = argumentList.pop();
+            group = groupC.get();
         }
 
         regexPattern = regexPattern.replace("#", "");
@@ -1299,48 +1391,40 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         int pos;
         List<String> list = new ArrayList<String>();
 
-	/*	for (pos = 0; matcher.find(); pos = matcher.end()) {
-
-			if (null != group && matcher.groupCount() > 0) {
-				list.add(matcher.group(((Double) group).intValue()));
-			} else {
-				list.add(regexFieldValue.substring(matcher.start(), matcher.end()));
-			}
-		}*/
-
         while (matcher.find()) {
             int groupCount = matcher.groupCount();
             for (int i = 0; i < groupCount + 1; i++) {
                 String gr = matcher.group(i);
                 list.add(gr);
-                // System.out.println(gr);
             }
         }
 
         if (list.size() > 1) {
             if (null != group) {
                 Integer groupInt = TypeUtils.resolveInteger(group);
-                return list.get(groupInt);
+                return wrap(list.get(groupInt));
             } else {
-                return list;
+                return wrap(list);
             }
         }
 
-        return list.size() != 0 ? list.get(0) : "";
+        return wrap(list.size() != 0 ? list.get(0) : "");
     }
 
-    private Object regexMatch(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                              Object evaluationContext) {
+    private ContextWrapper regexMatch(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                      Object evaluationContext) {
 
-        Object op1 = operands.next();
+        ContextWrapper op1C = operands.next();
+        argumentList.pop();
+        Object op1 = op1C.get();
         if (null == op1)
-            return null;
+            return wrap(null);
         String regexFieldValue = op1.toString();
 
-        Token token = argumentList.pop();
+        ContextWrapper regexPatternC = operands.next();
 
-        String regexPattern = operands.next().toString();
-        Token token1 = argumentList.pop();
+        argumentList.pop();
+        String regexPattern = regexPatternC.get().toString();
 
         regexPattern = regexPattern.replace("#", "");
 
@@ -1349,20 +1433,22 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
         boolean matches = matcher.find();
 
-        return matches;
+        return wrap(matches);
     }
 
-    private Object toDate(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                          Object evaluationContext) {
+    private ContextWrapper toDate(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                  Object evaluationContext) {
 
-        Object valueObject = operands.next();
+        ContextWrapper valueObjectC = operands.next();
         Token valueObjectToken = argumentList.pop();
+        Object valueObject = valueObjectC.get();
+
         String formatObject = null;
 
         if (operands.hasNext()) {
-            formatObject = (String) operands.next();
+            ContextWrapper formatObjectC = operands.next();
             Token formatObjectToken = argumentList.pop();
-
+            formatObject = (String) formatObjectC.get();
         }
         String format = null;
         if (!StringUtils.isEmpty(formatObject)) {
@@ -1430,21 +1516,25 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 i = DateTimeUtils.resolve(i, timeZoneObject);
             }
 
-            return i; // leftDateTime.atOffset(ZoneOffset.UTC);//dateTime;
+            return wrap(i); // leftDateTime.atOffset(ZoneOffset.UTC);//dateTime;
         }
 
-        return null;
+        return wrap(null);
     }
 
-    private Object strToDateTimeStamp(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                                      Object evaluationContext) {
+    private ContextWrapper strToDateTimeStamp(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
+                                              Object evaluationContext) {
 
-        String dateString = operands.next().toString().replace("#", "");
+        ContextWrapper dataStringC = operands.next();
+        argumentList.pop();
 
-        Token token = argumentList.pop();
+        String dateString = dataStringC.get().toString().replace("#", "");
 
-        String stringFormat = operands.next().toString().replace("#", "");
+        ContextWrapper stringFormatC = operands.next();
         Token token1 = argumentList.pop();
+
+        String stringFormat = stringFormatC.get().toString().replace("#", "");
+
 
         if (stringFormat instanceof String && dateString instanceof String) {
             try {
@@ -1454,34 +1544,30 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                  * DateTime.parse(dateString, df);
                  */
                 Instant dt = DateTimeUtils.resolve(dateString, stringFormat);
-                return dt.toEpochMilli();
+                return wrap(dt.toEpochMilli());
             } catch (Exception e) {
                 System.out.println("Parse date error for date: " + dateString + " and format: " + stringFormat + " - "
                         + e.getMessage());
             }
         }
 
-        return null;
+        return wrap(null);
     }
 
-    protected Object nextFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList,
+    protected ContextWrapper nextFunctionEvaluate(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
                                           Object evaluationContext) {
         return super.evaluate(function, operands, argumentList, evaluationContext);
     }
 
-   /* protected Object superFunctionEvaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList,
-                                           Object evaluationContext) {
-        return super.evaluate(function, operands, argumentList, evaluationContext);
-    }*/
 
     @Override
-    protected Object evaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
+    protected ContextWrapper evaluate(Operator operator, Iterator<ContextWrapper> operands, Object evaluationContext) {
 
         if (operator == POW) {
             Tuple<Number, Number> numberTuple = getNumberTuple(operands);
 
             if (null != numberTuple.getKey() && null != numberTuple.getValue()) {
-                return Math.pow(numberTuple.getKey().doubleValue(), numberTuple.getValue().doubleValue());
+                return wrap(Math.pow(numberTuple.getKey().doubleValue(), numberTuple.getValue().doubleValue()));
             }
             throw new ExpressionValidationException("Values cannot be null type");
 
@@ -1490,13 +1576,17 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
 
             // TODO - write test ases for Modulo
             if (null != numberTuple.getKey() && null != numberTuple.getValue()) {
-                return numberTuple.getKey().doubleValue() % numberTuple.getValue().doubleValue();
+                return wrap(numberTuple.getKey().doubleValue() % numberTuple.getValue().doubleValue());
             }
-            return 0;
+            return wrap(0);
 
         } else if (operator == DIVIDE) {
-            Object left = operands.next();
-            Object right = operands.next();
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
+
 
             Number lN = null;
             Number rN = null;
@@ -1512,12 +1602,18 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 rN = resolveNumber(right);
             }
             if (null != lN && null != rN) {
-                return lN.doubleValue() / rN.doubleValue();
+                return wrap(lN.doubleValue() / rN.doubleValue());
             }
-            return 0;
+            return wrap(0);
         } else if (operator == MULTIPLY) {
-            Object left = operands.next();
-            Object right = operands.next();
+
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
+
+
             Number lN = null;
             Number rN = null;
             if (left instanceof Number) {
@@ -1532,53 +1628,72 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 rN = resolveNumber(right);
             }
             if (null != lN && null != rN) {
-                return lN.doubleValue() * rN.doubleValue();
+                return wrap(lN.doubleValue() * rN.doubleValue());
             }
-            return 0;
+            return wrap(0);
         } else if (operator == NEGATE) {
-            Object next = operands.next();
+            ContextWrapper nextC = operands.next();
+            Object next = nextC.get();
+
             if (next == null) {
-                return false;
+                return wrap(false);
             }
-            if (next instanceof Boolean) {
-                return !((Boolean) next);
+            Boolean nextB = TypeUtils.resolveBoolean(next);
+            if(null!=nextB){
+                return wrap(!nextB);
+            }else{
+                return wrap(!true);
             }
         } else if (operator == NOT_EQUAL) {
-            return !getEqual(operator, operands, evaluationContext);
+            Boolean booleanRes = getEqual(operator, operands, evaluationContext);
+            return wrap(!booleanRes);
         } else if (operator == EQUAL) {
-            return getEqual(operator, operands, evaluationContext);
+            Boolean booleanRes = getEqual(operator, operands, evaluationContext);
+            return wrap(booleanRes);
         } else if (operator == LOWER_THEN_OR_EQUAL) {
 
-            Object left = operands.next();
-            Object right = operands.next();
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
+
 
             if (null == left || null == right) {
-                return false;
+                return wrap(false);
             }
 
             Number l = (Number) left;
             Number r = (Number) right;
             // if (null!=l && null!=r)
-            return l.doubleValue() <= r.doubleValue();
+            return wrap(l.doubleValue() <= r.doubleValue());
 
         } else if (operator == GREATER_THEN_OR_EQUAL) {
 
-            Object left = operands.next();
-            Object right = operands.next();
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
+
+
 
             if (null == left || null == right) {
-                return false;
+                return wrap(false);
             }
 
             Number l = (Number) left;
             Number r = (Number) right;
-            return l.doubleValue() >= r.doubleValue();
+            return wrap(l.doubleValue() >= r.doubleValue());
         } else if (operator == GREATER_THEN) {
-            Object left = operands.next();
-            Object right = operands.next();
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
 
             if (null == left || null == right) {
-                return false;
+                return wrap(false);
             }
 
             // check this:
@@ -1586,46 +1701,63 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
             Number l = (Number) left;
             Number r = (Number) right;
             // if (null!=l && null!=r)
-            return l.doubleValue() > r.doubleValue();
+            return wrap(l.doubleValue() > r.doubleValue());
             // else return false;
         } else if (operator == LOWER_THEN) {
-            Object left = operands.next();
-            Object right = operands.next();
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
+
+
             if (null == left || null == right) {
-                return false;
+                return wrap(false);
             }
             // check this:
             // http://stackoverflow.com/questions/2683202/comparing-the-values-of-two-generic-numbers
             Number l = (Number) left;
             Number r = (Number) right;
             // if (null!=l && null!=r)
-            return l.doubleValue() < r.doubleValue();
+            return wrap(l.doubleValue() < r.doubleValue());
             // else return false;
         } else if (operator == AND) {
-            Object left = operands.next();
-            Object right = operands.next();
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
 
             if (null == left || null == right) {
-                return false;
+                return wrap(false);
             }
 
             boolean l = (Boolean) left;
             boolean r = (Boolean) right;
-            return l && r; // Boolean.logicalAnd(l,r);
+            return wrap(l && r); // Boolean.logicalAnd(l,r);
         } else if (operator == OR) {
-            Object left = operands.next();
-            Object right = operands.next();
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
 
             if (null == left || null == right) {
-                return false;
+                return wrap(false);
             }
 
             boolean l = (Boolean) left;
             boolean r = (Boolean) right;
-            return l || r; // Boolean.logicalOr(l,r);
+            return wrap(l || r); // Boolean.logicalOr(l,r);
         } else if (operator == PLUS) {
-            Object left = operands.next();
-            Object right = operands.next();
+
+            ContextWrapper leftC = operands.next();
+            ContextWrapper rightC = operands.next();
+
+            Object left = leftC.get();
+            Object right = rightC.get();
+
+
             if (left instanceof String || right instanceof String) {
                 String l, r;
                 if (left instanceof String) {
@@ -1638,7 +1770,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 } else {
                     r = (null == right ? "" : right.toString());
                 }
-                return l + r;
+                return wrap(l + r);
             } else {
                 Number l = (Number) left;
                 if (null == l)
@@ -1646,33 +1778,41 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
                 Number r = (Number) right;
                 if (null == r)
                     r = 0;
-                return l.doubleValue() + r.doubleValue();
+                return wrap(l.doubleValue() + r.doubleValue());
             }
 
         } else if (operator == MINUS) {
-            Object left = operands.next();
+            ContextWrapper leftC = operands.next();
+            Object left = leftC.get();
             if (null == left)
-                return null;
+                return wrap(null);
 
-            Object right = operands.next();
+            ContextWrapper rightC = operands.next();
+            Object right = rightC.get();
+
             if (null == right)
-                return null;
+                return wrap(null);
             Number l = (Number) left;
             Number r = (Number) right;
 
             if (null == l || null == r)
                 return null;
 
-            return l.doubleValue() - r.doubleValue();
+            return wrap(l.doubleValue() - r.doubleValue());
         } else {
             return nextOperatorEvaluate(operator, operands, evaluationContext);
         }
-        return false;
+        //return false;
     }
 
-    private Boolean getEqual(Operator operator, Iterator<Object> operands, Object evaluationContext) {
-        Object left = operands.next();
-        Object right = operands.next();
+    private Boolean getEqual(Operator operator, Iterator<ContextWrapper> operands, Object evaluationContext) {
+        ContextWrapper leftC = operands.next();
+        ContextWrapper rightC = operands.next();
+
+        Object left = leftC.get();
+        Object right = rightC.get();
+
+
         if (null == left || right == null) {
             return false; // left.equals(right);
         }
@@ -1694,9 +1834,11 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         }
     }
 
-    private Tuple<Number, Number> getNumberTuple(Iterator<Object> operands) {
-        Object left = operands.next();
-        Object right = operands.next();
+    private Tuple<Number, Number> getNumberTuple(Iterator<ContextWrapper> operands) {
+        ContextWrapper leftC = operands.next();
+        ContextWrapper rightC = operands.next();
+        Object left = leftC.get();
+        Object right = rightC.get();
 
         Number lN = null;
         Number rN = null;
@@ -1715,7 +1857,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator<Object> {
         return new Tuple<>(lN, rN);
     }
 
-    protected Object nextOperatorEvaluate(Operator operator, Iterator<Object> operands, Object evaluationContext) {
+    protected ContextWrapper nextOperatorEvaluate(Operator operator, Iterator<ContextWrapper> operands, Object evaluationContext) {
         return super.evaluate(operator, operands, evaluationContext);
     }
 

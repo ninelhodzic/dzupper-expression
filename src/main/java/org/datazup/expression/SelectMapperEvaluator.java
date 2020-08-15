@@ -4,6 +4,7 @@ package org.datazup.expression;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.context.ConcurrentExecutionContext;
+import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.AbstractResolverHelper;
@@ -78,7 +79,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             if (null == INSTANCE) {
                 synchronized (SelectMapperEvaluator.class) {
                     if (null == INSTANCE)
-                        INSTANCE = new SelectMapperEvaluator(executionContext,mapListResolver);
+                        INSTANCE = new SelectMapperEvaluator(executionContext, mapListResolver);
                 }
             }
         }
@@ -86,7 +87,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     }
 
     public SelectMapperEvaluator(ExecutionContext executionContext, AbstractResolverHelper mapListResolver) {
-        super(executionContext,mapListResolver);
+        super(executionContext, mapListResolver);
     }
 
     static {
@@ -131,7 +132,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     }
 
     @Override
-    protected Object evaluate(Function function, Iterator<Object> operands, Deque<Token> argumentList, Object evaluationContext) {
+    protected ContextWrapper evaluate(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
         if (function == MAX) {
             return getMax(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == MIN) {
@@ -201,12 +202,14 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
     }
 
-    private Object getMax(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getMax(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
+        Object value1 = value1C.get();
+
         if (null == value1)
-            return null;
+            return wrap(null);
 
         Collection collection = mapListResolver.resolveToCollection(value1);
         if (null == collection) {
@@ -225,15 +228,17 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 }
             }
         }
-        return max;
+        return wrap(max);
     }
 
-    private Object getMin(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getMin(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
+        Object value1 = value1C.get();
+
         if (null == value1)
-            return null;
+            return wrap(null);
 
         Collection collection = mapListResolver.resolveToCollection(value1);
         if (null == collection) {
@@ -252,7 +257,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 }
             }
         }
-        return min;
+        return wrap(min);
     }
 
     private Number sum(Collection collection) {
@@ -271,27 +276,31 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         return sum;
     }
 
-    private Object getSum(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getSum(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
+        Object value1 = value1C.get();
+
         if (null == value1)
-            return null;
+            return wrap(null);
 
         Collection collection = mapListResolver.resolveToCollection(value1);
         if (null == collection) {
             throw new ExpressionValidationException("Value should be of collection type");
         }
 
-        return sum(collection);
+        return wrap(sum(collection));
     }
 
-    private Object getAvg(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getAvg(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
+        Object value1 = value1C.get();
+
         if (null == value1)
-            return null;
+            return wrap(null);
 
         Collection collection = mapListResolver.resolveToCollection(value1);
         if (null == collection) {
@@ -300,24 +309,25 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         Number sum = sum(collection);
         if (null != sum) {
-            return sum.doubleValue() / collection.size();
+            return wrap(sum.doubleValue() / collection.size());
         }
-        return null;
+        return wrap(null);
     }
 
-    private Object getLimit(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getLimit(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
+        Object value1 = value1C.get();
+
         if (null == value1)
-            return null;
+            return wrap(null);
 
         Integer limitSize = null;
         if (operands.hasNext()) {
-            limitSize = TypeUtils.resolveInteger(operands.next());
+            limitSize = TypeUtils.resolveInteger(operands.next().get());
             argumentList.pop();
         }
-
 
         List list = mapListResolver.resolveToList(value1);
         if (null == list) {
@@ -325,33 +335,35 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             if (null == map) {
                 Collection set = mapListResolver.resolveToCollection(value1);
                 if (null == set) {
-                    return value1;
+                    return wrap(value1);
                 } else {
-                    return set.stream().limit(limitSize).collect(Collectors.toSet());
+                    return wrap(set.stream().limit(limitSize).collect(Collectors.toSet()));
                 }
             } else {
                 Map limitedMap = map.entrySet().stream().limit(limitSize).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-                return limitedMap;
+                return wrap(limitedMap);
 
             }
         } else {
             List limitedList = (List) list.stream().limit(limitSize).collect(Collectors.toList());
-            return limitedList;
+            return wrap(limitedList);
         }
     }
 
-    private Object getSort(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getSort(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
+        Object value1 = value1C.get();
+
         if (null == value1)
-            return null;
+            return wrap(null);
 
         // we can sort List or Map
         // if List Object can be simple Number or simple String/char/boolean or complext Map
         String direction = "DESC";
         if (operands.hasNext()) {
-            Object dirO = operands.next();
+            Object dirO = operands.next().get();
             argumentList.pop();
             direction = (String) dirO;
         }
@@ -359,7 +371,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         String sortingComponent = "BY_KEY";
         if (operands.hasNext()) {
-            sortingComponent = (String) operands.next();
+            sortingComponent = (String) operands.next().get();
             argumentList.pop();
         }
         final String finalSortingComponent = sortingComponent;
@@ -368,28 +380,29 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         if (null == list) {
             Map m = mapListResolver.resolveToMap(value1);
             if (null == m) {
-                return null;
+                return wrap(null);
             } else {
                 Map sortedMap = SortingUtils.sortMap(m, finalDirection, finalSortingComponent);
-                return sortedMap;
+                return wrap(sortedMap);
             }
         } else {
 
             List sortedList = SortingUtils.sortList(list, finalDirection, finalSortingComponent);
-            return sortedList;
+            return wrap(sortedList);
         }
     }
 
-    private Object getListUnPartition(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getListUnPartition(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
+        Object value1 = value1C.get();
 
         if (null == value1)
-            return null;
+            return wrap(null);
 
         List l = mapListResolver.resolveToList(value1);
         if (null == l) {
-            return value1;
+            return wrap(value1);
         }
 
         List newList = new ArrayList();
@@ -405,26 +418,28 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 // TODO do we need to do something here??? - what if list contains some other type of objcts?
             }
         }
-        return newList;
+        return wrap(newList);
     }
 
-    private Object getListPartition(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getListPartition(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
-        Object value1 = operands.next();
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
+        Object value1 = value1C.get();
+
         if (null == value1)
-            return null;
+            return wrap(null);
 
         List l = mapListResolver.resolveToList(value1);
         if (null == l) {
             throw new ExpressionValidationException("First item should be list");
         }
 
-        Object value2 = operands.next();
+        Object value2 = operands.next().get();
         Token token2 = argumentList.pop();
         if (null == value2) {
-            return value1;
+            return wrap(value1);
         }
 
         Number n = 0;
@@ -440,7 +455,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         List<List<Object>> lists = new ListPartition<>(l, n.intValue());
 
-        return lists;
+        return wrap(lists);
     }
 
 
@@ -488,9 +503,11 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         return null;
     }*/
 
-    private Object getPut(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getPut(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
+
+        Object value1 = value1C.get();
 
         if (null == value1) {
             throw new ExpressionValidationException("Key as first parameter cannot be null or empty");
@@ -498,26 +515,27 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
         Map map = mapListResolver.resolveToMap(value1);
         if (null != map) {
-            Object key = operands.next();
+            Object key = operands.next().get();
             argumentList.pop();
 
             if (null == key) {
                 throw new ExpressionValidationException("Key as second parameter cannot be null or empty");
             }
 
-            Object value = operands.next();
+            Object value = operands.next().get();
             argumentList.pop();
 
             map.put(key, value);
-            return map;
+            return wrap(map);
         }
-        return value1;
+        return wrap(value1);
     }
 
-    private Object getAdd(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getAdd(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
-        Object value1 = operands.next();
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
+        Object value1 = value1C.get();
 
         if (null == value1) {
             throw new ExpressionValidationException("Key as first parameter cannot be null or empty");
@@ -526,36 +544,39 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         Collection col = mapListResolver.resolveToCollection(value1);
         if (null != col) {
             while (operands.hasNext()) {
-                Object o = operands.next();
+                Object o = operands.next().get();
                 argumentList.pop();
                 col.add(o);
             }
-            return col;
+            return wrap(col);
         }
-        return value1;
+        return wrap(value1);
     }
 
-    private Object getGet(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getGet(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
-        Object value1 = operands.next();
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
+        Object value1 = value1C.get();
 
         if (null == value1) {
             //throw new ExpressionValidationException("Key as first parameter cannot be null or empty");
-            return null;
+            return wrap(null);
         }
 
-        Object value2 = operands.next();
+        ContextWrapper value2C = operands.next();
         Token token2 = argumentList.pop();
 
+        Object value2 = value2C.get();
+
         if (null == value2) {
-            return null;//throw new ExpressionValidationException("Value as second parameter cannot be null or empty");
+            return wrap(null);//throw new ExpressionValidationException("Value as second parameter cannot be null or empty");
         }
 
         Map map = mapListResolver.resolveToMap(value2);
         if (null != map) {
             if (map.containsKey(value1)) {
-                return map.get(value1);
+                return wrap(map.get(value1));
             }
         } else {
             List list = mapListResolver.resolveToList(value2);
@@ -566,35 +587,37 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 } else if (value1 instanceof String) {
                     n = NumberUtils.createNumber((String) value1);
                 } else {
-                    return null;//throw new ExpressionValidationException("In case of List, first parameter has to be Integer");
+                    return wrap(null);//throw new ExpressionValidationException("In case of List, first parameter has to be Integer");
                 }
                 if (null != n && n.doubleValue() > -1) {
-                    return list.get(n.intValue());
+                    return wrap(list.get(n.intValue()));
                 }
             }
         }
-        return null;
+        return wrap(null);
     }
 
-    private Object getExcludeFields(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getExcludeFields(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
         while (operands.hasNext()) {
-            Object value = operands.next();
+            Object value = operands.next(); // WE NEED TO CALL NEXT
             Token token = argumentList.removeLast();
 
             String key = token.getLookupLiteralValue();
             evaluationContext.remove(key);
         }
 
-        return evaluationContext.getDataObject();
+        return wrap(evaluationContext.getDataObject());
     }
 
-    private Object getGroupBy(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object source = operands.next();
+    private ContextWrapper getGroupBy(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper sourceC = operands.next();
         argumentList.pop();
 
+        Object source = sourceC.get();
+
         if (null == source) {
-            return null;
+            return wrap(null);
         }
 
         List list = mapListResolver.resolveToList(source);
@@ -603,19 +626,19 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
 
         if (!operands.hasNext())
-            return source;
+            return wrap(source);
 
-        Object propertySource = operands.next();
+        Object propertySource = operands.next().get();
         argumentList.pop();
 
         Object childrenKey = null;
         if (operands.hasNext()) {
-            childrenKey = operands.next();
+            childrenKey = operands.next().get();
             argumentList.pop();
         }
 
         Map properties = mapListResolver.resolveToMap(propertySource);
-        List<Map<String,Object>> propertyList = new ArrayList();
+        List<Map<String, Object>> propertyList = new ArrayList();
         //List<Map<String, Object>> properties = mapListResolver.resolveToList(propertySource);
         if (null == properties) {
             String propertyName = (String) propertySource;
@@ -624,7 +647,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             Map newMap = new HashMap();
             newMap.put("propertyName", propertyName);
             propertyList.add(newMap);
-        }else{
+        } else {
             Object propertiesObject = properties.get("properties");
             propertyList = mapListResolver.resolveToList(propertiesObject);
         }
@@ -633,31 +656,33 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         if (null == childrenKey) {
             // return Map { prop1Val:[] ... } - we'll use only first Property from properties list
             Map<Object, List<Object>> result = groupByUtils.groupByProperty(list, propertyList.get(0));
-            return result;
+            return wrap(result);
         } else {
             // return List of Maps [{ propName:propValue, propName1: propVale1, children: [] }] - we'll use only first Property from properties list
             String childrenKeyStr = "children";
             Map childrenKeyMap = mapListResolver.resolveToMap(childrenKey);
-            if (null!=childrenKeyMap){
+            if (null != childrenKeyMap) {
                 Object chTmp = childrenKeyMap.get("childrenKey");
-                if(null!=chTmp){
-                    childrenKeyStr = (String)chTmp;
+                if (null != chTmp) {
+                    childrenKeyStr = (String) chTmp;
                 }
-            }else if (childrenKey instanceof String){
-                childrenKeyStr = (String)childrenKey;
+            } else if (childrenKey instanceof String) {
+                childrenKeyStr = (String) childrenKey;
             }
 
             List<Map<Object, List<Object>>> result = groupByUtils.groupByProperties(list, propertyList, childrenKeyStr);
-            return result;
+            return wrap(result);
         }
     }
 
-    private Object getStep(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object source = operands.next();
+    private ContextWrapper getStep(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper sourceC = operands.next();
         argumentList.pop();
 
+        Object source = sourceC.get();
+
         if (null == source) {
-            return null;
+            return wrap(null);
         }
 
         List<String> steps = new ArrayList<>();
@@ -666,7 +691,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             Token stepObj = iterator.next();
             String step = (String) stepObj.getContent();
             steps.add(step);
-            argumentList.pop();
+            //argumentList.pop();
+            iterator.remove();
         }
 
         Object stepResult = source;
@@ -681,49 +707,52 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     if (step.startsWith("'#") && step.endsWith("#'")) {
                         step = step.substring(2, step.length() - 2);
                     }
-                    stepResult = evaluate(step, pathExtractor);
+                    ContextWrapper evaluatedResult = evaluate(step, pathExtractor);
+                    stepResult = evaluatedResult.get();
                 } catch (EvaluatorException e) {
                     LOG.error("Cannot execute Step expression: " + step, e);
-                    return null;
+                    return wrap(null);
                 }
             }
         }
 
-        return stepResult;
+        return wrap(stepResult);
 
     }
 
-    private Object getForeach(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object source = operands.next();
+    private ContextWrapper getForeach(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper sourceC = operands.next();
         argumentList.pop();
+
+        Object source = sourceC.get();
 
         if (null == source) {
-            return null;
+            return wrap(null);
         }
 
-        Object value2 = operands.next();
+        ContextWrapper value2C = operands.next();
         argumentList.pop();
+        Object value2 = value2C.get();
         if (null == value2) {
-            return source;
+            return wrap(source);
         }
 
         Object parentObj = evaluationContext.getDataObject();
         if (operands.hasNext()) {
-            parentObj = operands.next();
+            parentObj = operands.next().get();
             argumentList.pop();
         }
 
-
         String expressionToExecute = TypeUtils.resolveString(value2);
         if (null == expressionToExecute || expressionToExecute.isEmpty()) {
-            return source;
+            return wrap(source);
         }
 
         Map sourceMap = mapListResolver.resolveToMap(source);
         if (null == sourceMap) {
             Collection l = mapListResolver.resolveToCollection(source);
             if (null == l) {
-                return source;
+                return wrap(source);
             } else {
                 List newList = new ArrayList(l);
 
@@ -739,7 +768,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     map.put("_parent", parentObj);
 
                     try {
-                        Object res = evaluate(expressionToExecute, new PathExtractor(map, mapListResolver));
+                        ContextWrapper evaluated = evaluate(expressionToExecute, new PathExtractor(map, mapListResolver));
+                        Object res = evaluated.get();
                         Map resMap = mapListResolver.resolveToMap(res);
                         if (null != resMap) {
                             resMap.remove("_index");
@@ -758,7 +788,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     ++index;
                 }
 
-                return newList;
+                return wrap(newList);
             }
         } else {
             try {
@@ -768,26 +798,33 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     map.put("_parent", parentObj);
                 }
 
-                Object res = evaluate(expressionToExecute, new PathExtractor(map, mapListResolver));
-                return res;
+                ContextWrapper evaluated = evaluate(expressionToExecute, new PathExtractor(map, mapListResolver));
+                /*Object res = evaluated.get();
+                return res;*/
+                return evaluated;
             } catch (EvaluatorException e) {
                 throw new ExpressionValidationException("Second parameter expression cannot be executed: " + expressionToExecute, e);
             }
         }
     }
 
-    private Object getReMap(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object source = operands.next();
+    private ContextWrapper getReMap(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper sourceC = operands.next();
         argumentList.pop();
+
+        Object source = sourceC.get();
 
         if (null == source) {
             throw new ExpressionValidationException("First parameter cannot be null or empty");
         }
 
-        Object value2 = operands.next();
+        ContextWrapper value2C = operands.next();
         argumentList.pop();
+
+        Object value2 = value2C.get();
+
         if (null == value2) {
-            return source;
+            return wrap(source);
         }
 
         Map mapper = mapListResolver.resolveDeepMap(value2);
@@ -800,7 +837,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         if (null == sourceMap) {
             List sourceList = mapListResolver.resolveToList(source);
             if (null == sourceList) {
-                return source;
+                return wrap(source);
             } else {
                 // handle list of Maps
                 List newList = new ArrayList();
@@ -813,11 +850,11 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                         newList.add(mappedObject);
                     }
                 }
-                return newList;
+                return wrap(newList);
             }
         } else {
             // handle single map
-            return remapMap(sourceMap, mapper);
+            return wrap(remapMap(sourceMap, mapper));
         }
     }
 
@@ -831,13 +868,15 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         return newMap;
     }
 
-    private Object getMap(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getMap(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
 
         Map<String, Object> map = new LinkedHashMap<>();
         // Token token = argumentList.pop();
         while (operands.hasNext()) {
-            Object value = operands.next();
+            ContextWrapper valueC = operands.next();
             argumentList.removeLast();
+            Object value = valueC.get();
+
             if (null != value) {
                 Map newMap = mapListResolver.resolveToMap(value);
                /* if (null == newMap)
@@ -848,21 +887,23 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 }
             }
         }
-        return map;
+        return wrap(map);
 
     }
 
-    private Object getSortedSet(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getSortedSet(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         Set<Object> set;
-        Object value1 = operands.next();
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
+
+        Object value1 = value1C.get();
 
         if (null == value1) {
             while (operands.hasNext()) {
-                operands.next();
+                operands.next(); // do we need this here???
                 argumentList.pop();
             }
-            return null;
+            return wrap(null);
         }
 
         String fieldsToSortBy = null;
@@ -932,7 +973,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
 
         while (operands.hasNext()) {
-            Object value = operands.next();
+            Object value = operands.next().get();
             argumentList.removeLast();
 
             if (value instanceof Collection) {
@@ -942,15 +983,17 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             }
         }
 
-        return new ArrayList(set);
+        return wrap(new ArrayList(set));
     }
 
 
-    private Object getList(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getList(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         List<Object> list = new ArrayList<>();
         while (operands.hasNext()) {
-            Object value = operands.next();
+            ContextWrapper contextWrapper = operands.next();
+            Object value = contextWrapper.get();
             argumentList.removeLast();
+
             Collection listChild = mapListResolver.resolveToCollection(value);
             if (null != listChild) {
                 list.addAll(listChild);
@@ -958,12 +1001,14 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 list.add(value);
             }
         }
-        return list;
+        return wrap(list);
     }
 
-    private Object getTemplate(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value1 = operands.next();
+    private ContextWrapper getTemplate(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
+
+        Object value1 = value1C.get();
 
         if (operands.hasNext()) {
             Object value2 = operands.next(); // this could be used in future to define template engine
@@ -971,37 +1016,40 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
 
         if (value1 instanceof String) {
-
             try {
                 Object evaluated = evaluationContext.compileString((String) value1);
                 if (evaluated instanceof String) {
                     String s = (String) evaluated;
                     if (s.startsWith("#") && s.endsWith("#")) {
                         s = s.trim().substring(1, s.length() - 1).trim();
-                        return s;
+                        return wrap(s);
                     }
                 }
-                return evaluated;
+                return wrap(evaluated);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        return value1;
+        return wrap(value1);
     }
 
-    private Object getField(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getField(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         Map<Object, Object> map = new LinkedHashMap<>();
-        Object value1 = operands.next();
+        ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
-        Object value2 = operands.next();
+        ContextWrapper value2C = operands.next();
         Token token2 = argumentList.pop();
+
+        Object value1 = value1C.get();
+        Object value2 = value2C.get();
 
         boolean shouldIncludeNull = true;
         if (argumentList.size() > 0 && operands.hasNext()) {
-            Object value3 = operands.next();
+            ContextWrapper value3C = operands.next();
             Token token3 = argumentList.pop();
+            Object value3 = value3C.get();
 
             if (null != value3) {
                 if (value3 instanceof String) {
@@ -1028,14 +1076,14 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 }
             }
         }
-
-
-        return map;
+        return wrap(map);
     }
 
-    private Object getValues(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value = operands.next();
+    private ContextWrapper getValues(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper valueC = operands.next();
         Token token = argumentList.pop();
+        Object value = valueC.get();
+
         Map newMap = mapListResolver.resolveToMap(value);
         if (null != newMap) {
             List list = new ArrayList<>();
@@ -1043,14 +1091,15 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             Collection c = ((Map) value).values();
             List cL = new ArrayList<>(c);
             list.addAll(cL);
-            return list;
+            return wrap(list);
         }
-        return null;
+        return wrap(null);
     }
 
-    private Object getKeys(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value = operands.next();
+    private ContextWrapper getKeys(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper valueC = operands.next();
         Token token = argumentList.pop();
+        Object value = valueC.get();
         Map newMap = mapListResolver.resolveToMap(value);
         if (null != newMap) {
             List list = new ArrayList<>();
@@ -1059,33 +1108,36 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             for (Object o : cL) {
                 list.add(o);
             }
-            return list;
+            return wrap(list);
         }
-        return null;
+        return wrap(null);
     }
 
-    private Object getExtend(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getExtend(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         Map<String, Object> map = new LinkedHashMap<>();
         while (operands.hasNext()) {
-            Object value = operands.next();
+            ContextWrapper valueC = operands.next();
             Token token = argumentList.pop();
+            Object value = valueC.get();
+
             Map newMap = mapListResolver.resolveToMap(value);
             if (null != newMap) {
                 map.putAll((Map) newMap);
             }
 
         }
-        return map;
+        return wrap(map);
     }
 
-    private Object getUnion(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getUnion(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         List<Object> list = new ArrayList<>();
 
         while (operands.hasNext()) {
-            Object value = operands.next();
+            ContextWrapper valueC = operands.next();
             if (argumentList.size() > 0) {
                 Token token = argumentList.pop(); // just pop if exist - it will not exists if function was called before. Sample: union(keys($item$), values($item$))
             }
+            Object value = valueC.get();
             Collection lst = mapListResolver.resolveToCollection(value);
 
             if (null != lst) {
@@ -1095,16 +1147,19 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     list.add(value);
             }
         }
-        return list;
+        return wrap(list);
     }
 
-    private Object getThis(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        return evaluationContext.getDataObject();
+    private ContextWrapper getThis(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        return wrap(evaluationContext.getDataObject());
     }
 
-    private Object getCopy(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value = operands.next();
+    private ContextWrapper getCopy(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper valueC = operands.next();
         Token token = argumentList.pop();
+
+        Object value = valueC.get();
+
 
         Object newObject = value;
         Map newMap = mapListResolver.resolveToMap(value);
@@ -1117,25 +1172,26 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             }
         }
 
-        return newObject;
+        return wrap(newObject);
     }
 
-    private Object getRemove(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
-        Object value = operands.next();
+    private ContextWrapper getRemove(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper valueC = operands.next();
         Token token = argumentList.pop();
         String argumentName = (String) token.getContent();
         Object o = evaluationContext.remove(argumentName);
-        return o;
+        return wrap(o);
     }
 
-
-    private Object getSelect(Function function, Iterator<Object> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+    private ContextWrapper getSelect(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         Map<String, Object> map = new LinkedHashMap<>();
         // Token token = argumentList.pop();
         while (operands.hasNext()) {
-            Object value = operands.next();
+            ContextWrapper valueC = operands.next();
             Token token = argumentList.removeLast();
             String argumentName = token.getContent().toString();
+
+            Object value = valueC.get();
 
             String fieldName = argumentName;
             if (token.isLookupLiteral())
@@ -1143,8 +1199,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
             map.put(fieldName, value);
         }
-        return map;
+        return wrap(map);
     }
-
 
 }

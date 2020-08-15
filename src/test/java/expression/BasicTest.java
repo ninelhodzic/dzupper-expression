@@ -4,6 +4,7 @@ import base.TestBase;
 import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.SimpleObjectEvaluator;
 import org.datazup.expression.context.ConcurrentExecutionContext;
+import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
@@ -30,30 +31,14 @@ public class BasicTest extends TestBase {
 
     private Object evaluateOnMap(String expression){
         try {
-            return evaluator.evaluate(expression,new PathExtractor(getData(), mapListResolver));
+            ContextWrapper contextWrapper = evaluator.evaluate(expression,new PathExtractor(getData(), mapListResolver));
+            return contextWrapper.get();
         } catch (EvaluatorException e) {
             throw new RuntimeException(e);
 
         }
     }
 
-    private Object evaluateOnListOfMaps(String expression){
-        try {
-            return evaluator.evaluate(expression, getListOfMaps());
-        } catch (EvaluatorException e) {
-            throw new RuntimeException(e);
-
-        }
-    }
-
-    private Object evaluateOnNestedListOfMaps(String expression){
-        try {
-            return evaluator.evaluate(expression, getNestedListOfMaps());
-        } catch (EvaluatorException e) {
-            throw new RuntimeException(e);
-
-        }
-    }
 
     @Test
     public void testPlus(){
