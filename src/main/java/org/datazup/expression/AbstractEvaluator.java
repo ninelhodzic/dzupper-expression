@@ -1,6 +1,5 @@
 package org.datazup.expression;
 
-
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -10,6 +9,8 @@ import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.utils.JsonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -18,6 +19,7 @@ import java.util.regex.Pattern;
  * Created by admin@datazup on 3/14/16.
  */
 public abstract class AbstractEvaluator {
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractEvaluator.class);
     private final Tokenizer tokenizer;
     private final Map<String, Function> functions;
     private final Map<String, List<Operator>> operators;
@@ -258,6 +260,10 @@ public abstract class AbstractEvaluator {
 
     public ContextWrapper evaluate(String expression, Object evaluationContext) throws EvaluatorException {
 
+        if(LOG.isDebugEnabled()){
+            LOG.debug("Abstract evaluator Evaluating thread name: "+Thread.currentThread().getName());
+        }
+
         if (StringUtils.isEmpty(expression)) {
             //return null;
             return executionContext.create(null);
@@ -267,6 +273,12 @@ public abstract class AbstractEvaluator {
             Boolean b = Boolean.parseBoolean(expression);
             return executionContext.create(b); //(T)b;
         }
+
+        //TODO - check if expression is just regular string without singlequotes or real expression
+        // should count 5+5 or 2-5 expressions (these have '-' and '+' singes)
+       /* if(!StringUtils.containsAny(expression, "+")){
+            expression = "'"+expression+"'";
+        }*/
 
         if (expression.startsWith("'") && expression.endsWith("'")) {
             int count = StringUtils.countMatches(expression, "'");
@@ -384,7 +396,7 @@ public abstract class AbstractEvaluator {
                     }
                 } else if (token.isFunctionArgumentSeparator()) {
                     if (previous == null) {
-                        throw new IllegalArgumentException("expression can\'t start with a function argument separator");
+                        throw new IllegalArgumentException("expression can't start with a function argument separator");
                     }
 
                     if (previous.isOpenBracket() || previous.isFunctionArgumentSeparator()) {

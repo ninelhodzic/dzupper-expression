@@ -98,7 +98,7 @@ public class Tokenizer {
     }
 
     private Iterator<String> internalTokenizer(String string) {
-        ArrayList res = new ArrayList();
+        List res = new ArrayList();
         Matcher m = this.pattern.matcher(string);
 
         int pos;

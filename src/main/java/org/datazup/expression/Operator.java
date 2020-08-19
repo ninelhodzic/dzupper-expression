@@ -80,6 +80,10 @@ public class Operator {
         }
     }
 
+    public String toString(){
+        return this.symbol;
+    }
+
     public static enum Associativity {
         LEFT,
         RIGHT,

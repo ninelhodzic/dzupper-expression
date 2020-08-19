@@ -40,17 +40,8 @@ import java.util.regex.Pattern;
  */
 public class SimpleObjectEvaluator extends AbstractEvaluator {
     protected static final Logger LOG = LoggerFactory.getLogger(SimpleObjectEvaluator.class);
-    /**
-     * The negate unary operator.
-     */
     public final static Operator NEGATE = new Operator("!", 1, Operator.Associativity.RIGHT, 3);
-    /**
-     * The logical AND operator.
-     */
     private static final Operator AND = new Operator("&&", 2, Operator.Associativity.LEFT, 2);
-    /**
-     * The logical OR operator.
-     */
     public final static Operator OR = new Operator("||", 2, Operator.Associativity.LEFT, 1);
 
     public final static Operator NOT_EQUAL = new Operator("!=", 2, Operator.Associativity.LEFT, 4);
@@ -529,14 +520,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
     }
 
     private ContextWrapper toBooleanValue(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
-        ContextWrapper valueObj = operands.next();
+        ContextWrapper valueObjC = operands.next();
         argumentList.pop();
+        Object valueObj = valueObjC.get();
         if (null == valueObj) {
             return executionContext.create(false);
         }
-
-        Object resolved = valueObj.get();
-        return executionContext.create(TypeUtils.resolveBoolean(resolved));
+        return executionContext.create(TypeUtils.resolveBoolean(valueObj));
     }
 
     private ContextWrapper getIndexOf(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -689,7 +679,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
         }
 
         String timeUnitString = TypeUtils.resolveString(timeUnitObj);
-        if (null == timeUnitString) {
+        if (null == timeUnitString || timeUnitString.isEmpty()) {
             timeUnitString = "Minutes";
         }
         ChronoUnit timeUnit = ChronoUnit.valueOf(timeUnitString.toUpperCase());

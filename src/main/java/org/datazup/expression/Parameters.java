@@ -91,7 +91,7 @@ public class Parameters {
         this.translations.put(name, translatedName);
     }
 
-    String getTranslation(String originalName) {
+    public String getTranslation(String originalName) {
         String translation = (String)this.translations.get(originalName);
         return translation == null?originalName:translation;
     }

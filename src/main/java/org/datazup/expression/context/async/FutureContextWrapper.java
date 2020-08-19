@@ -1,11 +1,12 @@
-package org.datazup.expression.context;
+package org.datazup.expression.context.async;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.datazup.expression.context.exceptions.ExpressionContextException;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-public class FutureContextWrapper implements ContextWrapper {
+public class FutureContextWrapper<T> implements AsyncContextWrapper<T> {
 
     private Future result;
 
@@ -26,5 +27,11 @@ public class FutureContextWrapper implements ContextWrapper {
         }else {
             return null;
         }
+    }
+
+
+    @Override
+    public void handle(FutureHandler<T> handler) {
+        throw new NotImplementedException("Not implemented");
     }
 }

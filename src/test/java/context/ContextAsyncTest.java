@@ -2,7 +2,7 @@ package context;
 
 import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
-import org.datazup.expression.context.FutureExecutionContext;
+import org.datazup.expression.context.async.FutureExecutionContext;
 import org.datazup.utils.TypeUtils;
 import org.junit.Assert;
 import org.junit.Test;

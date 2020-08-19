@@ -505,8 +505,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     private ContextWrapper getPut(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         ContextWrapper value1C = operands.next();
-        Token token1 = argumentList.pop();
-
+        argumentList.pop();
         Object value1 = value1C.get();
 
         if (null == value1) {
