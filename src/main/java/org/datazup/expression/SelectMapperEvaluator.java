@@ -32,6 +32,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function SORTED_SET = new Function("SORTED_SET", 1, Integer.MAX_VALUE);
     public final static Function LIST_PARTITION = new Function("LIST_PARTITION", 1, 2);
     public final static Function LIST_UNPARTITION = new Function("LIST_UNPARTITION", 1);
+    public final static Function SUBLIST = new Function("SUBLIST", 2, 3);
 
 
     public final static Function MAP = new Function("MAP", 0, Integer.MAX_VALUE);
@@ -39,7 +40,6 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function FOREACH = new Function("FOREACH", 2, 3);
     public final static Function STEP = new Function("STEP", 2, Integer.MAX_VALUE);
 
-    public final static Function REMOVE = new Function("REMOVE", 1);
     public final static Function THIS = new Function("THIS", 0);
     public final static Function COPY = new Function("COPY", 1);
     public final static Function UNION = new Function("UNION", 1, Integer.MAX_VALUE);
@@ -57,6 +57,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function GET = new Function("GET", 2, 3);
     public final static Function ADD = new Function("ADD", 2, Integer.MAX_VALUE);
     public final static Function PUT = new Function("PUT", 3, 3);
+    public final static Function REMOVE = new Function("REMOVE", 1, Integer.MAX_VALUE);
 
     public final static Function SORT = new Function("SORT", 2, 3);
     public final static Function LIMIT = new Function("LIMIT", 2, 2);
@@ -97,6 +98,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         SimpleObjectEvaluator.PARAMETERS.add(SORTED_SET);
         SimpleObjectEvaluator.PARAMETERS.add(LIST_PARTITION);
         SimpleObjectEvaluator.PARAMETERS.add(LIST_UNPARTITION);
+        SimpleObjectEvaluator.PARAMETERS.add(SUBLIST);
 
 
         SimpleObjectEvaluator.PARAMETERS.add(MAP);
@@ -161,6 +163,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return getListPartition(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == LIST_UNPARTITION) {
             return getListUnPartition(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == SUBLIST) {
+            return getListSublist(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == MAP) {
             return getMap(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == REMAP) {
@@ -390,6 +394,41 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             List sortedList = SortingUtils.sortList(list, finalDirection, finalSortingComponent);
             return wrap(sortedList);
         }
+    }
+
+    private ContextWrapper getListSublist(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        ContextWrapper value1C = operands.next();
+        argumentList.pop();
+        Object listVal = value1C.get();
+
+        ContextWrapper fromC = operands.next();
+        argumentList.pop();
+
+        ContextWrapper toC = null;
+        if (operands.hasNext()) {
+            toC = operands.next();
+            argumentList.pop();
+        }
+
+        List list = mapListResolver.resolveToList(listVal);
+        if (null == list) {
+            return value1C;
+        }
+
+        Integer from = TypeUtils.resolveInteger(fromC.get());
+        if (null == from) {
+            return value1C;
+        }
+
+        Integer to = list.size();
+        if (null != toC) {
+            to = TypeUtils.resolveInteger(toC.get(), to);
+        }
+
+        List rangeList = new ArrayList(list.subList(from, to));
+
+        return wrap(rangeList);
+
     }
 
     private ContextWrapper getListUnPartition(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
@@ -709,8 +748,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                     ContextWrapper evaluatedResult = evaluate(step, pathExtractor);
                     stepResult = evaluatedResult.get();
                 } catch (EvaluatorException e) {
-                    LOG.error("Cannot execute Step expression: " + step, e);
-                    return wrap(null);
+                    //LOG.error("Cannot execute Step expression: " + step, e);
+                    //return wrap(null);
+                    throw new ExpressionValidationException("Cannot execute Step expression: " + step, e);
                 }
             }
         }
@@ -878,11 +918,18 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
             if (null != value) {
                 Map newMap = mapListResolver.resolveToMap(value);
-               /* if (null == newMap)
-                    throw new ExpressionValidationException("Value in MAP expression should be of Map type");*/
-
                 if (null != newMap) {
                     map.putAll(newMap);
+                }else{
+                    List list = mapListResolver.resolveToList(value);
+                    if(null!=list){
+                        for(Object o: list){
+                            Map tmp = mapListResolver.resolveToMap(o);
+                            if(null!=tmp){
+                                map.putAll(tmp);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -995,9 +1042,14 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
             Collection listChild = mapListResolver.resolveToCollection(value);
             if (null != listChild) {
-                list.addAll(listChild);
+                list.add(listChild);
             } else {
-                list.add(value);
+                Map m = mapListResolver.resolveToMap(value);
+                if (null != m) {
+                    list.add(m);
+                } else {
+                    list.add(value);
+                }
             }
         }
         return wrap(list);
@@ -1176,10 +1228,44 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     private ContextWrapper getRemove(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         ContextWrapper valueC = operands.next();
-        Token token = argumentList.pop();
+        /*Token token = argumentList.pop();
         String argumentName = (String) token.getContent();
-        Object o = evaluationContext.remove(argumentName);
-        return wrap(o);
+        Object o = evaluationContext.remove(argumentName);*/
+
+        Object valueO = valueC.get();
+        if (null == valueO) {
+            return wrap(null);
+        }
+
+        if (!operands.hasNext()) {
+            return valueC;
+        }
+
+        Map valueMap = mapListResolver.resolveToMap(valueO);
+        if (null == valueMap) {
+            List valueList = mapListResolver.resolveToList(valueO);
+            if (null == valueList) {
+                return valueC;
+            } else {
+                while (operands.hasNext()) {
+                    ContextWrapper tmpC = operands.next();
+                    argumentList.pop();
+                    Integer index = TypeUtils.resolveInteger(tmpC.get());
+                    if (null != index) {
+                        valueList.remove(index);
+                    }
+                }
+                return wrap(valueList);
+            }
+        } else {
+            while (operands.hasNext()) {
+                ContextWrapper tmpC = operands.next();
+                argumentList.pop();
+                Object keyToRemove = tmpC.get();
+                valueMap.remove(keyToRemove);
+            }
+            return wrap(valueMap);
+        }
     }
 
     private ContextWrapper getSelect(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {

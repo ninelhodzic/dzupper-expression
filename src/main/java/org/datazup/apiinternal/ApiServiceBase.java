@@ -1,5 +1,6 @@
 package org.datazup.apiinternal;
 
+import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.context.ContextWrapper;
 import org.datazup.pathextractor.PathExtractor;
 
@@ -21,7 +22,7 @@ public abstract class ApiServiceBase implements ApiService {
         return apis.containsKey(apiName);
     }
 
-    public ContextWrapper execute(String apiName, ContextWrapper params, PathExtractor context) {
+    public ContextWrapper execute(String apiName, ContextWrapper params, PathExtractor context) throws EvaluatorException {
         if (apis.containsKey(apiName)) {
             APICallable api = apis.get(apiName);
             ContextWrapper apiResponse = api.run(params, context);

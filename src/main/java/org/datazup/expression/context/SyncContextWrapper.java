@@ -5,6 +5,7 @@ public class SyncContextWrapper implements ContextWrapper {
     public SyncContextWrapper(Object object) {
         this.result = object;
     }
+    public SyncContextWrapper(){}
 
     @Override
     public Object get() {

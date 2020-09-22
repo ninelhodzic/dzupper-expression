@@ -1,5 +1,6 @@
 package org.datazup.apiinternal;
 
+import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.pathextractor.PathExtractor;
@@ -10,6 +11,6 @@ import org.datazup.pathextractor.PathExtractor;
 
 public interface ApiService {
     Boolean contains(String apiName);
-    ContextWrapper execute(String apiName, ContextWrapper params, PathExtractor context);
+    ContextWrapper execute(String apiName, ContextWrapper params, PathExtractor context) throws EvaluatorException;
     void add(APICallable apiCallable);
 }

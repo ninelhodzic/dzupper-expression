@@ -120,6 +120,16 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
     public final static Function RANDOM_NUM = new Function("RANDOM_NUM", 0, 2);
     public final static Function RANDOM_SENTENCE = new Function("RANDOM_SENTENCE", 0, 1);
     public final static Function RANDOM_WORD = new Function("RANDOM_WORD", 0, 1);
+    public final static Function RANDOM_ALPHABETIC = new Function("RANDOM_ALPHABETIC", 0, 1);
+
+    public final static Function RANDOM_ALPHANUMERIC= new Function("RANDOM_ALPHANUMERIC", 0, 1);
+    public final static Function RANDOM_NUMERIC = new Function("RANDOM_NUMERIC", 0, 1);
+    public final static Function RANDOM_STRING = new Function("RANDOM_STRING", 0, 1);
+    public final static Function RANDOM_ASCII = new Function("RANDOM_ASCII", 0, 1);
+    public final static Function RANDOM_GRAPH = new Function("RANDOM_GRAPH", 0, 1);
+
+
+
     public final static Function RANDOM_CHAR = new Function("RANDOM_CHAR", 0, 1);
 
     public final static Function SPLITTER = new Function("SPLITTER", 1, 4);
@@ -216,6 +226,15 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
         PARAMETERS.add(RANDOM_SENTENCE);
         PARAMETERS.add(RANDOM_WORD);
         PARAMETERS.add(RANDOM_CHAR);
+
+        PARAMETERS.add(RANDOM_ALPHABETIC);
+
+        PARAMETERS.add(RANDOM_ALPHANUMERIC);
+        PARAMETERS.add(RANDOM_NUMERIC);
+        PARAMETERS.add(RANDOM_STRING);
+        PARAMETERS.add(RANDOM_ASCII);
+        PARAMETERS.add(RANDOM_GRAPH);
+
     }
 
     private static SimpleObjectEvaluator INSTANCE;
@@ -453,7 +472,20 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             return evaluateRandomSentenceFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == RANDOM_WORD) {
             return evaluateRandomWordFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
-        } else if (function == RANDOM_CHAR) {
+        } else if (function == RANDOM_ALPHABETIC) {
+            return evaluateRandomAlphabeticFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == RANDOM_ALPHANUMERIC) {
+            return evaluateRandomAlphanumericFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == RANDOM_STRING) {
+            return evaluateRandomFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == RANDOM_NUMERIC) {
+            return evaluateRandomNumericFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == RANDOM_ASCII) {
+            return evaluateRandomAsciiFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }else if (function == RANDOM_GRAPH) {
+            return evaluateRandomGraphFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
+        }
+        else if (function == RANDOM_CHAR) {
             return evaluateRandomCharFunction(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == SUBSTRING) {
             return substring(function, operands, argumentList, evaluationContext);
@@ -464,6 +496,69 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
         else {
             return super.evaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private Object evaluateRandomFunction(String type, Integer size) {
+        Object res = null;
+        switch (type) {
+            case "randomAlphabetic":
+                res = RandomStringUtils.randomAlphabetic(size);
+                break;
+            case "randomAlphanumeric":
+                res = RandomStringUtils.randomAlphanumeric(size);
+                break;
+            case "randomAscii":
+                res = RandomStringUtils.randomAscii(size);
+                break;
+            case "randomNumeric":
+                res = RandomStringUtils.randomNumeric(size);
+                break;
+            case "randomGraph":
+                res = RandomStringUtils.randomGraph(size);
+                break;
+            case "random":
+                res = RandomStringUtils.random(size);
+                break;
+        }
+
+        return res;
+    }
+
+    private ContextWrapper evaluateRandomFunction(String type, Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        if (operands.hasNext()) {
+            ContextWrapper countC = operands.next();
+            argumentList.pop();
+            Number num = TypeUtils.resolveNumber(countC.get());
+            if (null != num) {
+                return wrap(evaluateRandomFunction(type, num.intValue()));
+            }
+        } else {
+            return wrap(evaluateRandomFunction(type, 10));
+        }
+        return wrap(null);
+    }
+
+    private ContextWrapper evaluateRandomAlphabeticFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        return evaluateRandomFunction("randomAlphabetic", function, operands, argumentList, evaluationContext);
+    }
+    private ContextWrapper evaluateRandomAlphanumericFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        return evaluateRandomFunction("randomAlphanumeric", function, operands, argumentList, evaluationContext);
+    }
+
+    private ContextWrapper evaluateRandomNumericFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        return evaluateRandomFunction("randomNumeric", function, operands, argumentList, evaluationContext);
+    }
+
+    private ContextWrapper evaluateRandomFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        return evaluateRandomFunction("random", function, operands, argumentList, evaluationContext);
+    }
+
+    private ContextWrapper evaluateRandomGraphFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        return evaluateRandomFunction("randomGraph", function, operands, argumentList, evaluationContext);
+    }
+
+    private ContextWrapper evaluateRandomAsciiFunction(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
+        return evaluateRandomFunction("randomAscii", function, operands, argumentList, evaluationContext);
     }
 
     private Boolean isOfTypeRecursively(Class objClass, String type) {
@@ -872,7 +967,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             Object containerOrString = containerOrStringC.get();
 
             if (null == containerOrString || !(containerOrString instanceof String)) {
-                return wrap(RandomStringUtils.random(10));
+                Number num = TypeUtils.resolveNumber(containerOrString);
+                if (null != num) {
+                    return wrap(RandomStringUtils.random(num.intValue()));
+                } else {
+                    return wrap(RandomStringUtils.random(10));
+                }
             } else {
                 String words = (String) containerOrString;
                 if (words.contains(" ")) {
@@ -1545,7 +1645,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
     }
 
     protected ContextWrapper nextFunctionEvaluate(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList,
-                                          Object evaluationContext) {
+                                                  Object evaluationContext) {
         return super.evaluate(function, operands, argumentList, evaluationContext);
     }
 
@@ -1629,9 +1729,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
                 return wrap(false);
             }
             Boolean nextB = TypeUtils.resolveBoolean(next);
-            if(null!=nextB){
+            if (null != nextB) {
                 return wrap(!nextB);
-            }else{
+            } else {
                 return wrap(!true);
             }
         } else if (operator == NOT_EQUAL) {
@@ -1665,7 +1765,6 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
 
             Object left = leftC.get();
             Object right = rightC.get();
-
 
 
             if (null == left || null == right) {

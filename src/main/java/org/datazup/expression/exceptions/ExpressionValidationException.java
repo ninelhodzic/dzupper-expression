@@ -8,6 +8,9 @@ public class ExpressionValidationException extends RuntimeException {
     public ExpressionValidationException(String message){
         super(message);
     }
+    public ExpressionValidationException(Throwable e){
+        super(e);
+    }
     public ExpressionValidationException(String message, Throwable e){
         super(message, e);
     }
