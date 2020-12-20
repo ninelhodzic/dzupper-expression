@@ -273,7 +273,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
         o = evaluate("REMOVE(child.list[last])", pathExtractor);
         Assert.assertNotNull(o);
 
-        o = evaluate("SIZE_OF(child.list)==3", pathExtractor);
+        o = evaluate("SIZE_OF(child.list)==4", pathExtractor);
         Assert.assertTrue(o instanceof Boolean);
 
         Boolean b = (Boolean) o;
@@ -754,6 +754,17 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void templateHtmlTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         String strToCompile = "T('#<html>ovo je moj </br> text <pre> {{child.name}} </pre> </html>#')";
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluate(strToCompile, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(((String) o).startsWith("<html>"));
+        Assert.assertTrue(((String) o).endsWith("</html>"));
+    }
+
+    @Test
+    public void templateIFHtmlTest() throws EvaluatorException{
+        Map<String, Object> data = getData();
+        String strToCompile = "T('#<html>ovo je moj </br> text <pre> {{#if child.name}} {{child.name}} {{/if}} </pre> </html>#')";
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         Object o = evaluate(strToCompile, pathExtractor);
         Assert.assertNotNull(o);

@@ -2,6 +2,8 @@ package org.datazup.expression;
 
 import com.florianingerl.util.regex.Matcher;
 import com.florianingerl.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -12,9 +14,13 @@ import java.util.regex.Pattern;*/
  * Created by admin@datazup on 3/14/16.
  */
 public class Tokenizer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Tokenizer.class);
+
     private Pattern pattern;
     private String tokenDelimiters;
     private boolean trimTokens;
+
 
     public Tokenizer(List<String> delimiters) {
         if (this.onlyOneChar(delimiters)) {
@@ -68,10 +74,12 @@ public class Tokenizer {
         StringBuilder result = new StringBuilder();
         result.append('(');
         //result.append("'#.*?#'"); //special case
-        result.append("('#(?:[^'#]+|(?1))*+#')"); // added library: florianingerl - suppor for "recursion" in Java regex (?1)
-
+      //  result.append("('#(?:[^'#]+|(?1))*+#')"); // added library: florianingerl - suppor for "recursion" in Java regex (?1) - https://github.com/florianingerl/com.florianingerl.util.regex
+        result.append("('#(?:([^'#])+|(?1))*+#')");
         result.append('|');
-        result.append("('(?!#).*?(?!#)')");
+       // result.append("('(?!#).*?(?!#)')");
+        result.append("('.*?')|");
+        result.append("('#.*?#')");
         String delim;
         for (Iterator i$ = delimiters.iterator(); i$.hasNext(); result.append("\\Q").append(delim).append("\\E")) {
             delim = (String) i$.next();
@@ -84,7 +92,10 @@ public class Tokenizer {
 
         result.append(')');
 
-        return Pattern.compile(result.toString(), Pattern.DOTALL);
+        String pattern = result.toString();
+//        System.out.println("Pattern; "+patter);
+
+        return Pattern.compile(pattern, Pattern.DOTALL);
     }
 
     private void addToTokens(List<String> tokens, String token) {
