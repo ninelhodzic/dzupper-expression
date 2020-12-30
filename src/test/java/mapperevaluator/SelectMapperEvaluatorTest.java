@@ -46,6 +46,49 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof List);
     }*/
 
+
+
+    @Test
+    public void complexParseTest() throws EvaluatorException {
+        String expression = "MAP(" +
+                "    FIELD('find'," +
+                "        MAP(" +
+                "            FIELD('tenantName', $_meta.tenant-Name$)," +
+                "            FIELD('applicationTenantName', $_meta.application.application-TenantName$)," +
+                "            FIELD('_id', $params.id$)" +
+                "        )" +
+                "    )," +
+                "    FIELD('query', " +
+                "        MAP(" +
+                "          FIELD('$set', " +
+                "               FIELD('enab-led', TO_BOOLEAN('true'))" +
+                "           )," +
+                "           FIELD('$date', " +
+                "               FIELD('enab-led', TO_BOOLEAN('true'))" +
+                "           )" +
+                "        )" +
+                "    )" +
+                ")";
+
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object evaluaged = evaluate(expression,  pathExtractor);
+        Assert.assertNotNull(evaluaged);
+    }
+
+
+    @Test
+    public void evaluateMatchingUrlPath() throws EvaluatorException {
+        String expression = "$method$=='DELETE' && $matchedPath$=='/request/{id}'";
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object evaluaged = evaluate(expression,  pathExtractor);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Boolean b = (Boolean)evaluaged;
+        Assert.assertTrue(b);
+    }
+
     @Test
     public void evaluateSimpleGroupByPropertyTest()throws EvaluatorException{
         String expression = "GROUP_BY($listOfMaps$, 'type')";

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.StreamSupport;
 
 /**
  * Created by admin@datazup on 3/14/16.
@@ -334,6 +335,8 @@ public abstract class AbstractEvaluator {
         ArrayDeque stack = new ArrayDeque();
         ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
         Iterator tokens = this.tokenize(expression);
+
+        System.out.println("Tokens: "+JsonUtils.getJsonFromObject(Lists.newArrayList(this.tokenize(expression))));
         //  List<Token> functionArgumentList = null;
 
         try {

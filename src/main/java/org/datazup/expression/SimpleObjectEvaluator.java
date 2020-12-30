@@ -71,6 +71,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
 
     // date functions
     public final static Function NOW = new Function("NOW", 0);
+    public final static Function DATE_NOW = new Function("DATE_NOW", 0);
     public final static Function STR_TO_DATE_TIMESTAMP = new Function("STR_TO_DATE_TIMESTAMP", 2);
 
     public final static Function MINUTE = new Function("MINUTE", 1);
@@ -166,6 +167,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
         PARAMETERS.addExpressionBracket(BracketPair.PARENTHESES);
         PARAMETERS.addFunctionBracket(BracketPair.PARENTHESES);
         PARAMETERS.add(NOW);
+        PARAMETERS.add(DATE_NOW);
         PARAMETERS.add(IS_NULL);
         PARAMETERS.add(SET_NULL);
         PARAMETERS.add(SIZE_OF);
@@ -374,6 +376,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             return executionContext.create(DateTimeUtils.getYear(dt));
         } else if (function == NOW) {
             return executionContext.create(System.currentTimeMillis()); //Instant.now();
+        } else if (function == DATE_NOW) {
+            return executionContext.create(Instant.now()); //Instant.now();
         } else if (function == SET_NULL) {
             Object op1 = operands.next();
             argumentList.pop();

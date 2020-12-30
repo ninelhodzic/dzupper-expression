@@ -125,6 +125,11 @@ public abstract class TestBase {
         numbers.add(4);
         parent.put("numbers", numbers);
         parent.put("listOfMaps", getListOfMaps());
+        parent.put("with-separator", Arrays.asList(1, 2, 3));
+
+        parent.put("method", "DELETE");
+        parent.put("matchedPath", "/request/{id}");
+
         return parent;
     }
 

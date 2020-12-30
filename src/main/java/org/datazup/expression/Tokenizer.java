@@ -77,8 +77,12 @@ public class Tokenizer {
       //  result.append("('#(?:[^'#]+|(?1))*+#')"); // added library: florianingerl - suppor for "recursion" in Java regex (?1) - https://github.com/florianingerl/com.florianingerl.util.regex
         result.append("('#(?:([^'#])+|(?1))*+#')");
         result.append('|');
-       // result.append("('(?!#).*?(?!#)')");
+        result.append("\\$(.*?)\\$|");
+
         result.append("('.*?')|");
+        result.append("(^['\\$](?:([^\\$])+|(?1))*+[\\$']$)|");
+
+
         result.append("('#.*?#')");
         String delim;
         for (Iterator i$ = delimiters.iterator(); i$.hasNext(); result.append("\\Q").append(delim).append("\\E")) {
@@ -93,7 +97,7 @@ public class Tokenizer {
         result.append(')');
 
         String pattern = result.toString();
-//        System.out.println("Pattern; "+patter);
+        System.out.println("Pattern; "+pattern);
 
         return Pattern.compile(pattern, Pattern.DOTALL);
     }
