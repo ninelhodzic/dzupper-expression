@@ -33,6 +33,7 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "        \"where\": {\n" +
                 "            \"AND\": [\n" +
                 "                {\"name\":\"createdAt\",\"func\":\"GTE\",\"value\":\"2020-12-27\"},\n" +
+                "                {\"name\":\"enabled\",\"func\":\"=\",\"value\":true},\n" +
                 "                {\"OR\": [{\"name\":\"tenantName\", \"func\":\"=\",\"value\":\"dataZup\"}]},\n" +
                 "                {\"OR\": [{\"name\":\"applicationTenantName\",\"func\":\"=\",\"value\":\"ahsalini\"}]}\n" +
                 "            ]\n" +

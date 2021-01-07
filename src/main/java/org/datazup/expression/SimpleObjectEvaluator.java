@@ -24,10 +24,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.WeekFields;
@@ -90,6 +87,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
 
     public final static Function DATE_MINUS = new Function("DATE_MINUS", 3);//firstDate, secondDate, TimeUnit
     public final static Function DATE_PLUS = new Function("DATE_PLUS", 3);//firstDate, secondDate, TimeUnit
+    public final static Function DATE_START = new Function("DATE_START", 1);//firstDate, secondDate, TimeUnit
+    public final static Function DATE_END = new Function("DATE_END", 1);//firstDate, secondDate, TimeUnit
 
     public final static Function TO_DATE = new Function("TO_DATE", 1, 3);
     public final static Function TO_INT = new Function("TO_INT", 1);
@@ -192,6 +191,11 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
         PARAMETERS.add(DATE_MINUS);
         PARAMETERS.add(DATE_PLUS);
 
+        PARAMETERS.add(DATE_START);
+        PARAMETERS.add(DATE_END);
+
+
+
         PARAMETERS.add(TO_DATE);
         PARAMETERS.add(TO_INT);
         PARAMETERS.add(TO_LONG);
@@ -289,6 +293,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             return getDateMinus(function, operands, argumentList, evaluationContext);
         } else if (function == DATE_PLUS) {
             return getDatePlus(function, operands, argumentList, evaluationContext);
+        }else if (function == DATE_START) {
+            return getDateStart(function, operands, argumentList, evaluationContext);
+        }else if (function == DATE_END) {
+            return getDateEnd(function, operands, argumentList, evaluationContext);
         } else if (function == ABS) {
             return abs(function, operands, argumentList, evaluationContext);
         } else if (function == ROUND) {
@@ -500,6 +508,44 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
         else {
             return super.evaluate(function, operands, argumentList, evaluationContext);
         }
+    }
+
+    private ContextWrapper getDateEnd(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper firstDTObjContext = operands.next();
+        argumentList.pop();
+
+        Object dt1 = firstDTObjContext.get();
+        if (null==dt1){
+            return wrap(null);
+        }
+
+        Instant date = DateTimeUtils.resolve(dt1);
+        if (null==date){
+            return wrap(null);
+        }
+        LocalDate localDateTime = LocalDateTime.ofInstant(date, ZoneId.systemDefault()).toLocalDate();
+        Instant res = LocalDateTime.of(localDateTime, LocalTime.MAX).toInstant(ZoneOffset.UTC);
+
+        return wrap(res);
+    }
+
+    private ContextWrapper getDateStart(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        ContextWrapper firstDTObjContext = operands.next();
+        argumentList.pop();
+
+        Object dt1 = firstDTObjContext.get();
+        if (null==dt1){
+            return wrap(null);
+        }
+
+        Instant date = DateTimeUtils.resolve(dt1);
+        if (null==date){
+            return wrap(null);
+        }
+        LocalDate localDateTime = LocalDateTime.ofInstant(date, ZoneId.systemDefault()).toLocalDate();
+        Instant res = LocalDateTime.of(localDateTime, LocalTime.MIN).toInstant(ZoneOffset.UTC);
+
+        return wrap(res);
     }
 
     private Object evaluateRandomFunction(String type, Integer size) {
@@ -1593,7 +1639,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             Instant dt = DateTimeUtils.format(value, format);
             leftDateTime = dt;
             // leftDateTime = new DateTime(value, DateTimeZone.UTC);
-
+        } else if (valueObject instanceof Instant){
+            leftDateTime = (Instant)valueObject;
         }
 
         if (null != leftDateTime) {
