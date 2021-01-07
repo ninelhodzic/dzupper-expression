@@ -42,7 +42,8 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "            \"AND\": [\n" +
                 "                {\"name\":\"createdAt\",\"func\":\">\",\"value\":\"2020-12-27\"}\n" +
                 "            ]\n" +
-                "        }\n" +
+                "        },\n" +
+                "        \"orderBy\": [ {\"name\":\"createdAt\", \"value\":\"DESC\"}] "+
                 "    }";
         Map<String, Object> data = getData();
         data.put("jsonString", json);

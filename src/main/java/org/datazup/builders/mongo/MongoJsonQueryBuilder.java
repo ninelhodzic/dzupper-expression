@@ -53,6 +53,8 @@ public class MongoJsonQueryBuilder {
         Map flattenStage = getFlattenStage(fields, groupByList);
         Map constraintsStage = getConstraintsStage(havingObj);
 
+        Map sortingStage = getOrderByConstraint(orderByObj);
+
 
         if (null != filterStage) {
             aggregations.add(filterStage);
@@ -65,6 +67,11 @@ public class MongoJsonQueryBuilder {
         if (null != constraintsStage)
             aggregations.add(constraintsStage);
 
+        if (null!=sortingStage){
+            Map sort = new HashMap();
+            sort.put("$sort", sortingStage);
+            aggregations.add(sort);
+        }
 
         query.put("AGGREGATIONS", aggregations);
 
@@ -126,7 +133,7 @@ public class MongoJsonQueryBuilder {
     private Map<String, Object> getOrderByConstraint(List<Map<String, Object>> orderByObject) {
         if (null != orderByObject) {
             /* sort: { field1: 1, field2: -1} */
-            Map<String, Object> res = new HashMap<>();
+            Map<String, Object> res = new LinkedHashMap<>();
             for (Map<String, Object> obj : orderByObject) {
                 Object valOb = obj.get("value");
                 Integer val = 1;
