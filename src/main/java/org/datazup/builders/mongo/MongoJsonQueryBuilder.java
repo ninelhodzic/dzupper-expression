@@ -123,6 +123,8 @@ public class MongoJsonQueryBuilder {
 
     private List<Map<String, Object>> getFields() {
         Object fieldsObj = jsonObject.get("fields");
+        if (null==fieldsObj)
+            return null;
         List<Map<String, Object>> fields = null;
         if (!fieldsObj.equals("*")) {
             fields = mapListResolver.resolveToList(fieldsObj);
@@ -272,16 +274,20 @@ public class MongoJsonQueryBuilder {
             idMap = new LinkedHashMap<>();
             for (Map<String, Object> groupMap : groupByList) {
                 String name = (String) groupMap.get("name");
-                String func = null;
                 String alias = null;
                 if (groupMap.containsKey("alias")) {
                     alias = (String) groupMap.get("alias");
                 }
                 if (groupMap.containsKey("func")) {
-                    Map<String, Object> tmpMap = new HashMap<>();
-                    func = (String) groupMap.get("func");
-                    tmpMap.put("$" + func, "$" + name);
 
+                    Map<String, Object> tmpMap = new HashMap<>();
+                    String func = (String) groupMap.get("func");
+                    Map funcParams = getFuncParams(groupMap);
+                    if (null==funcParams) {
+                        tmpMap.put("$" + func, "$" + name);
+                    }else{
+                        tmpMap.put("$"+func, funcParams);
+                    }
                     if (null == alias)
                         alias = name + func.substring(0, 1).toUpperCase() + func.substring(1);
 
@@ -294,6 +300,14 @@ public class MongoJsonQueryBuilder {
             }
         }
         return idMap;
+    }
+
+    private Map<String,Object> getFuncParams(Map<String, Object> groupMap) {
+        if (groupMap.containsKey("funcParams")){
+            Map<String,Object> m = mapListResolver.resolveToMap(groupMap.get("funcParams"));
+            return m;
+        }
+        return null;
     }
 
     private Map<String, Object> getFieldAliasFuncMap(Map<String, Object> field) {

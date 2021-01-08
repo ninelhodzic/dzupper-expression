@@ -69,7 +69,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
     public final static Function MIN = new Function("MIN", 1);
 
 
-    public final static Function TO_DB_QUERY = new Function("TO_DB_QUERY", 1,2);
+    public final static Function TO_DB_QUERY = new Function("TO_DB_QUERY", 1, 2);
 
 
     private static SelectMapperEvaluator INSTANCE;
@@ -142,9 +142,9 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     @Override
     protected ContextWrapper evaluate(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
-        if (function== TO_DB_QUERY){
-            return  jsonToDbQuery(function, operands, argumentList, (PathExtractor) evaluationContext);
-        }else if (function == MAX) {
+        if (function == TO_DB_QUERY) {
+            return jsonToDbQuery(function, operands, argumentList, (PathExtractor) evaluationContext);
+        } else if (function == MAX) {
             return getMax(function, operands, argumentList, (PathExtractor) evaluationContext);
         } else if (function == MIN) {
             return getMin(function, operands, argumentList, (PathExtractor) evaluationContext);
@@ -215,7 +215,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
         }
     }
 
-    private ContextWrapper jsonToDbQuery(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext){
+    private ContextWrapper jsonToDbQuery(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, PathExtractor evaluationContext) {
         ContextWrapper value1C = operands.next();
         Token token1 = argumentList.pop();
 
@@ -225,7 +225,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             return wrap(null);
 
         String queryType = "MONGO_DB";
-        Map<String,Object> jsonQuery = null;
+        Map<String, Object> jsonQuery = null;
         if (value1 instanceof String) {
             String value1S = (String) value1;
             Map<String, Object> tmp = mapListResolver.resolveToMap(value1);
@@ -234,10 +234,10 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             } else {
                 queryType = value1S;
             }
-        }else{
+        } else {
             jsonQuery = mapListResolver.resolveToMap(value1);
         }
-        if (null==jsonQuery){
+        if (null == jsonQuery) {
             ContextWrapper value2C = operands.next();
             Token token2 = argumentList.pop();
 
@@ -248,17 +248,14 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
             jsonQuery = mapListResolver.resolveToMap(value2);
         }
-        if (null==jsonQuery){
+        if (null == jsonQuery) {
             return wrap(null);
         }
 
-        switch (queryType){
+        switch (queryType) {
             case "MONGO_DB":
                 MongoJsonQueryBuilder queryBuilder = new MongoJsonQueryBuilder(jsonQuery, mapListResolver);
                 Map query = queryBuilder.execute();
-
-
-
                 return wrap(query);
             default:
                 throw new ExpressionValidationException("Only MongoDb query is supported");
@@ -979,12 +976,12 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 Map newMap = mapListResolver.resolveToMap(value);
                 if (null != newMap) {
                     map.putAll(newMap);
-                }else{
+                } else {
                     List list = mapListResolver.resolveToList(value);
-                    if(null!=list){
-                        for(Object o: list){
+                    if (null != list) {
+                        for (Object o : list) {
                             Map tmp = mapListResolver.resolveToMap(o);
-                            if(null!=tmp){
+                            if (null != tmp) {
                                 map.putAll(tmp);
                             }
                         }

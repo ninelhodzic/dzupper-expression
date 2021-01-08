@@ -28,7 +28,8 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "            {\"name\":\"*\",\"func\":\"count\"}\n" +
                 "        ],\n" +
                 "        \"groupBy\": [\n" +
-                "            {\"name\":\"createdAt\",\"func\":\"year\"}\n" +
+                "            {\"name\":\"createdAt\",\"func\":\"year\"},\n" +
+                "            {\"name\":\"createdAt\",\"func\":\"dateToString\", \"funcParams\":{\"format\":\"%Y-%m-%d\", \"date\": \"$createdAt\"}}\n" +
                 "        ],\n" +
                 "        \"where\": {\n" +
                 "            \"AND\": [\n" +
