@@ -76,6 +76,17 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertNotNull(evaluaged);
     }
 
+    @Test
+    public void evaluateListExtractorByIndex() throws EvaluatorException {
+        String expression = "$numbers['#index#']$";
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object evaluaged = evaluate(expression,  pathExtractor);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+        Number b = (Number) evaluaged;
+        Assert.assertTrue(b.intValue()==5);
+    }
 
     @Test
     public void evaluateMatchingUrlPath() throws EvaluatorException {

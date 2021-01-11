@@ -77,6 +77,7 @@ public class Tokenizer {
       //  result.append("('#(?:[^'#]+|(?1))*+#')"); // added library: florianingerl - suppor for "recursion" in Java regex (?1) - https://github.com/florianingerl/com.florianingerl.util.regex
         result.append("('#(?:([^'#])+|(?1))*+#')");
         result.append('|');
+       // result.append("\\$([a-zA-Z0-9\\.\\-]?)\\$|");
         result.append("\\$(.*?)\\$|");
 
         result.append("('.*?')|");

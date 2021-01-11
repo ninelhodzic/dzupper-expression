@@ -124,6 +124,7 @@ public abstract class TestBase {
         numbers.add(5);
         numbers.add(4);
         parent.put("numbers", numbers);
+        parent.put("index", 1);
         parent.put("listOfMaps", getListOfMaps());
         parent.put("with-separator", Arrays.asList(1, 2, 3));
 
