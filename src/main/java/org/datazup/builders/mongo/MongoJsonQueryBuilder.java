@@ -44,6 +44,8 @@ public class MongoJsonQueryBuilder {
         List<Map<String, Object>> orderByObj = mapListResolver.resolveToList(jsonObject.get("orderBy"));
         Map<String, Object> havingObj = mapListResolver.resolveToMap(jsonObject.get("having"));
         Map<String, Object> whereObj = mapListResolver.resolveToMap(jsonObject.get("where"));
+        Integer limit = TypeUtils.resolveInteger(jsonObject.get("limit"));
+        Integer skip = TypeUtils.resolveInteger(jsonObject.get("skip"));
 
         List<Map<String, Object>> fields = getFields();
 
@@ -71,6 +73,17 @@ public class MongoJsonQueryBuilder {
             Map sort = new HashMap();
             sort.put("$sort", sortingStage);
             aggregations.add(sort);
+        }
+
+        if (null!=limit){
+            Map l = new HashMap();
+            l.put("$limit", limit);
+            aggregations.add(l);
+        }
+        if (null!=skip){
+            Map l = new HashMap();
+            l.put("$skip", limit);
+            aggregations.add(l);
         }
 
         query.put("AGGREGATIONS", aggregations);
@@ -116,6 +129,15 @@ public class MongoJsonQueryBuilder {
         Map<String, Object> orderBy = getOrderByConstraint(mapListResolver.resolveToList(jsonObject.get("orderBy")));
         if (null != orderBy) {
             query.put("sort", orderBy);
+        }
+
+        Integer limit = TypeUtils.resolveInteger(jsonObject.get("limit"));
+        if (null!=limit){
+            query.put("limit", limit);
+        }
+        Integer skip = TypeUtils.resolveInteger(jsonObject.get("skip"));
+        if (null!=skip){
+            query.put("skip", skip);
         }
 
         return query;

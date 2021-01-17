@@ -45,6 +45,8 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "            ]\n" +
                 "        },\n" +
                 "        \"orderBy\": [ {\"name\":\"createdAt\", \"value\":\"DESC\"}] "+
+                "         \"limit\": 1,"+
+                "         \"skip\": 1"+
                 "    }";
         Map<String, Object> data = getData();
         data.put("jsonString", json);
@@ -61,7 +63,9 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "        ],\n" +
                 "    \"where\":{\n" +
                 "        \"AND\":[{\"name\":\"tenantName\",\"func\":\"=\",\"value\":\"dataZup\"}]\n" +
-                "    }\n" +
+                "    },\n" +
+                "         \"limit\": 1,"+
+                "         \"skip\": 1"+
                 "}\n";
         String expression = "TO_DB_QUERY(MAP($jsonString$))";
         Map<String, Object> data = getData();
@@ -96,7 +100,7 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "\"orderBy\":[\n" +
                 "            {\"name\":\"createdAt\", \"value\":-1},\n" +
                 "            {\"name\":\"updatedAt\", \"value\":1, \"func\":\"hour\"}\n" +
-                "        ]" +
+                "        ], \"limit\":1,\"skip\":1" +
                 "}\n";
         String expression = "TO_DB_QUERY(MAP($jsonString$))";
         Map<String, Object> data = getData();
@@ -111,7 +115,7 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "        ],\n" +
                 "        \"groupBy\": [\n" +
                 "            {\"name\":\"createdAt\",\"func\":\"year\"}\n" +
-                "        ]}";
+                "        ], \"limit\":1, \"skip\":2}";
         String expression = "TO_DB_QUERY(MAP($jsonString$))";
         Map<String, Object> data = getData();
         data.put("jsonString", json);
