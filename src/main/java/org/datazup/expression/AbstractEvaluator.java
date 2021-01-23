@@ -195,7 +195,9 @@ public abstract class AbstractEvaluator {
             }
 
             Operator operator1 = token.getOperator();
-            values.push(this.evaluate(operator1, this.getArguments(values, operator1.getOperandCount()), evaluationContext));
+            Iterator<ContextWrapper> args = this.getArguments(values, operator1.getOperandCount());
+            ContextWrapper res = this.evaluate(operator1, args, evaluationContext);
+            values.push(res);
         }
 
     }
@@ -336,7 +338,7 @@ public abstract class AbstractEvaluator {
         ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
         Iterator tokens = this.tokenize(expression);
 
-        System.out.println("Tokens: "+JsonUtils.getJsonFromObject(Lists.newArrayList(this.tokenize(expression))));
+      //  System.out.println("Tokens: "+JsonUtils.getJsonFromObject(Lists.newArrayList(this.tokenize(expression))));
         //  List<Token> functionArgumentList = null;
 
         try {

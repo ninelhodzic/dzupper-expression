@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.exceptions.ExpressionValidationException;
@@ -864,6 +865,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
 
         Object firstDTObj = firstDTObjC.get();
         Object secondDTObj = secondDTObjC.get();
+        if (null==firstDTObj || null==secondDTObj)
+            return wrap(null);
+
         Object timeUnitObj = timeUnitObjC.get();
 
         Instant firstDt = DateTimeUtils.resolve(firstDTObj);
@@ -1729,7 +1733,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             Object right = rightC.get();
 
 
-            Number lN = null;
+            /*Number lN = null;
             Number rN = null;
             if (left instanceof Number) {
                 lN = (Number) left;
@@ -1741,7 +1745,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
                 rN = (Number) right;
             } else if (right instanceof String) {
                 rN = resolveNumber(right);
-            }
+            }*/
+            Number lN = TypeUtils.resolveNumber(left);// left;
+            Number rN = TypeUtils.resolveNumber(right);//right;
             if (null != lN && null != rN) {
                 return wrap(lN.doubleValue() / rN.doubleValue());
             }
@@ -1755,7 +1761,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             Object right = rightC.get();
 
 
-            Number lN = null;
+           /* Number lN = null;
             Number rN = null;
             if (left instanceof Number) {
                 lN = (Number) left;
@@ -1767,7 +1773,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
                 rN = (Number) right;
             } else if (right instanceof String) {
                 rN = resolveNumber(right);
-            }
+            }*/
+            Number lN = TypeUtils.resolveNumber(left);// left;
+            Number rN = TypeUtils.resolveNumber(right);//right;
+
             if (null != lN && null != rN) {
                 return wrap(lN.doubleValue() * rN.doubleValue());
             }
@@ -1804,8 +1813,12 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
                 return wrap(false);
             }
 
-            Number l = (Number) left;
-            Number r = (Number) right;
+            /*Number l = (Number) left;
+            Number r = (Number) right;*/
+            Number l = TypeUtils.resolveNumber(left);// left;
+            Number r = TypeUtils.resolveNumber(right);//right;
+            if (null==l || null==r)
+                return wrap(null);
             // if (null!=l && null!=r)
             return wrap(l.doubleValue() <= r.doubleValue());
 
@@ -1822,8 +1835,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
                 return wrap(false);
             }
 
-            Number l = (Number) left;
-            Number r = (Number) right;
+            /*Number l = (Number) left;
+            Number r = (Number) right;*/
+            Number l = TypeUtils.resolveNumber(left);// left;
+            Number r = TypeUtils.resolveNumber(right);//right;
+            if (null==l || null==r)
+                return wrap(null);
+
             return wrap(l.doubleValue() >= r.doubleValue());
         } else if (operator == GREATER_THEN) {
             ContextWrapper leftC = operands.next();
@@ -1838,8 +1856,13 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
 
             // check this:
             // http://stackoverflow.com/questions/2683202/comparing-the-values-of-two-generic-numbers
-            Number l = (Number) left;
-            Number r = (Number) right;
+            /*Number l = (Number) left;
+            Number r = (Number) right;*/
+            Number l = TypeUtils.resolveNumber(left);// left;
+            Number r = TypeUtils.resolveNumber(right);//right;
+            if (null==l || null==r)
+                return wrap(null);
+
             // if (null!=l && null!=r)
             return wrap(l.doubleValue() > r.doubleValue());
             // else return false;
@@ -1856,8 +1879,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             }
             // check this:
             // http://stackoverflow.com/questions/2683202/comparing-the-values-of-two-generic-numbers
-            Number l = (Number) left;
-            Number r = (Number) right;
+            Number l = TypeUtils.resolveNumber(left);// left;
+            Number r = TypeUtils.resolveNumber(right);//right;
+            if (null==l || null==r)
+                return wrap(null);
             // if (null!=l && null!=r)
             return wrap(l.doubleValue() < r.doubleValue());
             // else return false;
@@ -1872,8 +1897,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
                 return wrap(false);
             }
 
-            boolean l = (Boolean) left;
-            boolean r = (Boolean) right;
+            boolean l = TypeUtils.resolveBoolean(left);
+            boolean r = TypeUtils.resolveBoolean(right);
             return wrap(l && r); // Boolean.logicalAnd(l,r);
         } else if (operator == OR) {
             ContextWrapper leftC = operands.next();
@@ -1886,8 +1911,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
                 return wrap(false);
             }
 
-            boolean l = (Boolean) left;
-            boolean r = (Boolean) right;
+            boolean l = TypeUtils.resolveBoolean(left);
+            boolean r = TypeUtils.resolveBoolean(right);
             return wrap(l || r); // Boolean.logicalOr(l,r);
         } else if (operator == PLUS) {
 
@@ -1912,10 +1937,10 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
                 }
                 return wrap(l + r);
             } else {
-                Number l = (Number) left;
+                Number l = TypeUtils.resolveNumber (left);
                 if (null == l)
                     l = 0;
-                Number r = (Number) right;
+                Number r = TypeUtils.resolveNumber(right);
                 if (null == r)
                     r = 0;
                 return wrap(l.doubleValue() + r.doubleValue());
@@ -1932,11 +1957,11 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
 
             if (null == right)
                 return wrap(null);
-            Number l = (Number) left;
-            Number r = (Number) right;
+            Number l = TypeUtils.resolveNumber(left);// left;
+            Number r = TypeUtils.resolveNumber(right);//right;
 
             if (null == l || null == r)
-                return null;
+                return wrap(null);
 
             return wrap(l.doubleValue() - r.doubleValue());
         } else {
@@ -1980,7 +2005,7 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
         Object left = leftC.get();
         Object right = rightC.get();
 
-        Number lN = null;
+        /*Number lN = null;
         Number rN = null;
         if (left instanceof Number) {
             lN = (Number) left;
@@ -1992,7 +2017,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
             rN = (Number) right;
         } else if (right instanceof String) {
             rN = resolveNumber(right);
-        }
+        }*/
+        Number lN = TypeUtils.resolveNumber(left);// left;
+        Number rN = TypeUtils.resolveNumber(right);//right;
 
         return new Tuple<>(lN, rN);
     }

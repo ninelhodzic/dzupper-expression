@@ -773,11 +773,100 @@ public class SelectMapperEvaluatorTest extends TestBase {
     @Test
     public void templateSimpleTest() throws EvaluatorException{
         Map<String, Object> data = getData();
-        String strToCompile = "T('ovo je moj text {{child.name}}')";
+        String strToCompile = "T('#{ovo $je moj $text {{{child.name}}} %Y-%m-%dT%H:%M }#')";
+
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
         Object o = evaluate(strToCompile, pathExtractor);
         Assert.assertNotNull(o);
-        Assert.assertTrue(o.equals("ovo je moj text child"));
+        Assert.assertTrue(o.equals("{ovo $je moj $text child %Y-%m-%dT%H:%M }"));
+    }
+
+    @Test
+    public void templateComplexTest() throws EvaluatorException{
+        Map<String, Object> data = getData();
+        String strToCompile = "{\n" +
+                "      \"AGGREGATIONS\": [\n" +
+                "        {\n" +
+                "          \"$match\": {\n" +
+                "            \"owner_id\": \"{{{child.name}}}\"\n" +
+                "          }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"$sort\": {\n" +
+                "            \"client_timestamp\": 1\n" +
+                "          }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"$group\": {\n" +
+                "            \"count\": {\n" +
+                "              \"$sum\": 1\n" +
+                "            },\n" +
+                "            \"position\": {\n" +
+                "              \"$push\": {\n" +
+                "                \"client_timestamp\": \"$client_timestamp\",\n" +
+                "                \"clock_timestamp\": \"$clock_timestamp\",\n" +
+                "                \"lat\": \"$lat\",\n" +
+                "                \"lon\": \"$lon\"\n" +
+                "              }\n" +
+                "            },\n" +
+                "            \"_id\": {\n" +
+                "              \"owner_id\": \"$owner_id\",\n" +
+                "              \"device_id\": \"$device_id\",\n" +
+                "              \"client_date_minute\": {\n" +
+                "                \"$dateToString\": {\n" +
+                "                  \"date\": \"$client_timestamp\",\n" +
+                "                  \"format\": \"%Y-%m-%dT%H:%M\"\n" +
+                "                }\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }";
+
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluate("T('#"+strToCompile+"#')", pathExtractor);
+        Assert.assertNotNull(o);
+        String res = "{\n" +
+                "      \"AGGREGATIONS\": [\n" +
+                "        {\n" +
+                "          \"$match\": {\n" +
+                "            \"owner_id\": \"child\"\n" +
+                "          }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"$sort\": {\n" +
+                "            \"client_timestamp\": 1\n" +
+                "          }\n" +
+                "        },\n" +
+                "        {\n" +
+                "          \"$group\": {\n" +
+                "            \"count\": {\n" +
+                "              \"$sum\": 1\n" +
+                "            },\n" +
+                "            \"position\": {\n" +
+                "              \"$push\": {\n" +
+                "                \"client_timestamp\": \"$client_timestamp\",\n" +
+                "                \"clock_timestamp\": \"$clock_timestamp\",\n" +
+                "                \"lat\": \"$lat\",\n" +
+                "                \"lon\": \"$lon\"\n" +
+                "              }\n" +
+                "            },\n" +
+                "            \"_id\": {\n" +
+                "              \"owner_id\": \"$owner_id\",\n" +
+                "              \"device_id\": \"$device_id\",\n" +
+                "              \"client_date_minute\": {\n" +
+                "                \"$dateToString\": {\n" +
+                "                  \"date\": \"$client_timestamp\",\n" +
+                "                  \"format\": \"%Y-%m-%dT%H:%M\"\n" +
+                "                }\n" +
+                "              }\n" +
+                "            }\n" +
+                "          }\n" +
+                "        }\n" +
+                "      ]\n" +
+                "    }";
+        Assert.assertTrue(o.equals(res));
     }
 
     @Test
@@ -794,7 +883,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     public void templateHtmlMultiLineTest() throws EvaluatorException{
         Map<String, Object> data = getData();
         String strToCompile = "T('#<html>This is Twitter results </br> \n" +
-                "    <pre> {{json child}}</pre>\n" +
+                "    <pre> {{{json child}}}</pre>\n" +
                 "</html>#')";
         //String strToCompile = "T('#<html>ovo je moj text {{child.name}}</html>#')";
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);

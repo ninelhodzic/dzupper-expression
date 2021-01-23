@@ -44,7 +44,7 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "                {\"name\":\"createdAt\",\"func\":\">\",\"value\":\"2020-12-27\"}\n" +
                 "            ]\n" +
                 "        },\n" +
-                "        \"orderBy\": [ {\"name\":\"createdAt\", \"value\":\"DESC\"}] "+
+                "        \"orderBy\": [ {\"name\":\"createdAt\", \"value\":\"DESC\"}], "+
                 "         \"limit\": 1,"+
                 "         \"skip\": 1"+
                 "    }";

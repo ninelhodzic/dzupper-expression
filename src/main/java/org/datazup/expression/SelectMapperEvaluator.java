@@ -1097,7 +1097,7 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             Object value = contextWrapper.get();
             argumentList.removeLast();
 
-            Collection listChild = mapListResolver.resolveToCollection(value);
+            /*Collection listChild = mapListResolver.resolveToCollection(value);
             if (null != listChild) {
                 list.add(listChild);
             } else {
@@ -1107,7 +1107,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
                 } else {
                     list.add(value);
                 }
-            }
+            }*/
+            list.add(value);
         }
         return wrap(list);
     }
