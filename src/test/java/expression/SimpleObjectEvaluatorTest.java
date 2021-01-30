@@ -53,6 +53,16 @@ public class SimpleObjectEvaluatorTest extends TestBase {
     }
 
     @Test
+    public void evaluateIndexOfStringExpressionTest() throws EvaluatorException {
+        String expression = "INDEX_OF('datazup', 'a')";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Number);
+        Number b = (Number) evaluaged;
+        Assert.assertTrue(b.equals(1));
+    }
+
+    @Test
     public void evaluateNullFunctionMissingExpressionTest() throws EvaluatorException {
         String expression = "IS_NULL(child.name.nemaovo)";
         Object evaluaged = evaluate(expression);

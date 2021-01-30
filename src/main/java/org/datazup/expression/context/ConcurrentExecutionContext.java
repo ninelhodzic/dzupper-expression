@@ -5,11 +5,4 @@ public class ConcurrentExecutionContext implements ExecutionContext {
         SyncContextWrapper contextWrapper = new SyncContextWrapper(object);
         return contextWrapper;
     }
-
-    /*@Override
-    public AsyncContextWrapper createAsync(Object object) {
-        CompletableFuture completableFuture = new CompletableFuture();
-        completableFuture.complete(object);
-        return new FutureContextWrapper(completableFuture);
-    }*/
 }
