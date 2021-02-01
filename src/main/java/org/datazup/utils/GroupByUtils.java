@@ -24,6 +24,7 @@ public class GroupByUtils {
 
     public Map<Object, List<Object>> groupByProperty(List list, Map<String, Object> stringObjectMap) {
         String propertyName = (String) stringObjectMap.get("propertyName");
+
         Map<Object, List<Object>> result = U.groupBy(list, o -> {
             Map m = mapListResolver.resolveToMap(o);
             if (null != m) {

@@ -122,7 +122,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
                 "   LIST(\n" +
                 "       MAP(\n" +
                 "           FIELD('property', 'type'),\n" +
-                "              FIELD('propertyNewName', 'name')\n" +
+                "           FIELD('propertyNewName', 'name')\n" +
                 "          ),\n" +
                 "       MAP(\n" +
                 "           FIELD('property', 'sourceType'),\n" +
