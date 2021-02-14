@@ -338,7 +338,7 @@ public abstract class AbstractEvaluator {
         ArrayDeque previousValuesSize = this.functions.isEmpty() ? null : new ArrayDeque();
         Iterator tokens = this.tokenize(expression);
 
-      //  System.out.println("Tokens: "+JsonUtils.getJsonFromObject(Lists.newArrayList(this.tokenize(expression))));
+        System.out.println("Tokens: "+JsonUtils.getJsonFromObject(Lists.newArrayList(this.tokenize(expression))));
         //  List<Token> functionArgumentList = null;
 
         try {

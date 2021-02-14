@@ -42,6 +42,18 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Boolean b = (Boolean)evaluaged;
         Assert.assertTrue(b);
     }*/
+
+   /* @Test
+    public void evaluateIndexInListParenthesesTest() throws EvaluatorException {
+        String expression = "$list[$index$]$";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Boolean);
+        Boolean b = (Boolean) evaluaged;
+        Assert.assertTrue(b);
+
+    }*/
+
     @Test
     public void evaluateSizeOfListExpressionTest() throws EvaluatorException {
         String expression = "SIZE_OF($list$)==1";
