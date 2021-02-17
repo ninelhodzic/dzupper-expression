@@ -279,7 +279,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
 
     }
 
-    protected ContextWrapper wrap(Object object){
+    protected ContextWrapper wrap(Object object) {
         return executionContext.create(object);
     }
 
@@ -757,7 +757,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         } else {
             return executionContext.create(Math.round(number.doubleValue()));
         }
-        
+
     }
 
     public ContextWrapper getCeil(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -790,7 +790,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         } else {
             return executionContext.create(Math.ceil(number.doubleValue()));
         }
-        
+
     }
 
     public ContextWrapper getStringFormat(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -819,7 +819,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         }
 
         return wrap(null);
-        
+
     }
 
     public ContextWrapper getReplaceAll(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -1021,7 +1021,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         }
 
         return wrap(list.size() != 0 ? list.get(0) : "");
-        
+
     }
 
     public ContextWrapper getExtract(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -1069,6 +1069,21 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         }
 
         return wrap(list);
+    }
+
+    public ContextWrapper getUUIDString(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
+        /*String randomString = RandomStringUtils.randomAlphabetic(32);
+        if (operands.hasNext()) {
+            ContextWrapper containerOrStringC = operands.next();
+            Token token1 = argumentList.pop();
+            Object containerOrString = containerOrStringC.get();
+            String tmp = TypeUtils.resolveString(containerOrString);
+            if (null!=tmp && !tmp.isEmpty()){
+                randomString = tmp;
+            }
+        }*/
+        UUID uuid = UUID.randomUUID();//.fromString(randomString);
+        return wrap(uuid.toString());
     }
 
     public ContextWrapper getContains(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
@@ -1300,6 +1315,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
     public ContextWrapper getRandomAlphabetic(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
         return evaluateRandomFunction("randomAlphabetic", function, operands, argumentList, evaluationContext);
     }
+
     private ContextWrapper evaluateRandomFunction(String type, Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
         if (operands.hasNext()) {
             ContextWrapper countC = operands.next();
