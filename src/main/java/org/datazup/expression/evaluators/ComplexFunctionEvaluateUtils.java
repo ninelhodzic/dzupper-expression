@@ -309,7 +309,8 @@ public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
 
     }
 
-    public ContextWrapper getRemap(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object abstractVariableSet) { ContextWrapper sourceC = operands.next();
+    public ContextWrapper getRemap(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object abstractVariableSet) {
+        ContextWrapper sourceC = operands.next();
         argumentList.pop();
 
         Object source = sourceC.get();
