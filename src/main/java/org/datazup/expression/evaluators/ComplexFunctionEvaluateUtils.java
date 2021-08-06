@@ -622,7 +622,7 @@ public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
             }
         } else {
             List list = mapListResolver.resolveToList(value2);
-            if (null != list) {
+            if (null != list && !list.isEmpty()) {
                 Number n = null;
                 if (value1 instanceof Number) {
                     n = (Number) value1;

@@ -166,6 +166,8 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(m.size()==5);
     }
 
+
+
     @Test
     public void isSumRuns() throws EvaluatorException {
         Map<String, Object> data = getData();
@@ -221,9 +223,20 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(list.size()==4);
         Assert.assertTrue(list.get(0).equals("Hello 0"));
         Assert.assertTrue(list.get(1).equals("Hi 1"));
-
     }
 
+   /* @Test
+    public void isFindRuns() throws EvaluatorException {
+        String expression = "FIND('')";
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluate(expression, pathExtractor);
+        Assert.assertTrue(evaluated instanceof List);
+        List list = (List) evaluated;
+    }
+    TODO: refactor tests to be Async using Async expressions
+*/
     @Test
     public void isThisExpressionRuns() throws EvaluatorException{
         String expression = "THIS()";
