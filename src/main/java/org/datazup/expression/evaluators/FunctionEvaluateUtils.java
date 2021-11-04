@@ -1,5 +1,6 @@
 package org.datazup.expression.evaluators;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -1086,6 +1087,14 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         return wrap(uuid.toString());
     }
 
+    private Boolean inSensitiveResolve(String container, String matcher, String allOrAnyType){
+        if (allOrAnyType.contains("INSENSITIVE")) {
+            return (container).toLowerCase().contains(matcher.toLowerCase());
+        } else {
+            return (container).contains(matcher);
+        }
+    }
+
     public ContextWrapper getContains(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object evaluationContext) {
 
         ContextWrapper containerOrStringC = operands.next();
@@ -1118,7 +1127,8 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
 
         if (containerOrString instanceof String) {
             if (!hasMore) {
-                return wrap(((String) containerOrString).contains(value.toString()));
+                Boolean res = inSensitiveResolve((String)containerOrString, value.toString(), allOrAnyType);
+                return wrap(res);
             } else {
 
                 List<Boolean> bList = new ArrayList<>();
