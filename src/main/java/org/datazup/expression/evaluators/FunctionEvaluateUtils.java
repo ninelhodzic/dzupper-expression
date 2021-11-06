@@ -630,22 +630,26 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         if (null == valueObject)
             return wrap(valueObject);
 
+        String format = null;
         if (operands.hasNext()) {
             ContextWrapper next = operands.next();
             Object formatO = next.get();
-            String format = (String) formatO;
+            format = (String) formatO;
             argumentList.pop();
-
-            if (!StringUtils.isEmpty(format)) {
-                format = format.replace("#", "");
-            }
+        }
+        if (!StringUtils.isEmpty(format)) {
+            format = format.replace("#", "");
+        }
+        if (valueObject instanceof byte[]){
+            String val = TypeUtils.resolveString(valueObject, format);
+            return wrap(val);
+        }else {
             Instant instant = DateTimeUtils.resolve(valueObject);
             if (null != instant) {
                 String formattedString = DateTimeFormatter.ofPattern(format).format(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
                 return wrap(formattedString);
             }
         }
-
         return wrap(valueObject.toString());
     }
 
