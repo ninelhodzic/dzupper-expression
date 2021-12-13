@@ -1,3 +1,4 @@
+/*
 package org.datazup.expression.context.async;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -35,3 +36,4 @@ public class FutureContextWrapper<T> implements AsyncContextWrapper<T> {
         throw new NotImplementedException("Not implemented");
     }
 }
+*/

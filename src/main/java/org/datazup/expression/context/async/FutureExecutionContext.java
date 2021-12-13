@@ -1,3 +1,4 @@
+/*
 package org.datazup.expression.context.async;
 
 import org.datazup.expression.context.ContextWrapper;
@@ -20,10 +21,13 @@ public class FutureExecutionContext implements ExecutionContext {
         return contextWrapper;
     }
 
-   /* @Override
+   */
+/* @Override
     public AsyncContextWrapper createAsync(Object object) {
         CompletableFuture completableFuture = new CompletableFuture();
         completableFuture.complete(object);
         return new FutureContextWrapper(completableFuture);
-    }*/
+    }*//*
+
 }
+*/
