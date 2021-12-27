@@ -558,7 +558,7 @@ public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
         Object value1 = value1C.get();
 
         if (operands.hasNext()) {
-            Object value2 = operands.next(); // this could be used in future to define template engine
+            Object value2 = operands.next(); // this could be used in future to define template engine type
             Token token2 = argumentList.pop();
         }
 
