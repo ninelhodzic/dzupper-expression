@@ -1,36 +1,18 @@
 package org.datazup.expression;
 
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
-import org.datazup.expression.evaluators.OperatorEvaluateUtils;
-import org.datazup.expression.exceptions.ExpressionValidationException;
-import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.expression.evaluators.FunctionEvaluateUtils;
+import org.datazup.expression.evaluators.OperatorEvaluateUtils;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.pathextractor.AbstractVariableSet;
-import org.datazup.pathextractor.PathExtractor;
 import org.datazup.pathextractor.SimpleResolverHelper;
-import org.datazup.utils.DateTimeUtils;
-import org.datazup.utils.TypeUtils;
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Deque;
+import java.util.Iterator;
 
 /**
  * Created by admin@datazup on 3/14/16.

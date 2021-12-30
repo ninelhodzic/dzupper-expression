@@ -3,17 +3,13 @@ package org.datazup.expression.evaluators;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.builders.mongo.MongoJsonQueryBuilder;
-import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.Function;
-import org.datazup.expression.SelectMapperEvaluator;
 import org.datazup.expression.Token;
 import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.AbstractResolverHelper;
-
 import org.datazup.pathextractor.PathExtractor;
-import org.datazup.utils.GroupByUtils;
 import org.datazup.utils.ListPartition;
 import org.datazup.utils.SortingUtils;
 import org.datazup.utils.TypeUtils;

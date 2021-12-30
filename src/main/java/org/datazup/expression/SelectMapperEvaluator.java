@@ -1,28 +1,17 @@
 package org.datazup.expression;
 
 
-import org.apache.commons.lang3.math.NumberUtils;
-import org.datazup.builders.mongo.MongoJsonQueryBuilder;
-import org.datazup.exceptions.EvaluatorException;
 import org.datazup.expression.context.ConcurrentExecutionContext;
 import org.datazup.expression.context.ContextWrapper;
 import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.evaluators.ComplexFunctionEvaluateUtils;
-import org.datazup.expression.evaluators.FunctionEvaluateUtils;
 import org.datazup.expression.evaluators.SyncEvaluatorComplexFunctionUtils;
-import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.pathextractor.AbstractResolverHelper;
-import org.datazup.pathextractor.PathExtractor;
-import org.datazup.utils.GroupByUtils;
-import org.datazup.utils.ListPartition;
-import org.datazup.utils.SortingUtils;
-import org.datazup.utils.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Deque;
+import java.util.Iterator;
 
 /**
  * Created by admin@datazup on 3/21/16.

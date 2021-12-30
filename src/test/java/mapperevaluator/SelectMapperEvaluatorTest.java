@@ -1003,4 +1003,67 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(((Map) o).get("prop2").equals(23));
 
     }
+
+    @Test
+    public void templateToMapTest() throws EvaluatorException {
+        String expression = "MAP(\n" +
+                "T('#\n" +
+                "\n" +
+                " {\n" +
+                "      \"$project\": {\n" +
+                "        \"_id\": 1,\n" +
+                "        \"count\": 1,\n" +
+                "        \"position\": 1,\n" +
+                "        \"first\": {\n" +
+                "          \"$first\": \"$position\"\n" +
+                "        },\n" +
+                "        \"last\": {\n" +
+                "          \"$last\": \"$position\"\n" +
+                "        },\n" +
+                "        \"diff\": {\n" +
+                "          \"time\": {\n" +
+                "            \"$subtract\": [\n" +
+                "              {\n" +
+                "                \"$last\": \"$position.client_timestamp\"\n" +
+                "              },\n" +
+                "              {\n" +
+                "                \"$first\": \"$position.client_timestamp\"\n" +
+                "              }\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"middleIndex\": {\n" +
+                "          \"$floor\": {\n" +
+                "            \"$divide\": [\n" +
+                "              \"$count\",\n" +
+                "              2\n" +
+                "            ]\n" +
+                "          }\n" +
+                "        },\n" +
+                "        \"median\": {\n" +
+                "          \"$arrayElemAt\": [\n" +
+                "            \"$position\",\n" +
+                "            {\n" +
+                "              \"$floor\": {\n" +
+                "                \"$divide\": [\n" +
+                "                  \"$count\",\n" +
+                "                  2\n" +
+                "                ]\n" +
+                "              }\n" +
+                "            }\n" +
+                "          ]\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "\n" +
+                "\n" +
+                "#')\n" +
+                ")";
+
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+        Object o = evaluate(expression, pathExtractor);
+        Assert.assertNotNull(o);
+        Assert.assertTrue(o instanceof Map);
+    }
 }
