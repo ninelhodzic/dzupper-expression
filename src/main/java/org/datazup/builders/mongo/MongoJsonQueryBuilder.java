@@ -266,7 +266,8 @@ public class MongoJsonQueryBuilder {
                 mergedObjectsList.add(map);
             }
 
-            for (Map<String, Object> field : fields) {
+            for (Object fieldObj : fields) {
+                Map<String, Object> field = mapListResolver.resolveToMap(fieldObj);
                 Map<String, Object> m = getFieldAliasFuncMap(field);
                 for (String key : m.keySet()) {
                     Map<String, Object> map = new HashMap<>();
@@ -294,7 +295,9 @@ public class MongoJsonQueryBuilder {
         Map<String, Object> idMap = null;
         if (null != groupByList) {
             idMap = new LinkedHashMap<>();
-            for (Map<String, Object> groupMap : groupByList) {
+            for (Object o: groupByList) {
+                Map<String, Object> groupMap = mapListResolver.resolveToMap(o);
+
                 String name = (String) groupMap.get("name");
                 String alias = null;
                 if (groupMap.containsKey("alias")) {
@@ -369,8 +372,10 @@ public class MongoJsonQueryBuilder {
 
             Map<String, Object> groupMap = new LinkedHashMap<>();
             groupMap.put("_id", idMap);
-            for (Map<String, Object> field : fields) {
-                Map aliasFuncMap = getFieldAliasFuncMap(field);
+            for (Object obj : fields) {
+                Map<String, Object> field = mapListResolver.resolveToMap(obj);
+                Map aliasFuncMap
+                        = getFieldAliasFuncMap(field);
                 groupMap.putAll(aliasFuncMap);
             }
 
