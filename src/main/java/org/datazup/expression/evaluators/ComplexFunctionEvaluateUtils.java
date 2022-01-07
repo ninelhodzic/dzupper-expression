@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
+public class ComplexFunctionEvaluateUtils extends EvaluatorBase {
     private static final Logger LOG = LoggerFactory.getLogger(ComplexFunctionEvaluateUtils.class);
 
     public ComplexFunctionEvaluateUtils(AbstractResolverHelper mapListResolver, ExecutionContext executionContext) {
@@ -472,7 +472,7 @@ public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
     }
 
     public ContextWrapper getThis(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object abstractVariableSet) {
-        PathExtractor evaluationContext = (PathExtractor)abstractVariableSet;
+        PathExtractor evaluationContext = (PathExtractor) abstractVariableSet;
         return wrap(evaluationContext.getDataObject());
     }
 
@@ -515,16 +515,12 @@ public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
 
     public ContextWrapper getKeys(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object abstractVariableSet) {
         ContextWrapper valueC = operands.next();
-        Token token = argumentList.pop();
+        argumentList.pop();
         Object value = valueC.get();
         Map newMap = mapListResolver.resolveToMap(value);
         if (null != newMap) {
-            List list = new ArrayList<>();
-            Collection c = ((Map) value).keySet();
-            List cL = new ArrayList<>(c);
-            for (Object o : cL) {
-                list.add(o);
-            }
+            Set c = newMap.keySet();
+            List list = new ArrayList(c);
             return wrap(list);
         }
         return wrap(null);
@@ -532,17 +528,15 @@ public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
 
     public ContextWrapper getValues(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object abstractVariableSet) {
         ContextWrapper valueC = operands.next();
-        Token token = argumentList.pop();
+        argumentList.pop();
         Object value = valueC.get();
 
         Map newMap = mapListResolver.resolveToMap(value);
         if (null != newMap) {
-            List list = new ArrayList<>();
 
-            Collection c = ((Map) value).values();
+            Collection c = newMap.values();
             List cL = new ArrayList<>(c);
-            list.addAll(cL);
-            return wrap(list);
+            return wrap(cL);
         }
         return wrap(null);
     }
@@ -560,7 +554,7 @@ public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
 
         if (value1 instanceof String) {
             try {
-                PathExtractor evaluationContext = (PathExtractor)abstractVariableSet;
+                PathExtractor evaluationContext = (PathExtractor) abstractVariableSet;
 
                 Object evaluated = evaluationContext.compileString((String) value1);
                 if (evaluated instanceof String) {
@@ -580,7 +574,7 @@ public class ComplexFunctionEvaluateUtils  extends EvaluatorBase {
     }
 
     public ContextWrapper getExcludeFields(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, Object abstractVariableSet) {
-        PathExtractor evaluationContext = (PathExtractor)abstractVariableSet;
+        PathExtractor evaluationContext = (PathExtractor) abstractVariableSet;
         while (operands.hasNext()) {
             Object value = operands.next(); // WE NEED TO CALL NEXT
             Token token = argumentList.removeLast();
