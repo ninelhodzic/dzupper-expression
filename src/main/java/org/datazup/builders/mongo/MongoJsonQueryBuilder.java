@@ -39,7 +39,7 @@ public class MongoJsonQueryBuilder {
     private Map buildAggregationQuery() {
         Map<String, Object> query = new HashMap<>();
         List<Map<String, Object>> aggregations = new ArrayList<>();
-       // Object fieldsObj = jsonObject.get("fields");
+        // Object fieldsObj = jsonObject.get("fields");
         List<Map<String, Object>> groupByList = mapListResolver.resolveToList(jsonObject.get("groupBy"));
         List<Map<String, Object>> orderByObj = mapListResolver.resolveToList(jsonObject.get("orderBy"));
         Map<String, Object> havingObj = mapListResolver.resolveToMap(jsonObject.get("having"));
@@ -51,6 +51,7 @@ public class MongoJsonQueryBuilder {
 
         Map filterStage = getFilterStage(fields, whereObj);
         // Map sumStage = getSumStage(groupByList);
+        List<Map> unwindStage = getUnwindStage(fields, groupByList);
         Map groupStage = getGroupStage(fields, groupByList);
         Map flattenStage = getFlattenStage(fields, groupByList);
         Map constraintsStage = getConstraintsStage(havingObj);
@@ -61,26 +62,32 @@ public class MongoJsonQueryBuilder {
         if (null != filterStage) {
             aggregations.add(filterStage);
         }
+        if (null != unwindStage) {
+            unwindStage.forEach(map -> {
+                aggregations.add(map);
+            });
+        }
 
-        if (null != groupStage)
+        if (null != groupStage) {
             aggregations.add(groupStage);
+        }
         if (null != flattenStage)
             aggregations.add(flattenStage);
         if (null != constraintsStage)
             aggregations.add(constraintsStage);
 
-        if (null!=sortingStage){
+        if (null != sortingStage) {
             Map sort = new HashMap();
             sort.put("$sort", sortingStage);
             aggregations.add(sort);
         }
 
-        if (null!=limit){
+        if (null != limit) {
             Map l = new HashMap();
             l.put("$limit", limit);
             aggregations.add(l);
         }
-        if (null!=skip){
+        if (null != skip) {
             Map l = new HashMap();
             l.put("$skip", limit);
             aggregations.add(l);
@@ -89,6 +96,94 @@ public class MongoJsonQueryBuilder {
         query.put("AGGREGATIONS", aggregations);
 
         return query;
+    }
+
+
+    private List<String> unwindSplitted(Map map) {
+        String name = (String) map.get("name");
+        if (null != name) {
+            if (name.contains(".")) {
+                String[] splited = name.split("\\.");
+                if (null!=splited && splited.length>1) {
+                    List<String> list = new ArrayList<>();
+
+                    for (int i = 0; i < splited.length - 1; i++) {
+                        String item = splited[i];
+                        if (i>0){
+                            item = list.get(i)+"."+item;
+                        }
+                        list.add(item);
+                    }
+
+                    return list;
+                }
+            }
+        }
+        return null;
+    }
+
+    private void addToUnwind(List<String> unwindList, List<String> tmpNew) {
+        if (tmpNew != null && tmpNew.size() > 0) {
+            tmpNew.forEach(r -> {
+                if (!unwindList.contains(r)) {
+                    unwindList.add(r);
+                }
+            });
+        }
+    }
+
+    private List<Map> getUnwindStage(List<Map<String, Object>> fields, List<Map<String, Object>> groupByList) {
+
+
+        /*
+
+            {
+                "items":[
+                    {
+                        "tags":[
+                            '1','2','3'
+                        ]
+                    },
+                    {
+                        "tags":[
+                            '1','2','3'
+                        ]
+                    }
+                ]
+            }
+
+          // First Stage
+              { $unwind: "$items" },
+              // Second Stage
+              { $unwind: "$items.tags" },
+
+         */
+        List<String> unwinds = new ArrayList<>();
+        if (fields != null) {
+            for (Map<String, Object> field : fields) {
+                List<String> tmpF = unwindSplitted(field);
+                addToUnwind(unwinds, tmpF);
+            }
+        }
+
+        if (groupByList != null) {
+            for (Map<String, Object> group : groupByList) {
+                List<String> tmpG = unwindSplitted(group);
+                addToUnwind(unwinds, tmpG);
+            }
+        }
+
+        if (unwinds.size() > 0) {
+            List<Map> unwindsMapList = new ArrayList<>();
+            unwinds.forEach(u -> {
+                Map m = new HashMap();
+                m.put("$unwind", "$"+u);
+                unwindsMapList.add(m);
+            });
+            return unwindsMapList;
+        }
+
+        return null;
     }
 
     private Map buildFindQuery() {
@@ -132,11 +227,11 @@ public class MongoJsonQueryBuilder {
         }
 
         Integer limit = TypeUtils.resolveInteger(jsonObject.get("limit"));
-        if (null!=limit){
+        if (null != limit) {
             query.put("limit", limit);
         }
         Integer skip = TypeUtils.resolveInteger(jsonObject.get("skip"));
-        if (null!=skip){
+        if (null != skip) {
             query.put("skip", skip);
         }
 
@@ -145,7 +240,7 @@ public class MongoJsonQueryBuilder {
 
     private List<Map<String, Object>> getFields() {
         Object fieldsObj = jsonObject.get("fields");
-        if (null==fieldsObj)
+        if (null == fieldsObj)
             return null;
         List<Map<String, Object>> fields = null;
         if (!fieldsObj.equals("*")) {
@@ -295,7 +390,7 @@ public class MongoJsonQueryBuilder {
         Map<String, Object> idMap = null;
         if (null != groupByList) {
             idMap = new LinkedHashMap<>();
-            for (Object o: groupByList) {
+            for (Object o : groupByList) {
                 Map<String, Object> groupMap = mapListResolver.resolveToMap(o);
 
                 String name = (String) groupMap.get("name");
@@ -308,18 +403,23 @@ public class MongoJsonQueryBuilder {
                     Map<String, Object> tmpMap = new HashMap<>();
                     String func = (String) groupMap.get("func");
                     Map funcParams = getFuncParams(groupMap);
-                    if (null==funcParams) {
+                    if (null == funcParams) {
                         tmpMap.put("$" + func, "$" + name);
-                    }else{
-                        tmpMap.put("$"+func, funcParams);
+                    } else {
+                        tmpMap.put("$" + func, funcParams);
                     }
-                    if (null == alias)
-                        alias = name + func.substring(0, 1).toUpperCase() + func.substring(1);
+
+                    if (null == alias) {
+                        String tmpName = name.replaceAll("\\.","_");
+                        alias = tmpName + func.substring(0, 1).toUpperCase() + func.substring(1);
+                    }
 
                     idMap.put(alias, tmpMap);
                 } else {
-                    if (null == alias)
-                        alias = name;
+                    if (null == alias) {
+                        String tmpName = name.replaceAll("\\.","_");
+                        alias = tmpName;
+                    }
                     idMap.put(alias, "$" + name);
                 }
             }
@@ -327,9 +427,9 @@ public class MongoJsonQueryBuilder {
         return idMap;
     }
 
-    private Map<String,Object> getFuncParams(Map<String, Object> groupMap) {
-        if (groupMap.containsKey("funcParams")){
-            Map<String,Object> m = mapListResolver.resolveToMap(groupMap.get("funcParams"));
+    private Map<String, Object> getFuncParams(Map<String, Object> groupMap) {
+        if (groupMap.containsKey("funcParams")) {
+            Map<String, Object> m = mapListResolver.resolveToMap(groupMap.get("funcParams"));
             return m;
         }
         return null;
@@ -346,7 +446,8 @@ public class MongoJsonQueryBuilder {
                 alias = func.toLowerCase();
             } else {
                 String func1 = func.toLowerCase();
-                alias = name + func1.substring(0, 1).toUpperCase() + func1.substring(1);
+                String tmpName = name.replaceAll("\\.","_");
+                alias = tmpName + func1.substring(0, 1).toUpperCase() + func1.substring(1);
             }
         }
         Map<String, Object> funcMap = new HashMap<>();
@@ -374,8 +475,7 @@ public class MongoJsonQueryBuilder {
             groupMap.put("_id", idMap);
             for (Object obj : fields) {
                 Map<String, Object> field = mapListResolver.resolveToMap(obj);
-                Map aliasFuncMap
-                        = getFieldAliasFuncMap(field);
+                Map aliasFuncMap = getFieldAliasFuncMap(field);
                 groupMap.putAll(aliasFuncMap);
             }
 
