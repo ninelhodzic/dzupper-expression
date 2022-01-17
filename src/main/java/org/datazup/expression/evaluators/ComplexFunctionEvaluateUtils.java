@@ -889,7 +889,7 @@ public class ComplexFunctionEvaluateUtils extends EvaluatorBase {
                 queryType = value1S;
             }
         } else {
-            jsonQuery = mapListResolver.resolveToMap(value1);
+            jsonQuery = mapListResolver.resolveDeepMap(value1);
         }
         if (null == jsonQuery) {
             ContextWrapper value2C = operands.next();
@@ -900,7 +900,7 @@ public class ComplexFunctionEvaluateUtils extends EvaluatorBase {
             if (null == value2)
                 return wrap(null);
 
-            jsonQuery = mapListResolver.resolveToMap(value2);
+            jsonQuery = mapListResolver.resolveDeepMap(value2);
         }
         if (null == jsonQuery) {
             return wrap(null);

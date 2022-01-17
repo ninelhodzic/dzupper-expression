@@ -1,5 +1,6 @@
 package org.datazup.builders.mongo;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.datazup.pathextractor.AbstractResolverHelper;
 import org.datazup.utils.TypeUtils;
 
@@ -7,7 +8,7 @@ import java.util.*;
 
 public class MongoJsonQueryBuilder {
     private static Set<String> whereKeywords = new HashSet<>(Arrays.asList("AND", "OR", "NOR"));
-    private static Set<String> whereFundKeywords = new HashSet<>(Arrays.asList("and", "or", "in", "=", ">", ">=", "<=", "<", "!", "nor", "eq"));
+    private static Set<String> whereFundKeywords = new HashSet<>(Arrays.asList("and", "or", "in", "=", ">", ">=", "<=", "<", "!", "nor", "eq", "!="));
     private static Map<String, String> whereMapper = new HashMap<String, String>() {{
         put("=", "eq");
         put(">", "gt");
@@ -15,6 +16,7 @@ public class MongoJsonQueryBuilder {
         put("<", "lt");
         put("<=", "lte");
         put("!", "not");
+        put("!=", "ne");
     }};
     private Map<String, Object> jsonObject;
     private AbstractResolverHelper mapListResolver;
@@ -49,7 +51,9 @@ public class MongoJsonQueryBuilder {
 
         List<Map<String, Object>> fields = getFields();
 
-        Map filterStage = getFilterStage(fields, whereObj);
+        List<String> filterStageUnwind = new ArrayList<>();
+
+        Map filterStage = getFilterStage(filterStageUnwind, whereObj);
         // Map sumStage = getSumStage(groupByList);
         List<Map> unwindStage = getUnwindStage(fields, groupByList);
         Map groupStage = getGroupStage(fields, groupByList);
@@ -60,6 +64,17 @@ public class MongoJsonQueryBuilder {
 
 
         if (null != filterStage) {
+            if (null != filterStageUnwind && filterStageUnwind.size() > 0) {
+                filterStageUnwind.forEach(toUnwind -> {
+                    Map<String, Object> filterUnwind = new HashMap<>();
+                    if (null != toUnwind && !toUnwind.isEmpty()) {
+                        filterUnwind.put("$unwind", "$" + toUnwind);
+                        aggregations.add(filterUnwind);
+                    }
+                });
+
+
+            }
             aggregations.add(filterStage);
         }
         if (null != unwindStage) {
@@ -98,19 +113,17 @@ public class MongoJsonQueryBuilder {
         return query;
     }
 
-
-    private List<String> unwindSplitted(Map map) {
-        String name = (String) map.get("name");
+    private List<String> unwindByString(String name) {
         if (null != name) {
             if (name.contains(".")) {
                 String[] splited = name.split("\\.");
-                if (null!=splited && splited.length>1) {
+                if (null != splited && splited.length > 1) {
                     List<String> list = new ArrayList<>();
 
                     for (int i = 0; i < splited.length - 1; i++) {
                         String item = splited[i];
-                        if (i>0){
-                            item = list.get(i)+"."+item;
+                        if (i > 0) {
+                            item = list.get(i) + "." + item;
                         }
                         list.add(item);
                     }
@@ -120,6 +133,12 @@ public class MongoJsonQueryBuilder {
             }
         }
         return null;
+    }
+
+    private List<String> unwindSplitted(Map map) {
+        String name = (String) map.get("name");
+
+        return unwindByString(name);
     }
 
     private void addToUnwind(List<String> unwindList, List<String> tmpNew) {
@@ -177,7 +196,7 @@ public class MongoJsonQueryBuilder {
             List<Map> unwindsMapList = new ArrayList<>();
             unwinds.forEach(u -> {
                 Map m = new HashMap();
-                m.put("$unwind", "$"+u);
+                m.put("$unwind", "$" + u);
                 unwindsMapList.add(m);
             });
             return unwindsMapList;
@@ -274,6 +293,69 @@ public class MongoJsonQueryBuilder {
         return null;
     }
 
+    private Map<String, Object> processAggregationWhereSingleMap(Map<String, Object> map, List<String> unwinds) {
+        if (null == map) {
+            return null;
+        }
+        Map<String, Object> res = new HashMap<>();
+        String funcObj = (String) map.get("func");
+        String func = funcObj;
+        if (whereFundKeywords.contains(funcObj)) {
+            func = whereMapper.get(funcObj.toLowerCase());
+            if (func == null) {
+                func = funcObj;
+            }
+        }
+        String name = (String) map.get("name");
+        Object val = map.get("value");
+        /*if (funcObj.equals("=")) {
+            res.put(name, val);
+        } else {
+            Map m = new HashMap();
+            m.put("$" + func.toLowerCase(), val);
+            res.put(name, m);
+        }*/
+
+        // check if there is anything to unwind first
+        List<String> tmpUnwinded = unwindByString(name);
+        if (null != tmpUnwinded) {
+            tmpUnwinded.forEach(r -> {
+                if (!unwinds.contains(r)) {
+                    unwinds.add(r);
+                }
+            });
+        }
+
+        if (val instanceof String) {
+            if (((String)
+                    val).contains("::")) {
+                Integer index = ((String) val).indexOf("::");
+                String valueType = ((String) val).substring(0, index);
+                String value = ((String) val).substring(index + 2);
+
+                if (null != valueType) {
+                    switch (valueType) {
+                        case "DATE":
+                            Map dtFromString = new HashMap();
+                            Map dtString = new HashMap();
+                            dtString.put("dateString", value);
+                            dtFromString.put("$dateFromString", dtString);
+                            val = dtFromString;
+                            break;
+                    }
+                }
+            }
+        }
+
+        List listVals = new ArrayList();
+        listVals.add("$" + name);
+        listVals.add(val);
+        res.put("$" + func.toLowerCase(), listVals);
+
+
+        return res;
+    }
+
     private Map<String, Object> processWhereSingleMap(Map<String, Object> map) {
         if (null == map) {
             return null;
@@ -331,6 +413,44 @@ public class MongoJsonQueryBuilder {
                 }
             } else {
                 return processWhereSingleMap(whereObject);
+            }
+            return res;
+        }
+        return null;
+    }
+
+
+    private Map<String, Object> getAggregationWhereConstraint(Map<String, Object> whereObject, List<String> toUnwind) {
+        if (null != whereObject) {
+            Map<String, Object> res = new HashMap<>();
+            /* "where":{ "AND":[{"name":"asd","value":123, "func":"="},{"name":"fied3","func":">=","value":10}] }, */
+            /* $and:[{field2:'123',field3: { $gte: 10 }},{ field4: $in:[1,2,3]}] */
+            if (whereObject.containsKey("AND") || whereObject.containsKey("OR") || whereObject.containsKey("NOR")) {
+                for (String key : whereObject.keySet()) {
+                    Object val = whereObject.get(key);
+                    boolean keyword = whereKeywords.contains(key);
+                    if (keyword) {
+                        List l = mapListResolver.resolveToList(val);
+                        List tmpList = new ArrayList();
+                        for (Object o : l) {
+                            Map m = mapListResolver.resolveToMap(o);
+                            if (null != m) {
+                                Map tmp = null;
+                                if (m.containsKey("AND") || m.containsKey("OR") || m.containsKey("NOR")) {
+                                    tmp = getAggregationWhereConstraint(m, toUnwind);
+                                } else {
+                                    tmp = processAggregationWhereSingleMap(m, toUnwind);
+                                }
+                                if (null != tmp) {
+                                    tmpList.add(tmp);
+                                }
+                            }
+                        }
+                        res.put("$" + key.toLowerCase(), tmpList);
+                    }
+                }
+            } else {
+                return processAggregationWhereSingleMap(whereObject, toUnwind);
             }
             return res;
         }
@@ -410,14 +530,14 @@ public class MongoJsonQueryBuilder {
                     }
 
                     if (null == alias) {
-                        String tmpName = name.replaceAll("\\.","_");
+                        String tmpName = name.replaceAll("\\.", "_");
                         alias = tmpName + func.substring(0, 1).toUpperCase() + func.substring(1);
                     }
 
                     idMap.put(alias, tmpMap);
                 } else {
                     if (null == alias) {
-                        String tmpName = name.replaceAll("\\.","_");
+                        String tmpName = name.replaceAll("\\.", "_");
                         alias = tmpName;
                     }
                     idMap.put(alias, "$" + name);
@@ -446,7 +566,7 @@ public class MongoJsonQueryBuilder {
                 alias = func.toLowerCase();
             } else {
                 String func1 = func.toLowerCase();
-                String tmpName = name.replaceAll("\\.","_");
+                String tmpName = name.replaceAll("\\.", "_");
                 alias = tmpName + func1.substring(0, 1).toUpperCase() + func1.substring(1);
             }
         }
@@ -486,13 +606,18 @@ public class MongoJsonQueryBuilder {
         return null;
     }
 
-    private Map getFilterStage(List<Map<String, Object>> fields, Map<String, Object> whereObj) {
+    private Map getFilterStage(List<String> toUnwind, Map<String, Object> whereObj) {
         Map<String, Object> res = new HashMap<>();
-        Map<String, Object> match = getWhereConstraint(whereObj);
+
+        Map<String, Object> match = getAggregationWhereConstraint(whereObj, toUnwind);
         if (null == match) {
             return null;
         }
-        res.put("$match", match);
+
+        Map<String, Object> expr = new HashMap<>();
+        expr.put("$expr", match);
+
+        res.put("$match", expr);
         return res;
     }
 }
