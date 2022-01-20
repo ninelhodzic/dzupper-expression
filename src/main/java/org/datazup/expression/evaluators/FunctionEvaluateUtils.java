@@ -792,9 +792,10 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
             DecimalFormat df = new DecimalFormat(format.trim());
             df.setRoundingMode(RoundingMode.CEILING);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
-            return executionContext.create(newNum.doubleValue());
+            Float flot = Float.valueOf(newNum.floatValue());
+            return executionContext.create(flot);
         } else {
-            return executionContext.create(Math.ceil(number.doubleValue()));
+            return executionContext.create(Math.ceil(number.floatValue()));
         }
 
     }
