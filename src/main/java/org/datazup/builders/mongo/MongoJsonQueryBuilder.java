@@ -476,9 +476,11 @@ public class MongoJsonQueryBuilder {
             Map<String, Object> idMap = getGroupByIdMap(groupByList);
 
             for (String key : idMap.keySet()) {
-                Map<String, Object> map = new HashMap<>();
-                map.put(key, "$_id." + key);
-                mergedObjectsList.add(map);
+                if (!key.equals("*")) { // we'll skip this as it means that there is no Id value in GROUP
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(key, "$_id." + key);
+                    mergedObjectsList.add(map);
+                }
             }
 
             for (Object fieldObj : fields) {
@@ -514,33 +516,35 @@ public class MongoJsonQueryBuilder {
                 Map<String, Object> groupMap = mapListResolver.resolveToMap(o);
 
                 String name = (String) groupMap.get("name");
-                String alias = null;
-                if (groupMap.containsKey("alias")) {
-                    alias = (String) groupMap.get("alias");
-                }
-                if (groupMap.containsKey("func")) {
+                if (!name.equals("*")) { // if name is * in groupBy it means we want to group with all
+                    String alias = null;
+                    if (groupMap.containsKey("alias")) {
+                        alias = (String) groupMap.get("alias");
+                    }
+                    if (groupMap.containsKey("func")) {
 
-                    Map<String, Object> tmpMap = new HashMap<>();
-                    String func = (String) groupMap.get("func");
-                    Map funcParams = getFuncParams(groupMap);
-                    if (null == funcParams) {
-                        tmpMap.put("$" + func, "$" + name);
+                        Map<String, Object> tmpMap = new HashMap<>();
+                        String func = (String) groupMap.get("func");
+                        Map funcParams = getFuncParams(groupMap);
+                        if (null == funcParams) {
+                            tmpMap.put("$" + func, "$" + name);
+                        } else {
+                            tmpMap.put("$" + func, funcParams);
+                        }
+
+                        if (null == alias) {
+                            String tmpName = name.replaceAll("\\.", "_");
+                            alias = tmpName + func.substring(0, 1).toUpperCase() + func.substring(1);
+                        }
+
+                        idMap.put(alias, tmpMap);
                     } else {
-                        tmpMap.put("$" + func, funcParams);
+                        if (null == alias) {
+                            String tmpName = name.replaceAll("\\.", "_");
+                            alias = tmpName;
+                        }
+                        idMap.put(alias, "$" + name);
                     }
-
-                    if (null == alias) {
-                        String tmpName = name.replaceAll("\\.", "_");
-                        alias = tmpName + func.substring(0, 1).toUpperCase() + func.substring(1);
-                    }
-
-                    idMap.put(alias, tmpMap);
-                } else {
-                    if (null == alias) {
-                        String tmpName = name.replaceAll("\\.", "_");
-                        alias = tmpName;
-                    }
-                    idMap.put(alias, "$" + name);
                 }
             }
         }

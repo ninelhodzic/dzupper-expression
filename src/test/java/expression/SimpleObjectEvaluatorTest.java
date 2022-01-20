@@ -451,7 +451,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof Number);
 
         Number val = (Number) evaluaged;
-        Assert.assertTrue(val.floatValue() == -10.24f);
+        Assert.assertTrue(val.doubleValue() == -10.24d);
     }
 
     @Test
@@ -462,7 +462,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof Number);
 
         Number val = (Number) evaluaged;
-        Assert.assertTrue(val.floatValue() == -10.23f);
+        Assert.assertTrue(val.doubleValue() == -10.23d);
     }
 
     @Test

@@ -19,7 +19,7 @@ public class JsonToQueryEvaluatorTest extends TestBase {
 
     private static AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
     private static ExecutionContext executionContext = new ConcurrentExecutionContext();
-    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(executionContext,mapListResolver);
+    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(executionContext, mapListResolver);
 
     @Test
     public void jsonGroupByTest() throws EvaluatorException {
@@ -44,9 +44,25 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "                {\"name\":\"createdAt\",\"func\":\">\",\"value\":\"2020-12-27\"}\n" +
                 "            ]\n" +
                 "        },\n" +
-                "        \"orderBy\": [ {\"name\":\"createdAt\", \"value\":\"DESC\"}], "+
-                "         \"limit\": 1,"+
-                "         \"skip\": 1"+
+                "        \"orderBy\": [ {\"name\":\"createdAt\", \"value\":\"DESC\"}], " +
+                "         \"limit\": 1," +
+                "         \"skip\": 1" +
+                "    }";
+        Map<String, Object> data = getData();
+        data.put("jsonString", json);
+        String expression = "TO_DB_QUERY('MONGO_DB', MAP($jsonString$))";
+        evaluate(expression, data);
+    }
+
+    @Test
+    public void jsonGroupByAllTest() throws EvaluatorException {
+        String json = "{\n" +
+                "        \"fields\": [\n" +
+                "            {\"name\":\"*\",\"func\":\"count\"}\n" +
+                "        ],\n" +
+                "        \"groupBy\": [\n" +
+                "            {\"name\":\"*\"}\n" +
+                "        ]\n" +
                 "    }";
         Map<String, Object> data = getData();
         data.put("jsonString", json);
@@ -64,8 +80,8 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "    \"where\":{\n" +
                 "        \"AND\":[{\"name\":\"tenantName\",\"func\":\"=\",\"value\":\"dataZup\"}]\n" +
                 "    },\n" +
-                "         \"limit\": 1,"+
-                "         \"skip\": 1"+
+                "         \"limit\": 1," +
+                "         \"skip\": 1" +
                 "}\n";
         String expression = "TO_DB_QUERY(MAP($jsonString$))";
         Map<String, Object> data = getData();
@@ -93,7 +109,18 @@ public class JsonToQueryEvaluatorTest extends TestBase {
     }
 
     @Test
-    public void     simpleOrderByTest() throws EvaluatorException {
+    public void complexQueryTest() throws EvaluatorException {
+        // to enable template to generate the JSON it is needed to add additional ' (single quote) to begining and end inside of the T  function - example: without:  T('# {} #') with single quotes  T('#' {} '#')
+        String expression = "TO_DB_QUERY(T('#'{\"fields\":[{\"name\":\"*\",\"func\":\"count\",\"alias\":\"totalCount\"},{\"name\":\"items.timeViewed\",\"func\":\"sum\",\"alias\":\"timeViewed\"},{\"name\":\"items.timeViewed\",\"func\":\"avg\",\"alias\":\"averageTimeViewed\"},{\"name\":\"items.minTimeViewed\",\"func\":\"min\",\"alias\":\"minTimeViewed\"},{\"name\":\"items.maxTimeViewed\",\"func\":\"max\",\"alias\":\"maxTimeViewed\"},{\"name\":\"items.averageBeforePlayingVideo\",\"func\":\"avg\",\"alias\":\"averageBeforePlayingVideo\"},{\"name\":\"items.maxBeforePlayVideo\",\"func\":\"max\",\"alias\":\"maxBeforePlayVideo\"},{\"name\":\"items.minBeforePlayVideo\",\"func\":\"min\",\"alias\":\"minBeforePlayVideo\"}],\"groupBy\":[{\"name\":\"date\",\"func\":\"dateToString\",\"funcParams\":{\"format\":\"%Y-%m-%d\",\"date\":\"$date\"},\"alias\":\"date\"},{\"name\":\"date\",\"func\":\"year\",\"alias\":\"year\"},{\"name\":\"date\",\"func\":\"month\",\"alias\":\"month\"},{\"name\":\"date\",\"func\":\"week\",\"alias\":\"week\"},{\"name\":\"date\",\"func\":\"dayOfMonth\",\"alias\":\"dayOfMonth\"}],\"where\":{\"AND\":[{\"name\":\"date\",\"func\":\">\",\"value\":\"DATE::$startDate$\"},{\"name\":\"date\",\"func\":\"<\",\"value\":\"DATE::$endDate$\"}]},\"orderby\":[{\"name\":\"date\",\"value\":\"DESC\"}]}'#'))";
+
+        Map<String, Object> data = getData();
+        data.put("startDate", "2020-01-01");
+        data.put("endDate", "2024-01-01");
+        evaluate(expression, data);
+    }
+
+    @Test
+    public void simpleOrderByTest() throws EvaluatorException {
         String json = "\n" +
                 "{\n" +
                 "    \"fields\":\"*\",\n" +
@@ -125,12 +152,13 @@ public class JsonToQueryEvaluatorTest extends TestBase {
     private void evaluate(String expression, Map data) throws EvaluatorException {
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
 
-        Object evaluaged = evaluate(expression,  pathExtractor);
+        Object evaluaged = evaluate(expression, pathExtractor);
         Assert.assertNotNull(evaluaged);
         Assert.assertTrue(evaluaged instanceof Map);
-        Map<String,Object> res = (Map)evaluaged;
+        Map<String, Object> res = (Map) evaluaged;
         Assert.assertTrue(!res.isEmpty());
-        System.out.println(JsonUtils.getJsonFromObject(res));
+
+        System.out.println(JsonUtils.getJsonFromObjectPretty(res));
     }
 
     private Object evaluate(String expression, PathExtractor pathExtractor) throws EvaluatorException {

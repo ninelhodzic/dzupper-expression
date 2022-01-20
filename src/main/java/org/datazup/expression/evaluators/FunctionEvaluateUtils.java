@@ -759,7 +759,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
             DecimalFormat df = new DecimalFormat(format.trim());
             df.setRoundingMode(RoundingMode.FLOOR);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
-            return executionContext.create(newNum.floatValue());
+            return executionContext.create(newNum.doubleValue());
         } else {
             return executionContext.create(Math.round(number.doubleValue()));
         }
@@ -792,7 +792,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
             DecimalFormat df = new DecimalFormat(format.trim());
             df.setRoundingMode(RoundingMode.CEILING);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
-            return executionContext.create(newNum.floatValue());
+            return executionContext.create(newNum.doubleValue());
         } else {
             return executionContext.create(Math.ceil(number.doubleValue()));
         }
