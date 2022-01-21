@@ -445,13 +445,27 @@ public class SimpleObjectEvaluatorTest extends TestBase {
 
     @Test
     public void testRoundDoubleValue() throws EvaluatorException {
-        String expression = "ROUND(0-10.23123523, 2)";
+        String expression = "ROUND(0-10.23923523, 2)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof Number);
+        Assert.assertTrue(evaluaged instanceof Double);
 
-        Number val = (Number) evaluaged;
-        Assert.assertTrue(val.doubleValue() == -10.24d);
+        System.out.println(evaluaged);
+
+        Double val = (Double) evaluaged;
+        Assert.assertTrue(val == -10.24d);
+    }
+
+    @Test
+    public void testRoundDouble1Value() throws EvaluatorException {
+        String expression = "ROUND($double$, 2)";
+        Object evaluaged = evaluate(expression);
+        Assert.assertNotNull(evaluaged);
+        Assert.assertTrue(evaluaged instanceof Double);
+        System.out.println(evaluaged);
+
+        //Number val = (Number) evaluaged;
+        //Assert.assertTrue(val.doubleValue() == -10.24d);
     }
 
     @Test
@@ -459,10 +473,10 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         String expression = "CEIL(0-10.23123523, 2)";
         Object evaluaged = evaluate(expression);
         Assert.assertNotNull(evaluaged);
-        Assert.assertTrue(evaluaged instanceof Number);
+        Assert.assertTrue(evaluaged instanceof Double);
 
-        Number val = (Number) evaluaged;
-        Assert.assertTrue(val.doubleValue() == -10.23d);
+        Double val = (Double) evaluaged;
+        Assert.assertTrue(val == -10.23d);
     }
 
     @Test

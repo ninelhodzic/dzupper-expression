@@ -130,6 +130,10 @@ public abstract class TestBase {
 
         parent.put("method", "DELETE");
         parent.put("matchedPath", "/request/{id}");
+        parent.put("double", 13.01d);
+        parent.put("double1", 675.3523135d);
+        parent.put("float", 34.1f);
+        parent.put("float1", 78.124124124f);
 
         return parent;
     }

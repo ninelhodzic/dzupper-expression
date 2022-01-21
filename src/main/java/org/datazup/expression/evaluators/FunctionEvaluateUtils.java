@@ -5,6 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.math3.util.Precision;
 import org.datazup.expression.Function;
 import org.datazup.expression.NullObject;
 import org.datazup.expression.Token;
@@ -641,10 +642,10 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         if (!StringUtils.isEmpty(format)) {
             format = format.replace("#", "");
         }
-        if (valueObject instanceof byte[]){
+        if (valueObject instanceof byte[]) {
             String val = TypeUtils.resolveString(valueObject, format);
             return wrap(val);
-        }else {
+        } else {
             Instant instant = DateTimeUtils.resolve(valueObject);
             if (null != instant) {
                 String formattedString = DateTimeFormatter.ofPattern(format).format(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
@@ -753,16 +754,26 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
 
         String format = "#";
 
-        if (null != decimalPlaces) {
+        /*if (null != decimalPlaces) {
             format = format + "." + StringUtils.repeat("#", decimalPlaces.intValue());
 
             DecimalFormat df = new DecimalFormat(format.trim());
             df.setRoundingMode(RoundingMode.FLOOR);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
-            return executionContext.create(newNum.doubleValue());
+
+            return executionContext.create(newNum.floatValue());
         } else {
-            return executionContext.create(Math.round(number.doubleValue()));
+            return executionContext.create(Math.round(number.floatValue()));
+        }*/
+
+        if (null != decimalPlaces) {
+            Double d = Precision.round(number.doubleValue(), decimalPlaces.intValue());
+            return executionContext.create(d);
+
+        } else {
+            return executionContext.create(Math.round(number.floatValue()));
         }
+
 
     }
 
@@ -792,11 +803,13 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
             DecimalFormat df = new DecimalFormat(format.trim());
             df.setRoundingMode(RoundingMode.CEILING);
             Number newNum = TypeUtils.resolveNumber(df.format(number));
-            Float flot = Float.valueOf(newNum.floatValue());
-            return executionContext.create(flot);
+
+            Double num = Precision.round(newNum.doubleValue(), decimalPlaces.intValue());
+            return executionContext.create(num.doubleValue());
         } else {
-            return executionContext.create(Math.ceil(number.floatValue()));
+            return executionContext.create(Math.ceil(number.doubleValue()));
         }
+
 
     }
 
@@ -1093,7 +1106,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         return wrap(uuid.toString());
     }
 
-    private Boolean inSensitiveResolve(String container, String matcher, String allOrAnyType){
+    private Boolean inSensitiveResolve(String container, String matcher, String allOrAnyType) {
         if (allOrAnyType.contains("INSENSITIVE")) {
             return (container).toLowerCase().contains(matcher.toLowerCase());
         } else {
@@ -1133,7 +1146,7 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
 
         if (containerOrString instanceof String) {
             if (!hasMore) {
-                Boolean res = inSensitiveResolve((String)containerOrString, value.toString(), allOrAnyType);
+                Boolean res = inSensitiveResolve((String) containerOrString, value.toString(), allOrAnyType);
                 return wrap(res);
             } else {
 

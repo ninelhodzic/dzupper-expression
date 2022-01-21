@@ -525,7 +525,7 @@ public class MongoJsonQueryBuilder {
 
                         Map<String, Object> tmpMap = new HashMap<>();
                         String func = (String) groupMap.get("func");
-                        Map funcParams = getFuncParams(groupMap);
+                        Object funcParams = getFuncParams(groupMap);
                         if (null == funcParams) {
                             tmpMap.put("$" + func, "$" + name);
                         } else {
@@ -551,10 +551,15 @@ public class MongoJsonQueryBuilder {
         return idMap;
     }
 
-    private Map<String, Object> getFuncParams(Map<String, Object> groupMap) {
+    private Object getFuncParams(Map<String, Object> groupMap) {
         if (groupMap.containsKey("funcParams")) {
             Map<String, Object> m = mapListResolver.resolveToMap(groupMap.get("funcParams"));
-            return m;
+            if (null==m){
+                List l = mapListResolver.resolveToList(groupMap.get("funcParams"));
+                return l;
+            }else {
+                return m;
+            }
         }
         return null;
     }
