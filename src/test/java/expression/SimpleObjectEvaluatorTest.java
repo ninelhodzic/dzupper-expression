@@ -31,7 +31,7 @@ import java.util.TimeZone;
 
 public class SimpleObjectEvaluatorTest extends TestBase {
 
-    private static ExecutionContext executionContext = new ConcurrentExecutionContext();
+    private static final ExecutionContext executionContext = new ConcurrentExecutionContext();
 
     /*@Test
     public void isEmptyExpressionEvaluatedAsTrueTest() throws EvaluatorException{
@@ -561,7 +561,7 @@ public class SimpleObjectEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluaged instanceof Instant);
 
         Instant dt = (Instant) evaluaged;
-        System.out.println(dt.toEpochMilli() + " " + dt.toString() + ", orig: " + 1464811823300L + " (06/01/2016 @ 8:10pm (UTC)) - offset: " + 240);
+        System.out.println(dt.toEpochMilli() + " " + dt + ", orig: " + 1464811823300L + " (06/01/2016 @ 8:10pm (UTC)) - offset: " + 240);
     }
 
     @Test

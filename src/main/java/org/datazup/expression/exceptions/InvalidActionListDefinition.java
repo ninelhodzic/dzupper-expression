@@ -5,7 +5,7 @@ package org.datazup.expression.exceptions;
  */
 public class InvalidActionListDefinition extends RuntimeException {
 
-    private String json;
+    private final String json;
 
     public InvalidActionListDefinition(String message, String json){
         super(message);

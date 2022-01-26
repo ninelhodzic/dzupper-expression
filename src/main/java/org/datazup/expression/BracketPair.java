@@ -8,12 +8,12 @@ public class BracketPair {
     public static final BracketPair BRACKETS = new BracketPair('[', ']');
     public static final BracketPair BRACES = new BracketPair('{', '}');
     public static final BracketPair ANGLES = new BracketPair('<', '>');
-    private String open;
-    private String close;
+    private final String open;
+    private final String close;
 
     public BracketPair(char open, char close) {
-        this.open = new String(new char[]{open});
-        this.close = new String(new char[]{close});
+        this.open = String.valueOf(open);
+        this.close = String.valueOf(close);
     }
 
     public String getOpen() {

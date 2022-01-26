@@ -21,8 +21,8 @@ import java.time.Instant;
 public class BasicTest extends TestBase {
 
     private static SimpleObjectEvaluator evaluator;
-    private static SimpleResolverHelper mapListResolver =new SimpleResolverHelper();
-    private static ExecutionContext executionContext = new ConcurrentExecutionContext();
+    private static final SimpleResolverHelper mapListResolver =new SimpleResolverHelper();
+    private static final ExecutionContext executionContext = new ConcurrentExecutionContext();
 
     @BeforeClass
     public static void init(){

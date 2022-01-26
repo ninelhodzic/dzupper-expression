@@ -23,9 +23,9 @@ import java.util.regex.Pattern;
  */
 public class SelectMapperEvaluatorTest extends TestBase {
 
-    private static AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
-    private static ExecutionContext executionContext = new ConcurrentExecutionContext();
-    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(executionContext,mapListResolver);
+    private static final AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
+    private static final ExecutionContext executionContext = new ConcurrentExecutionContext();
+    private static final SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(executionContext,mapListResolver);
 
         /*
     @Test
@@ -212,7 +212,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
 
     @Test
     public void isForEachRuns() throws EvaluatorException {
-        String expression = "FOREACH($child.list$, '#IF(IS_OF_TYPE($_current$, 'HashMap'), $_current$, $_current$+\' \'+ $_index$)#')";
+        String expression = "FOREACH($child.list$, '#IF(IS_OF_TYPE($_current$, 'HashMap'), $_current$, $_current$+' '+ $_index$)#')";
         Map<String, Object> data = getData();
         PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
 
@@ -255,10 +255,7 @@ public class SelectMapperEvaluatorTest extends TestBase {
     @Test
     public void isPatternMatch() {
         String expression = "SELECT";
-        boolean match = false;
-        if (Pattern.matches("[a-zA-Z0-9]+", expression)) {
-            match = true;
-        }
+        boolean match = Pattern.matches("[a-zA-Z0-9]+", expression);
         Assert.assertTrue(match);
 
         match = false;

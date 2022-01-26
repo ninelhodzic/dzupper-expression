@@ -145,7 +145,7 @@ public class Tokenizer {
     }
 
     private class StringTokenizerIterator implements Iterator<String> {
-        private StringTokenizer tokens;
+        private final StringTokenizer tokens;
         private String nextToken = null;
 
         public StringTokenizerIterator(StringTokenizer tokens) {

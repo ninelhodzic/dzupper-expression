@@ -506,7 +506,7 @@ public class ComplexFunctionEvaluateUtils extends EvaluatorBase {
 
             Map newMap = mapListResolver.resolveToMap(value);
             if (null != newMap) {
-                map.putAll((Map) newMap);
+                map.putAll(newMap);
             }
 
         }

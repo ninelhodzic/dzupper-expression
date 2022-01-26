@@ -63,8 +63,8 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
 
     public final static Function TO_DB_QUERY = new Function("TO_DB_QUERY", 1, 2);
 
-    private ComplexFunctionEvaluateUtils complexFunctionEvaluateUtils;
-    private SyncEvaluatorComplexFunctionUtils syncEvaluatorComplexFunctionUtils;
+    private final ComplexFunctionEvaluateUtils complexFunctionEvaluateUtils;
+    private final SyncEvaluatorComplexFunctionUtils syncEvaluatorComplexFunctionUtils;
 
     private static SelectMapperEvaluator INSTANCE;
     static ConcurrentExecutionContext executionContext = new ConcurrentExecutionContext();

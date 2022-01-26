@@ -7,9 +7,9 @@ import org.datazup.utils.TypeUtils;
 import java.util.*;
 
 public class MongoJsonQueryBuilder {
-    private static Set<String> whereKeywords = new HashSet<>(Arrays.asList("AND", "OR", "NOR"));
-    private static Set<String> whereFundKeywords = new HashSet<>(Arrays.asList("and", "or", "in", "=", ">", ">=", "<=", "<", "!", "nor", "eq", "!="));
-    private static Map<String, String> whereMapper = new HashMap<String, String>() {{
+    private static final Set<String> whereKeywords = new HashSet<>(Arrays.asList("AND", "OR", "NOR"));
+    private static final Set<String> whereFundKeywords = new HashSet<>(Arrays.asList("and", "or", "in", "=", ">", ">=", "<=", "<", "!", "nor", "eq", "!="));
+    private static final Map<String, String> whereMapper = new HashMap<String, String>() {{
         put("=", "eq");
         put(">", "gt");
         put(">=", "gte");
@@ -18,8 +18,8 @@ public class MongoJsonQueryBuilder {
         put("!", "not");
         put("!=", "ne");
     }};
-    private Map<String, Object> jsonObject;
-    private AbstractResolverHelper mapListResolver;
+    private final Map<String, Object> jsonObject;
+    private final AbstractResolverHelper mapListResolver;
 
     public MongoJsonQueryBuilder(Map<String, Object> jsonObject, AbstractResolverHelper mapListResolver) {
         this.jsonObject = jsonObject;
@@ -485,10 +485,16 @@ public class MongoJsonQueryBuilder {
 
             for (Object fieldObj : fields) {
                 Map<String, Object> field = mapListResolver.resolveToMap(fieldObj);
+                Object fieldFuncParams = getFuncParams(field);
+
                 Map<String, Object> m = getFieldAliasFuncMap(field);
                 for (String key : m.keySet()) {
                     Map<String, Object> map = new HashMap<>();
-                    map.put(key, "$" + key);
+                    if (null==fieldFuncParams) {
+                        map.put(key, "$" + key);
+                    }else{
+                        map.put(key, fieldFuncParams);
+                    }
                     mergedObjectsList.add(map);
                 }
             }

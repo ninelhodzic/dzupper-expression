@@ -225,8 +225,8 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
 
     }
 
-    private FunctionEvaluateUtils functionEvaluateUtils;
-    private OperatorEvaluateUtils operatorEvaluateUtils;
+    private final FunctionEvaluateUtils functionEvaluateUtils;
+    private final OperatorEvaluateUtils operatorEvaluateUtils;
     private static SimpleObjectEvaluator INSTANCE;
 
     public static SimpleObjectEvaluator getInstance(ExecutionContext executionContext, AbstractResolverHelper mapListResolver) {
@@ -327,9 +327,9 @@ public class SimpleObjectEvaluator extends AbstractEvaluator {
         } else if (function == FALSE) {
             return functionEvaluateUtils.getFalse(function, operands, argumentList, evaluationContext);
         } else if (function == TO_LOWERCASE) {
-            return functionEvaluateUtils.getToLowercase(function, operands, argumentList, (AbstractVariableSet) evaluationContext);
+            return functionEvaluateUtils.getToLowercase(function, operands, argumentList, evaluationContext);
         } else if (function == TO_UPPERCASE) {
-            return functionEvaluateUtils.getToUpperCase(function, operands, argumentList, (AbstractVariableSet) evaluationContext);
+            return functionEvaluateUtils.getToUpperCase(function, operands, argumentList, evaluationContext);
         } else if (function == STR_TO_DATE_TIMESTAMP) {
             return functionEvaluateUtils.getStrToDateTimestamp(function, operands, argumentList, evaluationContext);
         } else if (function == MINUTE) {

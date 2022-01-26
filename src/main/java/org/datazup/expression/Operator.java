@@ -5,15 +5,15 @@ package org.datazup.expression;
  */
 
 public class Operator {
-    private String symbol;
-    private int precedence;
-    private int operandCount;
-    private Operator.Associativity associativity;
+    private final String symbol;
+    private final int precedence;
+    private final int operandCount;
+    private final Operator.Associativity associativity;
 
     public Operator(String symbol, int operandCount, Operator.Associativity associativity, int precedence) {
         if(symbol != null && associativity != null) {
             if(symbol.length() == 0) {
-                throw new IllegalArgumentException("Operator symbol can\'t be null");
+                throw new IllegalArgumentException("Operator symbol can't be null");
             } else if(operandCount >= 1 && operandCount <= 2) {
                 if(Operator.Associativity.NONE.equals(associativity)) {
                     throw new IllegalArgumentException("None associativity operators are not supported");
@@ -84,12 +84,12 @@ public class Operator {
         return this.symbol;
     }
 
-    public static enum Associativity {
+    public enum Associativity {
         LEFT,
         RIGHT,
         NONE;
 
-        private Associativity() {
+        Associativity() {
         }
     }
 }

@@ -15,7 +15,7 @@ import org.datazup.utils.TypeUtils;
 import java.util.*;
 
 public class SyncEvaluatorComplexFunctionUtils extends EvaluatorBase {
-    private AbstractEvaluator evaluator;
+    private final AbstractEvaluator evaluator;
     public SyncEvaluatorComplexFunctionUtils(AbstractEvaluator abstractEvaluator, AbstractResolverHelper mapListResolver, ExecutionContext executionContext) {
         super(mapListResolver, executionContext);
         this.evaluator = abstractEvaluator;

@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 public class GroupByUtils {
-    private AbstractResolverHelper mapListResolver;
-    private AbstractEvaluator mapperEvaluator;
+    private final AbstractResolverHelper mapListResolver;
+    private final AbstractEvaluator mapperEvaluator;
 
     public GroupByUtils(AbstractEvaluator mapperEvaluator, AbstractResolverHelper mapListResolver) {
         this.mapperEvaluator = mapperEvaluator;

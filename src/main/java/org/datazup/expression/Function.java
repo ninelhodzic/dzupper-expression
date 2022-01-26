@@ -5,9 +5,9 @@ package org.datazup.expression;
  */
 
 public class Function {
-    private String name;
-    private int minArgumentCount;
-    private int maxArgumentCount;
+    private final String name;
+    private final int minArgumentCount;
+    private final int maxArgumentCount;
 
     public Function(String name, int argumentCount) {
         this(name, argumentCount, argumentCount);

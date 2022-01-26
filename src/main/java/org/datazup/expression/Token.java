@@ -8,8 +8,8 @@ import java.util.Map;
  */
 public class Token {
     public static final Token FUNCTION_ARG_SEPARATOR;
-    private Token.Kind kind;
-    private Object content;
+    private final Token.Kind kind;
+    private final Object content;
 
     static Token buildLiteral(String literal) {
         return new Token(Token.Kind.LITERAL, literal);
@@ -119,7 +119,7 @@ public class Token {
     }
 
     static {
-        FUNCTION_ARG_SEPARATOR = new Token(Token.Kind.FUNCTION_SEPARATOR, (Object) null);
+        FUNCTION_ARG_SEPARATOR = new Token(Token.Kind.FUNCTION_SEPARATOR, null);
     }
 
     public boolean isLiteralValue() {
@@ -170,7 +170,7 @@ public class Token {
         return new Token(Kind.LOOKUP_LITERAL, literal);
     }
 
-    private static enum Kind {
+    private enum Kind {
         OPEN_BRACKET,
         CLOSE_BRACKET,
         FUNCTION_SEPARATOR,
@@ -182,7 +182,7 @@ public class Token {
         LOOKUP_LITERAL,
         LITERAL_VALUE;
 
-        private Kind() {
+        Kind() {
         }
     }
 }

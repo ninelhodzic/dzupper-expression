@@ -17,19 +17,19 @@ import java.util.Map;
 
 public class JsonToQueryEvaluatorTest extends TestBase {
 
-    private static AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
-    private static ExecutionContext executionContext = new ConcurrentExecutionContext();
-    private static SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(executionContext, mapListResolver);
+    private static final AbstractResolverHelper mapListResolver = new SimpleResolverHelper();
+    private static final ExecutionContext executionContext = new ConcurrentExecutionContext();
+    private static final SelectMapperEvaluator evaluator = SelectMapperEvaluator.getInstance(executionContext, mapListResolver);
 
     @Test
     public void jsonGroupByTest() throws EvaluatorException {
         String json = "{\n" +
                 "        \"fields\": [\n" +
+                "            {\"name\":\"items.totalViews\",\"func\":\"avg\", \"alias\":\"totalViews\", \"funcParams\":{ \"$round\": [ \"$totalViews\", 2 ] }},\n" +
                 "            {\"name\":\"*\",\"func\":\"count\"}\n" +
                 "        ],\n" +
                 "        \"groupBy\": [\n" +
                 "            {\"name\":\"createdAt\",\"func\":\"year\"},\n" +
-                "            {\"name\":\"totalViews\",\"func\":\"round\", \"funcParams\":[{ \"$sum\": [ \"$obj1\", \"$obj2\"] }, 2] },\n" +
                 "            {\"name\":\"createdAt\",\"func\":\"dateToString\", \"funcParams\":{\"format\":\"%Y-%m-%d\", \"date\": \"$createdAt\"}}\n" +
                 "        ],\n" +
                 "        \"where\": {\n" +
@@ -51,6 +51,7 @@ public class JsonToQueryEvaluatorTest extends TestBase {
                 "    }";
         Map<String, Object> data = getData();
         data.put("jsonString", json);
+        System.out.println(json);
         String expression = "TO_DB_QUERY('MONGO_DB', MAP($jsonString$))";
         evaluate(expression, data);
     }

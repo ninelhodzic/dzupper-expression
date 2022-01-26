@@ -92,12 +92,12 @@ public class Parameters {
     }
 
     public String getTranslation(String originalName) {
-        String translation = (String)this.translations.get(originalName);
+        String translation = this.translations.get(originalName);
         return translation == null?originalName:translation;
     }
 
     public void setFunctionArgumentSeparator(char separator) {
-        this.functionSeparator = new String(new char[]{separator});
+        this.functionSeparator = String.valueOf(separator);
     }
 
     public String getFunctionArgumentSeparator() {

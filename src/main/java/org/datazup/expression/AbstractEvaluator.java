@@ -69,15 +69,15 @@ public abstract class AbstractEvaluator {
             while (needFunctionSeparator.hasNext()) {
                 Operator i$1 = (Operator) needFunctionSeparator.next();
                 tokenDelimitersBuilder.add(i$1.getSymbol());
-                List constant = (List) this.operators.get(i$1.getSymbol());
+                List constant = this.operators.get(i$1.getSymbol());
                 if (constant == null) {
                     constant = new ArrayList();
                     this.operators.put(i$1.getSymbol(), constant);
                 }
 
-                ((List) constant).add(i$1);
-                if (((List) constant).size() > 1) {
-                    this.validateHomonyms((List) constant);
+                constant.add(i$1);
+                if (constant.size() > 1) {
+                    this.validateHomonyms(constant);
                 }
             }
         }
@@ -356,7 +356,7 @@ public abstract class AbstractEvaluator {
                     }
                 } else if (token.isCloseBracket()) {
                     if (previous == null) {
-                        throw new IllegalArgumentException("expression can\'t start with a close bracket");
+                        throw new IllegalArgumentException("expression can't start with a close bracket");
                     }
 
                     if (previous.isFunctionArgumentSeparator()) {
@@ -429,7 +429,7 @@ public abstract class AbstractEvaluator {
                     previousValuesSize.push(Integer.valueOf(values.size()));
                 } else if (!token.isOperator()) {
                     if (previous != null && previous.isLiteral()) {
-                        throw new IllegalArgumentException("A literal can\'t follow another literal");
+                        throw new IllegalArgumentException("A literal can't follow another literal");
                     }
                     argumentTokens.push(token);
                     this.output(values, token, evaluationContext);
@@ -474,9 +474,9 @@ public abstract class AbstractEvaluator {
         if (token.equals(this.functionArgumentSeparator)) {
             return Token.FUNCTION_ARG_SEPARATOR;
         } else if (this.functions.containsKey(token)) {
-            return Token.buildFunction((Function) this.functions.get(token));
+            return Token.buildFunction(this.functions.get(token));
         } else if (this.operators.containsKey(token)) {
-            List brackets1 = (List) this.operators.get(token);
+            List brackets1 = this.operators.get(token);
             return brackets1.size() == 1 ? Token.buildOperator((Operator) brackets1.get(0)) : Token.buildOperator(this.guessOperator(previous, brackets1));
         } else {
             BracketPair brackets = this.getBracketPair(token);
@@ -494,8 +494,8 @@ public abstract class AbstractEvaluator {
     }
 
     private BracketPair getBracketPair(String token) {
-        BracketPair result = (BracketPair) this.expressionBrackets.get(token);
-        return result == null ? (BracketPair) this.functionBrackets.get(token) : result;
+        BracketPair result = this.expressionBrackets.get(token);
+        return result == null ? this.functionBrackets.get(token) : result;
     }
 
     public Collection<Operator> getOperators() {
