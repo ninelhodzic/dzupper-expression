@@ -1,5 +1,7 @@
 package org.datazup.expression.evaluators;
 
+import com.florianingerl.util.regex.Matcher;
+import com.florianingerl.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.datazup.builders.mongo.MongoJsonQueryBuilder;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 public class ComplexFunctionEvaluateUtils extends EvaluatorBase {
     private static final Logger LOG = LoggerFactory.getLogger(ComplexFunctionEvaluateUtils.class);
 
+
     public ComplexFunctionEvaluateUtils(AbstractResolverHelper mapListResolver, ExecutionContext executionContext) {
         super(mapListResolver, executionContext);
     }
@@ -33,7 +36,17 @@ public class ComplexFunctionEvaluateUtils extends EvaluatorBase {
         while (operands.hasNext()) {
             ContextWrapper valueC = operands.next();
             Token token = argumentList.removeLast();
-            String argumentName = token.getContent().toString();
+
+            Object content = token.getContent();
+            String argumentName;
+            if (token.isFunction()){
+                Function function1 = (Function) content;
+                argumentName = function1.getName(); //normalizeFunctionName(function1.getName());
+            }else{
+                argumentName = content.toString();
+            }
+
+            //String argumentName = .toString();
 
             Object value = valueC.get();
 

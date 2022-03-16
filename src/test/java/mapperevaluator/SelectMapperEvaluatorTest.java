@@ -112,7 +112,20 @@ public class SelectMapperEvaluatorTest extends TestBase {
         Assert.assertTrue(evaluated instanceof Map);
         Map result = (Map)evaluated;
         Assert.assertTrue(result.size()==2);
+    }
 
+    @Test
+    public void evaluateSimpleGroupByPropertyListTest()throws EvaluatorException{
+        String expression = "GROUP_BY($listOfMaps$, LIST('type', 'name'))";
+        // should be: {type1:[{}...], type2:[{}...]}
+        Map<String, Object> data = getData();
+        PathExtractor pathExtractor = new PathExtractor(data, mapListResolver);
+
+        Object evaluated = evaluate(expression, pathExtractor);
+        Assert.assertNotNull(evaluated);
+        Assert.assertTrue(evaluated instanceof Map);
+        Map result = (Map)evaluated;
+        Assert.assertTrue(result.size()==2);
     }
 
     @Test

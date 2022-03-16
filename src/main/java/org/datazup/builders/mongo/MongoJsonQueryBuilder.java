@@ -602,16 +602,18 @@ public class MongoJsonQueryBuilder {
     }
 
     private Map<String, Object> getGroupStage(List<Map<String, Object>> fields, List<Map<String, Object>> groupByList) {
-        if (null != groupByList && !groupByList.isEmpty() && null != fields && !fields.isEmpty()) {
+        if (null != groupByList && !groupByList.isEmpty() ) {
 
             Map<String, Object> idMap = getGroupByIdMap(groupByList);
 
             Map<String, Object> groupMap = new LinkedHashMap<>();
             groupMap.put("_id", idMap);
-            for (Object obj : fields) {
-                Map<String, Object> field = mapListResolver.resolveToMap(obj);
-                Map aliasFuncMap = getFieldAliasFuncMap(field);
-                groupMap.putAll(aliasFuncMap);
+            if (null!=fields) {
+                for (Object obj : fields) {
+                    Map<String, Object> field = mapListResolver.resolveToMap(obj);
+                    Map aliasFuncMap = getFieldAliasFuncMap(field);
+                    groupMap.putAll(aliasFuncMap);
+                }
             }
 
             Map<String, Object> res = new LinkedHashMap<>();

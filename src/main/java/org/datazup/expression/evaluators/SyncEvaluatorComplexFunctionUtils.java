@@ -191,12 +191,22 @@ public class SyncEvaluatorComplexFunctionUtils extends EvaluatorBase {
         List<Map<String, Object>> propertyList = new ArrayList();
         //List<Map<String, Object>> properties = mapListResolver.resolveToList(propertySource);
         if (null == properties) {
-            String propertyName = (String) propertySource;
-            if (null == propertyName)
-                throw new ExpressionValidationException("Property to group by is not String nor properly defined Map");
-            Map newMap = new HashMap();
-            newMap.put("propertyName", propertyName);
-            propertyList.add(newMap);
+            if (propertySource instanceof List){
+                List propertiesTmp = (List)propertySource;
+                for(Object o: propertiesTmp){
+                    Map tmpMap = new HashMap();
+                    tmpMap.put("propertyName", o);
+                    propertyList.add(tmpMap);
+                }
+            }else{
+                String propertyName = (String) propertySource;
+                if (null == propertyName)
+                    throw new ExpressionValidationException("Property to group by is not String nor properly defined Map");
+                Map newMap = new HashMap();
+                newMap.put("propertyName", propertyName);
+                propertyList.add(newMap);
+            }
+
         } else {
             Object propertiesObject = properties.get("properties");
             propertyList = mapListResolver.resolveToList(propertiesObject);

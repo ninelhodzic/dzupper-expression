@@ -204,7 +204,6 @@ public class SelectMapperEvaluator extends SimpleObjectEvaluator {
             //   return getGroupBy(function, operands, argumentList, (PathExtractor) evaluationContext);
             return syncEvaluatorComplexFunctionUtils.getGroupBy(function, operands, argumentList, evaluationContext);
         } else if (function == SELECT) {
-            //return getSelect(function, operands, argumentList, (PathExtractor) evaluationContext);
             return complexFunctionEvaluateUtils.getSelect(function, operands, argumentList, evaluationContext);
         } else if (function == REMOVE) {
             //   return getRemove(function, operands, argumentList, (PathExtractor) evaluationContext);

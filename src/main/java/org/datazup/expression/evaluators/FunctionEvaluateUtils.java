@@ -646,10 +646,14 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
             String val = TypeUtils.resolveString(valueObject, format);
             return wrap(val);
         } else {
-            Instant instant = DateTimeUtils.resolve(valueObject);
-            if (null != instant) {
-                String formattedString = DateTimeFormatter.ofPattern(format).format(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
-                return wrap(formattedString);
+            if (StringUtils.isEmpty(format)){
+                return wrap(TypeUtils.resolveString(valueObject));
+            }else {
+                Instant instant = DateTimeUtils.resolve(valueObject);
+                if (null != instant) {
+                    String formattedString = DateTimeFormatter.ofPattern(format).format(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
+                    return wrap(formattedString);
+                }
             }
         }
         return wrap(valueObject.toString());
