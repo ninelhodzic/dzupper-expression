@@ -75,15 +75,16 @@ public class Tokenizer {
         result.append('(');
         //result.append("('#(?:([^'#])+|(?1))*+#')|");
         result.append("('#(?:([^`'#])+|(?1))*+#')|");
+        result.append("('#.*?#')|");
         //result.append('|');
         result.append("\\$(.*?)\\$|");
 
         result.append("(`.*?`)|");
         result.append("('.*?')|");
-        result.append("(^['\\$](?:([^\\$])+|(?1))*+[\\$']$)|");
+        result.append("(^['\\$](?:([^\\$])+|(?1))*+[\\$']$)");
 
 
-        result.append("('#.*?#')");
+
         String delim;
         for (Iterator i$ = delimiters.iterator(); i$.hasNext(); result.append("\\Q").append(delim).append("\\E")) {
             delim = (String) i$.next();
