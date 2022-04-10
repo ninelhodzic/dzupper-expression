@@ -74,8 +74,11 @@ public class Tokenizer {
         StringBuilder result = new StringBuilder();
         result.append('(');
         //result.append("('#(?:([^'#])+|(?1))*+#')|");
+        result.append("('#(?:([^\"])+|(?1))*+\")|");
         result.append("('#(?:([^`'#])+|(?1))*+#')|");
+
         result.append("('#.*?#')|");
+        result.append("(\".*?\")|");
         //result.append('|');
         result.append("\\$(.*?)\\$|");
 
