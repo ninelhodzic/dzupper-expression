@@ -1,5 +1,6 @@
 package org.datazup.expression.evaluators;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -14,6 +15,7 @@ import org.datazup.expression.context.ExecutionContext;
 import org.datazup.expression.exceptions.ExpressionValidationException;
 import org.datazup.expression.exceptions.NotSupportedExpressionException;
 import org.datazup.pathextractor.AbstractResolverHelper;
+import org.datazup.pathextractor.AbstractVariableSet;
 import org.datazup.utils.DateTimeUtils;
 import org.datazup.utils.TypeUtils;
 import org.joda.time.DateTime;
@@ -1451,5 +1453,27 @@ public class FunctionEvaluateUtils extends EvaluatorBase {
         }
 
         return executionContext.create(result);
+    }
+
+    public ContextWrapper getExtension(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, AbstractVariableSet abstractVariableSet) {
+        ContextWrapper firstDTObjContext = operands.next();
+        argumentList.pop();
+
+        String file = TypeUtils.resolveString(firstDTObjContext.get());
+        if (null!=file){
+            return executionContext.create(FilenameUtils.getExtension(file));
+        }
+        return null;
+    }
+
+    public ContextWrapper getFileName(Function function, Iterator<ContextWrapper> operands, Deque<Token> argumentList, AbstractVariableSet abstractVariableSet) {
+        ContextWrapper firstDTObjContext = operands.next();
+        argumentList.pop();
+
+        String file = TypeUtils.resolveString(firstDTObjContext.get());
+        if (null!=file){
+            return executionContext.create(FilenameUtils.getName(file));
+        }
+        return null;
     }
 }
